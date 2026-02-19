@@ -1,9 +1,27 @@
+<?php
+
+use App\Livewire\Actions\Logout;
+use Livewire\Volt\Component;
+
+new class extends Component
+{
+    /**
+     * Log the current user out of the application.
+     */
+    public function logout(Logout $logout): void
+    {
+        $logout();
+
+        $this->redirect('/', navigate: true);
+    }
+}; ?>
 <nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 w-full">
     <div class="mx-auto px-4">
         <div class="flex justify-between h-16">
 
             <div class="flex items-center">
-                <button x-cloak @click="sidebarOpen = !sidebarOpen" x-show="!sidebarOpen" aria-label="Abrir o cerrar menu"
+                <button x-cloak @click="sidebarOpen = !sidebarOpen" x-show="!sidebarOpen"
+                    aria-label="Abrir o cerrar menu"
                     class="md:hidden p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-colors">
                     <i class="fa-solid" :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
                 </button>

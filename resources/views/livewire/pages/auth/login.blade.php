@@ -29,14 +29,15 @@ new #[Layout('layouts.guest')] class extends Component
 
     <form wire:submit="login" class="w-full max-w-5xl">
         <div
-            class="flex flex-col md:flex-row w-full backdrop-blur-xl overflow-hidden shadow-2xl shadow-slate-700/100  items-stretch">
+            class="flex flex-col md:flex-row w-full backdrop-blur-xl overflow-hidden shadow-lg shadow-slate-700/100  items-stretch">
 
             <div class="flex w-full bg-slate-800/100 rounded-ee-3xl rounded-se-3xl justify-center p-8 lg:p-12">
                 <div class="flex flex-col items-center justify-center h-full">
-                    <img width="80" src="images/spoon-trasp.png" alt="Logo de Spoon de Colombia" class="mb-6">
+                    <img width="80" height="80" src="images/spoon-trasp.webp" alt="Logo de Spoon de Colombia"
+                        class="mb-6">
 
                     <h2 class="text-white text-2xl font-semibold mb-2">Bienvenido</h2>
-                    <p class="text-slate-400 text-sm mb-8 text-center">Ingresa tus credenciales para continuar</p>
+                    <p class="text-white forn-bold text-sm mb-8 text-center">Ingresa tus credenciales para continuar</p>
 
                     <div class="w-full space-y-5">
                         <div class="relative">
@@ -74,13 +75,15 @@ new #[Layout('layouts.guest')] class extends Component
                     <h2 class="text-white text-3xl font-bold mb-4 uppercase tracking-tighter">Área Jurídica</h2>
                     <div class="w-full h-1 bg-blue-400 mx-auto mb-6"></div>
 
-                    <p class="text-blue-100 text-lg leading-relaxed mb-8">
-                        Revisa los consentimientos que han sido diligenciados y entre otras cosas
+                    <p class="text-blue-100 text-lg mb-8">
+                        Sección para resguardar consentimientos informados, proporcionando prueba legal y seguridad
+                        frente a riesgos operativos o legales.
                     </p>
 
                     <div
                         class="flex bg-slate-800/10 backdrop-blur-md p-4 rounded-2xl justify-center items-center border border-slate-400">
-                        <img class="justify-center" src="images/STARP.webp" alt="Imagen de Star Park">
+                        <img height="180 px" width="180 px" class="justify-center" src="images/STARP.webp"
+                            alt="Imagen de Star Park">
                     </div>
                 </div>
 
