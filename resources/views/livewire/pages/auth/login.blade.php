@@ -24,14 +24,14 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div class="w-full min-h-screen bg-slate-800 flex items-center justify-center">
+<div class="w-full min-h-screen bg-slate-950 flex items-center justify-center">
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form wire:submit="login" class="w-full max-w-5xl">
         <div
             class="flex flex-col md:flex-row w-full backdrop-blur-xl overflow-hidden shadow-2xl shadow-slate-700/100  items-stretch">
 
-            <div class="flex w-full bg-slate-950 rounded-ee-3xl rounded-se-3xl justify-center p-8 lg:p-12">
+            <div class="flex w-full bg-slate-800/100 rounded-ee-3xl rounded-se-3xl justify-center p-8 lg:p-12">
                 <div class="flex flex-col items-center justify-center h-full">
                     <img width="80" src="images/spoon-trasp.png" alt="Logo de Spoon de Colombia" class="mb-6">
 
@@ -58,7 +58,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <x-input-error :messages="$errors->get('form.password')" />
 
                         <button type="submit" wire:loading.attr="disabled" wire:loading.class=" cursor-progress"
-                            class="w-full bg-[#111a2c]  hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                            class="w-full bg-[#111a2c]  hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
                             <i class="fa-solid fa-right-to-bracket"></i>
                             <span>Iniciar Sesión</span>
                         </button>
@@ -67,7 +67,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
 
             <div
-                class="flex w-[800px] bg-slate-950/90 p-8 lg:p-12 flex-col items-center justify-center text-center relative overflow-hidden ">
+                class="flex w-[800px] bg-slate-950/100 p-8 lg:p-12 flex-col items-center justify-center text-center relative overflow-hidden ">
                 <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full blur-3xl"></div>
 
                 <div class="relative z-10">
