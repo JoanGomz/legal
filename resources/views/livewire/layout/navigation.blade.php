@@ -4,10 +4,7 @@
 
             <div class="flex items-center">
                 <div class="shrink-0 flex items-center ">
-                    <div
-                        class="h-8 w-40 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold italic">
-                        TU_LOGO_HORIZONTAL.PNG
-                    </div>
+                    <img src="{{ asset('images/STARP.webp') }}" alt="StarPark Legal" class="w-32">
                 </div>
 
                 <div class="hidden md:flex items-center ml-4 text-gray-400">

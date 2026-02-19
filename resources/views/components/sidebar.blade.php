@@ -34,7 +34,8 @@
                     </span>
                 </a>
 
-                <div x-show="!sidebarOpen" class="fixed left-20 ml-2 px-3 py-1 bg-slate-800 text-white text-xs rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] border border-slate-700">
+                <div x-show="!sidebarOpen"
+                    class="fixed left-20 ml-2 px-3 py-1 bg-slate-800 text-white text-xs rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] border border-slate-700">
                     {{ __('dashboard') }}
                 </div>
             </li>
@@ -47,7 +48,8 @@
             </div>
 
             <li class="relative group">
-                <a href="#" class="flex items-center h-12 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 transition-all">
+                <a href="#"
+                    class="flex items-center h-12 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 transition-all">
                     <div class="w-12 h-12 shrink-0 flex items-center justify-center">
                         <i class="fa-solid fa-file-signature text-lg"></i>
                     </div>
@@ -59,12 +61,28 @@
         </ul>
     </nav>
 
-    <div class="p-4 border-t border-slate-800 shrink-0 bg-slate-950">
-        <div class="flex items-center bg-slate-900/50 rounded-xl p-2 h-10 overflow-hidden" :class="sidebarOpen ? 'px-3' : 'justify-center px-0'">
-            <i class="fa-solid fa-shield-halved text-blue-500 shrink-0"></i>
-            <span x-show="sidebarOpen" x-transition.opacity class="text-[10px] text-slate-500 ml-3 font-mono whitespace-nowrap">
-                StarPark Legal
-            </span>
+    <div
+        class="flex flex-col items-center justify-center p-4 border-t border-slate-800 shrink-0 bg-slate-950 transition-all duration-300">
+
+        <img class="w-10 transition-transform duration-300" :class="sidebarOpen ? 'scale-110' : 'scale-90'"
+            src="{{ asset('images/spoon-logo.png') }}" alt="Logo Spoon">
+
+        <div class="flex flex-col items-center overflow-hidden w-full" x-show="sidebarOpen"
+            x-transition:enter="transition ease-out duration-300 delay-200"
+            x-transition:enter-start="opacity-0 transform translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
+
+            <div class="flex items-center bg-slate-900/50 rounded-xl px-3 h-8 mt-3 border border-slate-800/50">
+                <span class="text-[10px] text-slate-400 font-mono whitespace-nowrap tracking-wider uppercase">
+                    Spoon de Colombia
+                </span>
+            </div>
+
+            <p class="text-[9px] text-slate-600 mt-2 whitespace-nowrap">
+                © 2026 Todos los derechos reservados
+            </p>
         </div>
     </div>
 </aside>
