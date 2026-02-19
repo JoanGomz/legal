@@ -1,1 +1,1 @@
-<img class="w-20" src="images/spoon-negro.png" alt="Logo de Spoon de Colombia">
+<img class="w-20" src="images/spoon-trasp.png" alt="Logo de Spoon de Colombia">

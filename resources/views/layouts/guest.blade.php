@@ -11,20 +11,19 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans h-full text-gray-900 antialiased">
-    <div class="min-h-screen bg-gradient-button flex flex-col justify-center items-center p-4">
+<body class="font-sans h-full bg-slate-950 antialiased">
+    <div class="min-h-screen bg-gradient-button flex flex-col justify-center items-center ">
         <div class="absolute bottom-4 right-4 opacity-30 z-50">
-            <a href="/" wire:navigate>
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
+
         </div>
 
-        <div class="w-full max-w-md">
+        <div class="w-full">
             {{ $slot }}
         </div>
     </div>
