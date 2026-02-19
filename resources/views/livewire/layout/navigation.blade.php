@@ -3,8 +3,12 @@
         <div class="flex justify-between h-16">
 
             <div class="flex items-center">
+                <button x-cloak @click="sidebarOpen = !sidebarOpen" x-show="!sidebarOpen" aria-label="Abrir o cerrar menu"
+                    class="md:hidden p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-colors">
+                    <i class="fa-solid" :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
+                </button>
                 <div class="shrink-0 flex items-center ">
-                    <img src="{{ asset('images/STARP.webp') }}" alt="StarPark Legal" class="w-32">
+                    <img src="{{ asset('images/logohori.png') }}" alt="StarPark Legal" class="w-40 h-auto">
                 </div>
 
                 <div class="hidden md:flex items-center ml-4 text-gray-400">

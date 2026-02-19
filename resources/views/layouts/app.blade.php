@@ -19,18 +19,10 @@
 <body class="font-sans antialiased">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100">
         <x-sidebar />
-        <div x-cloak :class="sidebarOpen ? 'md:ml-64' : 'md:ml-20'" class="flex flex-col transition-all duration-300">
+        <div :class="sidebarOpen ? 'md:ml-64' : 'md:ml-[72px]'"
+            class="flex flex-col transition-all duration-300 min-h-screen">
             <livewire:layout.navigation />
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class=" mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
-            <!-- Page Content -->
-            <main>
+            <main class="flex-1 p-4">
                 {{ $slot }}
             </main>
         </div>
