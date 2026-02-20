@@ -23,7 +23,73 @@ new #[Layout('layouts.guest')] class extends Component
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>
+@push('styles')
+<style>
+    .wave-wrapper {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 1;
+    }
 
+    .wave-container {
+        display: flex;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        /* 1440px * 2 */
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ONDA FRONTAL: Hacia la izquierda */
+    .wave-container.front {
+        left: 0;
+        animation: wave-left 20s linear infinite !important;
+    }
+
+    /* ONDA TRASERA: Hacia la derecha */
+    .wave-container.back {
+        opacity: 0.4;
+        bottom: 50px;
+        left: -100%;
+        /* Empezamos desplazados para el bucle derecho */
+        animation: wave-right 15s linear infinite !important;
+    }
+
+    @keyframes wave-left {
+        0% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        100% {
+            transform: translate3d(-100%, 0, 0);
+        }
+    }
+
+    @keyframes wave-right {
+        0% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        100% {
+            transform: translate3d(100%, 0, 0);
+        }
+    }
+
+    .wave-container svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        flex-shrink: 0;
+    }
+</style>
+@endpush
 <div class="w-full min-h-screen bg-slate-950 flex items-center justify-center">
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -32,7 +98,7 @@ new #[Layout('layouts.guest')] class extends Component
             class="flex flex-col md:flex-row w-full backdrop-blur-xl overflow-hidden shadow-lg shadow-slate-700/100  items-stretch">
 
             <div class="flex w-full bg-slate-800/100 rounded-ee-3xl rounded-se-3xl justify-center p-8 lg:p-12">
-                <div class="flex flex-col items-center justify-center h-full">
+                <div class="flex flex-col w-full items-center justify-center h-full">
                     <img width="80" height="80" src="images/spoon-trasp.webp" alt="Logo de Spoon de Colombia"
                         class="mb-6">
 
@@ -90,6 +156,25 @@ new #[Layout('layouts.guest')] class extends Component
 
             </div>
 
+        </div>
+        <div class="wave-wrapper" wire:ignore>
+            <div class="wave-container back">
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="#0f172a" d="M0,160 C320,300 420,20 720,160 C1020,300 1120,20 1440,160 V320 H0 Z"></path>
+                </svg>
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="#0f172a" d="M0,160 C320,300 420,20 720,160 C1020,300 1120,20 1440,160 V320 H0 Z"></path>
+                </svg>
+            </div>
+
+            <div class="wave-container front" wire:ignore>
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="#1e293b" d="M0,160 C360,350 500,10 720,160 C940,310 1080,10 1440,160 V320 H0 Z"></path>
+                </svg>
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="#1e293b" d="M0,160 C360,350 500,10 720,160 C940,310 1080,10 1440,160 V320 H0 Z"></path>
+                </svg>
+            </div>
         </div>
     </form>
 </div>
