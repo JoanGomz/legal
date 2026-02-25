@@ -7,11 +7,9 @@ Route::livewire('/', 'pages.auth.login')
     ->name('login');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('profile', 'profile')
-        ->middleware(['auth'])
         ->name('profile');
 
     Route::livewire('dashboard', 'panels.dashboard')
-        ->middleware(['auth', 'verified'])
         ->name('dashboard');
 
     Route::prefix('accesos')->group(function () {
