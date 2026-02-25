@@ -8,7 +8,7 @@
     </div>
 
     <!-- Tarjeta principal para navegación de pestañas -->
-    <div class="bg-white h-96 rounded-xl shadow-md overflow-hidden">
+    <div class="bg-white  rounded-xl shadow-md overflow-auto ">
         <!-- Navegación de pestañas -->
         <div>
             <div class="flex gap-8 py-2 px-4">

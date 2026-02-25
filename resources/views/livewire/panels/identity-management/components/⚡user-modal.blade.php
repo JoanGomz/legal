@@ -1,21 +1,21 @@
 <?php
 
 use Livewire\Component;
-
+use App\Http\Controllers\Admin\RoleController;
 new class extends Component {
     public $name;
     public $email;
     public $password;
     public $password_verify;
     public $role_check;
-
+    public $roles;
     protected function rules()
     {
         return [
             'name' => 'required|min:3|string',
             'email' => 'required|min:4|email',
             'password' => ['required', 'min:8', Password::min(8)->mixedCase()],
-            'password_verify' => 'required,same:password'
+            'password_verify' => 'required,same:password',
         ];
     }
     public function clear()
@@ -34,14 +34,18 @@ new class extends Component {
         ]);
         $this->js("console.log('entro a crear usuario')");
     }
+    public function mount()
+    {
+        $this->roles = app(RoleController::class)->index();
+    }
 };
 ?>
 
-<!-- Formulario de creación -->
 <div x-show="userForm" x-cloak
     x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
     x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
-    class="fixed inset-0 z-40 overflow-y-auto flex items-center justify-center ">
+    class="fixed inset-0 z-40 overflow-y-auto flex items-center justify-center "
+    @close-user-modal.window="userForm = false; $wire.clear()">
     <!-- Overlay de fondo oscuro -->
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="userForm=false; $wire.clear()">
     </div>
@@ -81,10 +85,14 @@ new class extends Component {
 
                     <select wire:model="role_check" id="role_select"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option value="">Selecciona un rol</option>
-
-                        <option value="Prueba" class="">
-                        </option>
+                        @if ($roles['data']['roles'])
+                            <option value="">Selecciona un rol</option>
+                        @endif
+                        @forelse($roles['data']['roles'] as $item)
+                            <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                        @empty
+                            <option value="">No hay opciones disponibles</option>
+                        @endforelse
                     </select>
 
                     <x-input-error :messages="$errors->get('role_check')" />
@@ -98,7 +106,8 @@ new class extends Component {
                     <x-input-error :messages="$errors->get('password')" />
                 </div>
                 <div>
-                    <label for="password_verify" class="block mb-2 text-sm font-medium text-gray-9xt-">Repite la contraseña</label>
+                    <label for="password_verify" class="block mb-2 text-sm font-medium text-gray-9xt-">Repite la
+                        contraseña</label>
                     <input wire:model="password_verify" type="password" id="password_verify" autocomplete="new-password"
                         class="shadow-xs bg-gray-50 border border-gray-300 text-slate-950 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " />
                     <x-input-error :messages="$errors->get('password')" />

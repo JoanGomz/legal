@@ -22,11 +22,19 @@ class PermissionController extends Controller
         $permissions = $this->permissionService->getAllActivePermissions();
         return $permissions;
     }
-
+    public function indexPaginated($page, $items, $search = '')
+    {
+        try {
+            $response = $this->permissionService->getPaginated($page, $items, $search);
+            return $this->responseLivewire('success', 'Datos obtenidos correctamente', $response);
+        } catch (\Exception $ex) {
+            return $this->responseLivewire('error', $ex->getMessage(), []);
+        }
+    }
     public function store(Request $request)
     {
         if ($request->name) {
-            $permission = Permission::where('name', $request->name)->where('status', 1)->first();
+            $permission = Permission::where('name', $request->name)->first();
             if ($permission) {
                 return $this->responseLivewire('error', 'El permiso ya existe', []);
             }

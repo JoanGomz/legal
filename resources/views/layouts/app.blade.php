@@ -26,6 +26,8 @@
             </main>
         </div>
     </div>
+    @include('components.loading-notification')
+    @include('components.notification')
 </body>
 
 </html>
