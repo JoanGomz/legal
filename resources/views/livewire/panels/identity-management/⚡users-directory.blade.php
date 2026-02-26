@@ -9,6 +9,14 @@ use App\Traits\traitCruds;
 
 new class extends Component {
     use traitCruds;
+    public function delete($id){
+        try {
+            $response = app(UserController::class)->delete($id);
+            $this->endPetition();
+        } catch (\Throwable $th) {
+            $this->handleException($th, "Ocurrio un error al intener borrar el usuario");
+        }
+    }
     public function with()
     {
         $users = app(UserController::class)->indexPaginated($this->page, $this->perPage, $this->search);
@@ -25,18 +33,19 @@ new class extends Component {
         titleModal: 'Creación de Usuarios',
         textButton: 'Crear Usuario',
         method: 'create',
-        prepareModal(type) {
-            this.titleModal = type == 'create' ? 'Creación de Usuarios' : 'Actualización de Usuarios';
+        init() {
+            window.prepareModal = (type, text) => this.prepareModal(type, text);
+        },
+        prepareModal(type, textButton) {
+            this.titleModal = type == 'create' ? 'Creación de Usuario' : 'Actualización de Usuario';
             this.method = type == 'create' ? 'create' : 'update';
             this.userForm = true;
-            this.textButton = 'Crear Usuario'
+            this.textButton = textButton;
         },
-    
     }" class="space-y-4 pb-4">
         <div class="flex justify-between items-center">
-            <input wire:model.live.debounce.250ms="search" type="text" placeholder="Buscar usuario"
-                class="text-white placeholder:text-slate-300 bg-slate-700 shadow-md border-none rounded-lg px-4 py-2 w-full max-w-sm ">
-            <button @click="prepareModal('create')"
+            <x-input-search mode="tableSearch" placeholder="Buscar usuarios"></x-input-search>
+            <button @click="prepareModal('create','Crear Usuario')"
                 class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-opacity-90 transition-all">
                 <i class="fa-solid fa-user-plus mr-2"></i> Nuevo Usuario
             </button>
@@ -83,8 +92,22 @@ new class extends Component {
                             <td class="px-6 py-4">
                                 {{ $user->updated_at }}
                             </td>
-                            <td class="px-6 py-4">
-                                <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
+                            <td class="px-2 py-4 flex gap-2 justify-center">
+                                <button aria-label="Editar permiso" type="button" wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:click="$dispatchTo('panels.identity-management.components.user-modal', 'setEditingUser', { id: {{ $user['id'] }} })">
+                                    <i class="fa-solid fa-square-pen fa-xl text-blue-500"></i>
+                                </button>
+                                <button type="button" aria-label="Eliminar Permiso" wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    @click="window.dispatchEvent(new CustomEvent('show-delete-modal', {
+                                                    detail: {
+                                                        id: {{ $user['id'] }},
+                                                        name: '{{ $user['name'] }}'
+                                                    }
+                                                }))">
+                                    <i class="fa-solid fa-trash fa-xl text-red-500"></i>
+                                </button>
                             </td>
                         </tr>
                     @empty

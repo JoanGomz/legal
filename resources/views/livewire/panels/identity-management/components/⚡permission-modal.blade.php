@@ -23,13 +23,17 @@ new class extends Component {
         $this->reset('id', 'name');
         $this->response = '';
     }
+    public function refreshData()
+    {
+        $this->dispatch('refresh-user-list')->to('panels.identity.management.permissions');
+    }
     //METODO PARA ESTABLECER LOS VALORES DEL UPDATE Y MOSTRARLOS EN EL FORMULARIO
     #[On('setEditingPermission')]
     public function setEditingPermission($id, $name)
     {
         $this->id = $id;
         $this->name = $name;
-        $this->dispatch('open-permission-update');
+        $this->js("window.prepareModal('update', 'Actualizar Permiso')");
     }
     //METODO PARA CREAR PERMISOS
     public function sendPetition($type)
@@ -47,7 +51,6 @@ new class extends Component {
 
             if ($this->response['status'] == 'success') {
                 $this->dispatch('close-permission-modal');
-                $this->dispatch('refresh-user-list');
             }
             $this->endPetition();
         } catch (\Throwable $th) {

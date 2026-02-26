@@ -6,7 +6,10 @@ use App\Http\Controllers\Admin\PermissionController;
 use Livewire\Attributes\On;
 new class extends Component {
     use traitCruds;
-
+    public function refreshData()
+    {
+        $this->with();
+    }
     #[On('refresh-user-list')]
     public function with()
     {
@@ -24,13 +27,16 @@ new class extends Component {
         titleModal: 'Creación de Permisos',
         textButton: 'Crear Permiso',
         method: 'create',
+        init() {
+            window.prepareModal = (type, text) => this.prepareModal(type, text);
+        },
         prepareModal(type, textButton) {
             this.titleModal = type == 'create' ? 'Creación de Permisos' : 'Actualización de Permisos';
             this.method = type == 'create' ? 'create' : 'update';
             this.permissionForm = true;
             this.textButton = textButton;
         },
-    }" class="space-y-4 pb-4" @open-permission-update.window="prepareModal('update','Actualizar Permiso')">
+    }" class="space-y-4 pb-4">
         <div class="flex justify-between items-center">
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="Buscar Permiso"
                 class="text-white placeholder:text-slate-300 bg-slate-700 shadow-md border-none rounded-lg px-4 py-2 w-full max-w-sm ">

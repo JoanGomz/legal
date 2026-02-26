@@ -44,5 +44,6 @@
             {{ $slot }}
         </div>
     </div>
-
+    <!--MODAL DE CONFIRMACIÓN-->
+    @include('components.confirmation-modal')
 </div>

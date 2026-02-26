@@ -1,8 +1,15 @@
 <?php
 
 use Livewire\Component;
+use Illuminate\Validation\Rules\Password;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Traits\traitCruds;
+use Livewire\Attributes\On;
+use App\Models\User;
 new class extends Component {
+    use traitCruds;
+    public $id;
     public $name;
     public $email;
     public $password;
@@ -14,25 +21,56 @@ new class extends Component {
         return [
             'name' => 'required|min:3|string',
             'email' => 'required|min:4|email',
+            'role_check' => 'required|string',
             'password' => ['required', 'min:8', Password::min(8)->mixedCase()],
-            'password_verify' => 'required,same:password',
+            'password_verify' => 'required|same:password',
+        ];
+    }
+    public function rulesOnly()
+    {
+        return [
+            'name' => 'required|min:3|string',
+            'email' => 'required|min:4|email',
+            'role_check' => 'required|string',
         ];
     }
     public function clear()
     {
         $this->reset('name', 'email', 'password', 'role_check');
     }
-    public function sendPetition()
+    #[On('setEditingUser')]
+    public function setEditingUser($id)
     {
-        $this->validate();
-        $request = new Request();
-        $request->merge([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'role_check' => $this->role_check,
-        ]);
-        $this->js("console.log('entro a crear usuario')");
+        $user = User::select('id', 'name', 'email')->findOrFail($id);
+        $this->id = $user->id;
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->js("window.prepareModal('update', 'Actualizar Usuario')");
+    }
+    public function sendPetition($type)
+    {
+        $type == 'create' ? $this->validateWithSpinner() : $this->validateWithSpinnerUpdate();
+        try {
+            $dataRequest = [
+                'name' => $this->name,
+                'email' => $this->email,
+                'role_check' => $this->role_check,
+            ];
+            $this->password ? ($dataRequest['password'] = $this->password) : '';
+            $request = new \Illuminate\Http\Request();
+            $request->merge($dataRequest);
+            $this->response = $type == 'create' ? app(UserController::class)->store($request) : app(UserController::class)->update($request, $this->id);
+            if ($this->response['status'] == 'success') {
+                $this->dispatch('close-user-modal');
+            }
+            $this->endPetition();
+        } catch (\Throwable $th) {
+            $message = $type == 'create' ? 'Ocurrio un error al crear el usuario' : 'Ocurrio un error al actualizar el usuario' ;
+            $this->handleException($th, $message);
+        }
+    }
+    public function refreshData(){
+        $this->dispatch('refresh-user-list')->to('panels.identity-management.users-directory');
     }
     public function mount()
     {
@@ -56,7 +94,7 @@ new class extends Component {
             <h3 class="text-xl font-medium text-center text-white pb-2" x-text="titleModal"></h3>
         </div>
         <!-- Body modal -->
-        <form wire:submit="sendPetition(method)" class="max-w-full p-6">
+        <form @submit.prevent="$wire.sendPetition(method)" class="max-w-full p-6">
             <div class="flex min-w-[200px] gap-4">
                 <div class="mb-5 flex-1">
                     <label for="name" class="block mb-2 text-sm font-medium text-gray-9xt-">Nombre</label>
@@ -89,7 +127,7 @@ new class extends Component {
                             <option value="">Selecciona un rol</option>
                         @endif
                         @forelse($roles['data']['roles'] as $item)
-                            <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                            <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
                         @empty
                             <option value="">No hay opciones disponibles</option>
                         @endforelse
