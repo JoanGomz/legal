@@ -10,28 +10,14 @@ class PermissionService implements PermissionServiceInterface
 {
     public function getAllActivePermissions()
     {
-        return Permission::all();
+        return Permission::where('status', 1)->get();
     }
-    public function getPaginated($page, $items, $search){
-        $query = Permission::query();
 
-
-        // buscador - AGRUPA TODAS LAS CONDICIONES DE BÚSQUEDA
-        if (!empty($search)) {
-            $query->where(function ($mainQuery) use ($search) {
-                // Búsqueda en campos directos del usuario
-                $mainQuery->where('id', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%");
-            });
-        }
-
-        $query->orderBy('id', 'desc');
-        return $query->paginate($items, ['*'], 'page', $page);
-    }
     public function createPermission(Request $request)
     {
         $request->validate([
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'description' => 'required|string'
         ]);
 
         $validateExistName = $this->validateExistName($request);
@@ -45,7 +31,8 @@ class PermissionService implements PermissionServiceInterface
     public function updatePermission(Request $request, Permission $permission)
     {
         $request->validate([
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'description' => 'required|string'
         ]);
 
         if ($permission->name !== $request->name) {
@@ -68,7 +55,7 @@ class PermissionService implements PermissionServiceInterface
 
     public function getPermissionById($id)
     {
-        return Permission::where('id', $id)->first();
+        return Permission::where('status', 1)->where('id', $id)->first();
     }
 
     public function validatePermissions(array $ids)
@@ -81,6 +68,7 @@ class PermissionService implements PermissionServiceInterface
         $searcPermission = Permission::where('name', $request->name)->first();
         if ($searcPermission instanceof Permission) {
             if (!$searcPermission->status) {
+                $searcPermission->update(['status' => 1]);
                 return $searcPermission;
             }
 

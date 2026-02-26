@@ -14,6 +14,7 @@ class BaseModel extends Model
         'user_last_update',
         'user_creator'
     ];
+
     protected static function boot()
     {
         parent::boot();

@@ -10,7 +10,7 @@ class RoleService implements RoleServiceInterface
 {
     public function getAllActiveRoles()
     {
-        return Role::with('permissions')->get();
+        return Role::where('status', 1)->with('permissions')->get();
     }
 
     public function createRole(Request $request)

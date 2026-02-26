@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Operation\Parks;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,11 +23,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'id',
+        'park_id',
         'name',
         'email',
+        'email_verified_at',
         'password',
+        'remember_token',
+        'created_at',
+        'updated_at',
         'status',
-        'id_centro_comercial',
+        'user_creator',
+        'user_last_update'
     ];
 
     /**
@@ -52,12 +60,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Set Values
-     */
-    const CREATED_AT = 'create_at';
-    const UPDATED_AT = 'update_at';
-
     public function userCreator()
     {
         return $this->hasOne(self::class, 'id', 'user_creator');
@@ -66,6 +68,11 @@ class User extends Authenticatable
     public function userUpdate()
     {
         return $this->hasOne(self::class, 'id', 'user_last_update');
+    }
+
+    public function park()
+    {
+        return $this->belongsTo(Parks::class, 'park_id');
     }
 
     protected static function boot()
