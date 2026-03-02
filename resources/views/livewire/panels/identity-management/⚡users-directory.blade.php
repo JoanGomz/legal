@@ -6,17 +6,21 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use App\Http\Controllers\Admin\UserController;
 use App\Traits\traitCruds;
-
+use Livewire\Attributes\On;
 new class extends Component {
     use traitCruds;
+    public function refreshData(){
+        $this->with();
+    }
     public function delete($id){
         try {
-            $response = app(UserController::class)->delete($id);
+            $this->response = app(UserController::class)->destroy($id);
             $this->endPetition();
         } catch (\Throwable $th) {
             $this->handleException($th, "Ocurrio un error al intener borrar el usuario");
         }
     }
+    #[On('refresh-user-list')]
     public function with()
     {
         $users = app(UserController::class)->indexPaginated($this->page, $this->perPage, $this->search);

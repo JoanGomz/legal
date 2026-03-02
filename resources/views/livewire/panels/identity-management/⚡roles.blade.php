@@ -6,6 +6,15 @@ use App\Http\Controllers\Admin\RoleController;
 use Livewire\Attributes\On;
 new class extends Component {
     use traitCruds;
+    public function delete($id)
+    {
+        try {
+            $this->response = app(RoleController::class)->destroy($id);
+            $this->endPetition();
+        } catch (\Throwable $th) {
+            $this->handleException($th, 'Ocurrio un error al intentar eliminar al rol');
+        }
+    }
     #[On('refresh-user-list')]
     public function with()
     {
@@ -40,11 +49,9 @@ new class extends Component {
                 <i class="fa-solid fa-unlock mr-2"></i></i> Nuevo Rol
             </button>
         </div>
-        <div
-            class="div grid grid-cols-3 gap-2 relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base ">
+        <div class="div grid grid-cols-3 gap-2 relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base ">
             @forelse($roles['data']['roles'] as $role)
-                <div
-                    class="div gap-2 relative bg-slate-600 text-white p-6 rounded-2xl shadow-lg">
+                <div class="div gap-2 relative bg-slate-600 text-white p-6 rounded-2xl shadow-lg">
                     <!-- Badge de ID -->
                     <span
                         class="absolute top-3 right-3 bg-black/20 px-2 py-1 text-xs font-mono rounded-md text-white/70">#{{ $role['id'] }}</span>
@@ -90,7 +97,7 @@ new class extends Component {
                     <div class="flex gap-2 mt-auto">
 
                         <button
-                        wire:click="$dispatchTo('panels.identity-management.components.role-modal', 'setEditingRole', {id: {{ $role['id'] }} })"
+                            wire:click="$dispatchTo('panels.identity-management.components.role-modal', 'setEditingRole', {id: {{ $role['id'] }} })"
                             class="bg-white text-black font-medium px-4 py-2 rounded-lg flex-1 shadow-sm hover:bg-blue-50 transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">

@@ -16,6 +16,7 @@ new class extends Component {
     public $password_verify;
     public $role_check;
     public $roles;
+
     protected function rules()
     {
         return [
@@ -41,10 +42,11 @@ new class extends Component {
     #[On('setEditingUser')]
     public function setEditingUser($id)
     {
-        $user = User::select('id', 'name', 'email')->findOrFail($id);
+        $user = User::select('id', 'name', 'email')->with('roles:id,name')->findOrFail($id);
         $this->id = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
+        $this->role_check = $user->roles->first()->name;
         $this->js("window.prepareModal('update', 'Actualizar Usuario')");
     }
     public function sendPetition($type)
@@ -65,11 +67,12 @@ new class extends Component {
             }
             $this->endPetition();
         } catch (\Throwable $th) {
-            $message = $type == 'create' ? 'Ocurrio un error al crear el usuario' : 'Ocurrio un error al actualizar el usuario' ;
+            $message = $type == 'create' ? 'Ocurrio un error al crear el usuario' : 'Ocurrio un error al actualizar el usuario';
             $this->handleException($th, $message);
         }
     }
-    public function refreshData(){
+    public function refreshData()
+    {
         $this->dispatch('refresh-user-list')->to('panels.identity-management.users-directory');
     }
     public function mount()
@@ -109,7 +112,7 @@ new class extends Component {
                 <div class="mb-5 flex-1">
                     <label for="email" class="block mb-2 text-sm font-medium text-gray-9xt-">Correo
                         Electronico</label>
-                    <input wire:model="email" type="email" id="email"
+                    <input wire:model="email" type="email" id="email" autocomplete="username"  novalidate
                         class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                         placeholder="Ej: example@example.com" />
                     <x-input-error :messages="$errors->get('email')" />
@@ -127,7 +130,7 @@ new class extends Component {
                             <option value="">Selecciona un rol</option>
                         @endif
                         @forelse($roles['data']['roles'] as $item)
-                            <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                            <option value="{{ $item['name'] }}">{{ $item['name'] }}</option>
                         @empty
                             <option value="">No hay opciones disponibles</option>
                         @endforelse
@@ -148,7 +151,7 @@ new class extends Component {
                         contraseña</label>
                     <input wire:model="password_verify" type="password" id="password_verify" autocomplete="new-password"
                         class="shadow-xs bg-gray-50 border border-gray-300 text-slate-950 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " />
-                    <x-input-error :messages="$errors->get('password')" />
+                    <x-input-error :messages="$errors->get('password_verify')" />
                 </div>
             </div>
             <!-- Footer buttons modal -->

@@ -12,7 +12,18 @@ class PermissionService implements PermissionServiceInterface
     {
         return Permission::where('status', 1)->get();
     }
-
+    public function getPaginated($page, $items, $search){
+        $query = Permission::query();
+        if (!empty($search)) {
+            $query->where(function ($mainQuery) use ($search) {
+                $mainQuery->where('id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+        $query->where('status', 1);
+        $query->orderBy('id', 'desc');
+        return $query->paginate($items, ['*'], 'page', $page);
+    }
     public function createPermission(Request $request)
     {
         $request->validate([

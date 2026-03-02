@@ -10,6 +10,14 @@ new class extends Component {
     {
         $this->with();
     }
+    public function delete($id){
+        try {
+            $this->response = app(PermissionController::class)->destroy($id);
+            $this->endPetition();
+        } catch (\Throwable $th) {
+            $this->handleException($th, "Ocurrio un error al intentar eliminar el permiso");
+        }
+    }
     #[On('refresh-user-list')]
     public function with()
     {
@@ -56,6 +64,9 @@ new class extends Component {
                             Nombre
                         </th>
                         <th scope="col" class="px-6 py-3 font-medium">
+                            Descripción
+                        </th>
+                        <th scope="col" class="px-6 py-3 font-medium">
                             Creado
                         </th>
                         <th scope="col" class="px-6 py-3 font-medium">
@@ -70,21 +81,24 @@ new class extends Component {
                     @forelse ($permissions['data'] as $permission)
                         <tr class="bg-neutral-primary-soft border-b  border-default">
                             <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                                {{ $permission->id }}
+                                {{ $permission->id  ?? '--'  }}
                             </th>
                             <td class="px-6 py-4">
-                                {{ $permission->name }}
+                                {{ $permission->name  ?? '--'  }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ $permission->created_at }}
+                                {{ $permission->description ?? '--' }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ $permission->updated_at }}
+                                {{ $permission->created_at  ?? '--'  }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ $permission->updated_at  ?? '--'  }}
                             </td>
                             <td class="px-2 py-4 flex gap-2 justify-center">
                                 <button aria-label="Editar permiso" type="button" wire:loading.attr="disabled"
                                     wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:click="$dispatchTo('panels.identity-management.components.permission-modal', 'setEditingPermission', { id: {{ $permission['id'] }}, name: '{{ $permission['name'] }}' })">
+                                    wire:click="$dispatchTo('panels.identity-management.components.permission-modal', 'setEditingPermission', { id: {{ $permission['id'] }}, name: '{{ $permission['name'] }}', description: '{{ $permission['description'] }}' })">
                                     <i class="fa-solid fa-square-pen fa-xl text-blue-500"></i>
                                 </button>
                                 <button type="button" aria-label="Eliminar Permiso" wire:loading.attr="disabled"
