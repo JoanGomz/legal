@@ -9,30 +9,32 @@ new class extends Component {
     //MODELOS DE FORMULARIOS
     public $id;
     public $name;
-
+    public $description;
     //METODOS VARIOS
     //METODO DE VALIDACIONES
     protected function rules()
     {
         return [
             'name' => 'required|min:3',
+            'description' => 'required|min:5'
         ];
     }
     public function clear()
     {
-        $this->reset('id', 'name');
+        $this->reset('id', 'name','description');
         $this->response = '';
     }
     public function refreshData()
     {
-        $this->dispatch('refresh-user-list')->to('panels.identity.management.permissions');
+        $this->dispatch('refresh-user-list')->to('panels.identity-management.permissions');
     }
     //METODO PARA ESTABLECER LOS VALORES DEL UPDATE Y MOSTRARLOS EN EL FORMULARIO
     #[On('setEditingPermission')]
-    public function setEditingPermission($id, $name)
+    public function setEditingPermission($id, $name,$description)
     {
         $this->id = $id;
         $this->name = $name;
+        $this->description = $description;
         $this->js("window.prepareModal('update', 'Actualizar Permiso')");
     }
     //METODO PARA CREAR PERMISOS
@@ -46,6 +48,7 @@ new class extends Component {
             $request = new \Illuminate\Http\Request();
             $request->merge([
                 'name' => $this->name,
+                'description' => $this->description
             ]);
             $this->response = $type == 'create' ? app(PermissionController::class)->store($request) : app(PermissionController::class)->update($request, $this->id);
 
@@ -77,7 +80,7 @@ new class extends Component {
         </div>
         <!-- Body modal -->
         <form @submit.prevent="$wire.sendPetition(method)" class="max-w-full p-6">
-            <div class="flex min-w-[200px] gap-4">
+            <div class="flex flex-col min-w-[200px] gap-4">
                 <div class="mb-5 flex-1">
                     <label for="name" class="block mb-2 text-sm font-medium text-gray-9xt-">Nombre</label>
                     <input wire:model="name" type="text" id="name"
@@ -85,6 +88,15 @@ new class extends Component {
                         placeholder="Ej: user.create" />
                     <span>
                         <x-input-error :messages="$errors->get('name')" />
+                    </span>
+                </div>
+                <div class="mb-5 flex-1">
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-9xt-">Descripción</label>
+                    <input wire:model="description" type="text" id="description"
+                        class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                        placeholder="Ej: Crear usuarios en el sistema" />
+                    <span>
+                        <x-input-error :messages="$errors->get('description')" />
                     </span>
                 </div>
             </div>

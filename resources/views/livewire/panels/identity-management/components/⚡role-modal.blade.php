@@ -11,15 +11,17 @@ new class extends Component {
     use traitCruds;
     public $id;
     public $name;
+    public $description;
     public $selectedPermissions = [];
     public function clear()
     {
-        $this->reset(['name', 'selectedPermissions']);
+        $this->reset(['name','description','selectedPermissions']);
     }
     protected function rules()
     {
         return [
             'name' => 'required|min:3',
+            'description' => 'required|min:4',
             'selectedPermissions' => 'required',
         ];
     }
@@ -38,9 +40,10 @@ new class extends Component {
     #[On('setEditingRole')]
     public function setEditingRole($id)
     {
-        $role = Role::select('id', 'name')->findOrFail($id);
+        $role = Role::select('id', 'name','description')->findOrFail($id);
         $this->id = $role['id'];
         $this->name = $role['name'];
+        $this->description = $role['description'];
         $this->selectedPermissions = $role->permissions()->allRelatedIds()->toArray();
         $this->js("window.prepareModal('update', 'Actualizar Rol')");
     }
@@ -56,6 +59,7 @@ new class extends Component {
             $request = new \Illuminate\Http\Request();
             $request->merge([
                 'name' => $this->name,
+                'description' => $this->description,
                 'permissions' => $this->selectedPermissions,
             ]);
             $this->response = $type == 'create' ? app(RoleController::class)->store($request) : app(RoleController::class)->update($request, $this->id);
@@ -96,6 +100,15 @@ new class extends Component {
                         placeholder="Ej: Gestor Jurídico" />
                     <span>
                         <x-input-error :messages="$errors->get('name')" />
+                    </span>
+                </div>
+                <div class="mb-5 flex-1">
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-9xt-">Descripción</label>
+                    <input wire:model="description" type="text" id="description"
+                        class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                        placeholder="Ej: Visualizador de autorizaciones" />
+                    <span>
+                        <x-input-error :messages="$errors->get('description')" />
                     </span>
                 </div>
                 <div class="mb-5 flex-1">

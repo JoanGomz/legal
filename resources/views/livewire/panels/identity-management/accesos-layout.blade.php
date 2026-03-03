@@ -12,7 +12,7 @@
         <!-- Navegación de pestañas -->
         <div>
             <div class="flex gap-8 py-2 px-4">
-                <a href="{{ route('access.users') }}" wire:navigate.hover @class([
+                <a href="{{ route('access.users') }}" wire:navigate @class([
                     'py-4 text-sm font-bold border-b-2 transition-all',
                     'border-brand-purple text-brand-purple' => request()->routeIs(
                         'access.users'),
@@ -20,7 +20,7 @@
                 ])>
                     Usuarios
                 </a>
-                <a href="{{ route('access.roles') }}" wire:navigate.hover @class([
+                <a href="{{ route('access.roles') }}" wire:navigate @class([
                     'py-4 text-sm font-bold border-b-2 transition-all',
                     'border-brand-purple text-brand-purple' => request()->routeIs(
                         'access.roles'),
@@ -28,7 +28,7 @@
                 ])>
                     Roles
                 </a>
-                <a href="{{ route('access.permissions') }}" wire:navigate.hover @class([
+                <a href="{{ route('access.permissions') }}" wire:navigate @class([
                     'py-4 text-sm font-bold border-b-2 transition-all',
                     'border-brand-purple text-brand-purple' => request()->routeIs(
                         'access.permissions'),
