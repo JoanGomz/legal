@@ -27,7 +27,7 @@ class BaseService implements BaseServiceInterface
         $query->where('is_deleted', 0);
 
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('nombre', 'like', '%' . $search . '%');
             $query->orWhere('id', 'like', '%' . $search . '%');
         }
 
