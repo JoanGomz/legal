@@ -24,8 +24,9 @@ class StoreParksRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'location' => ['required', 'string'],
-            'capacity' => ['required', 'integer']
+            'address' => ['required', 'string'],
+            'city_id' => ['nullable'],
+            'type' => ['nullable']
         ];
     }
 }

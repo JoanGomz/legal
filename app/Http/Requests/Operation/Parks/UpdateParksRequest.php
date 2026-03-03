@@ -23,11 +23,10 @@ class UpdateParksRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => ['required', 'string'],
-            'horarios' => ['required', 'string'],
-            'direccion' => ['required', 'string'],
-            'id_ciudad' => ['required', 'integer'],
-            'compania_id' => ['required', 'integer']
+            'name' => ['required', 'string'],
+            'address' => ['required', 'string'],
+            'city_id' => ['nullable'],
+            'type' => ['nullable']
         ];
     }
 }
