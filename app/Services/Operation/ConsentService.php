@@ -2,9 +2,12 @@
 
 namespace App\Services\Operation;
 
+use App\Models\Operation\AtraccionArcade;
 use App\Models\Operation\Consents;
 use App\Models\Operation\Parks;
 use App\Services\BaseService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class ConsentService extends BaseService
 {
@@ -33,13 +36,33 @@ class ConsentService extends BaseService
                 throw new \Exception('El parque no existe');
             }
 
+            $arcade = AtraccionArcade::find($data['arcade_id']);
+            if (!$arcade) {
+                throw new \Exception('La atracción arcade no existe');
+            }
+
             $conset = new Consents();
             $conset->fill($data);
             $conset->save();
 
-            $code = "STSP" . $park->id . "-$conset->id";
+            $code = "STSP" . $park->id . "-" . $conset->id;
+
+            $pdf = Pdf::loadView('pdf.consent', ['registration' => $conset, 'park' => $park, 'arcade' => $arcade, 'code' => $code])
+                ->setPaper('letter', 'portrait')
+                ->setOptions([
+                    'isRemoteEnabled' => true,
+                    'isHtml5ParserEnabled' => true
+                ]);
+
+            $fileName = 'consents/consentimiento_' . $conset->minor_document_number . '_' . $conset->id . '.pdf';
+            Storage::disk('s3')->put($fileName, $pdf->output());
+
+            $s3Url = Storage::disk('s3')->url($fileName);
+
+            $conset->url_pdf = $s3Url;
             $conset->code = $code;
             $conset->save();
+
             return $conset;
         } catch (\Exception $ex) {
             throw new \Exception('Error al guardar el consentimiento: ' . $ex->getMessage());
