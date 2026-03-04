@@ -38,11 +38,7 @@ class AtraccionArcadeController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $request->validate([
-                'nombre' => 'required|string',
-                'descripcion' => 'nullable|string'
-            ]);
-            $atraccionArcade = $this->atraccionArcadeService->create($data);
+            $atraccionArcade = $this->atraccionArcadeService->create($request->all());
             return $this->responseLivewire('success', 'Atracción Arcade creada exitosamente', $atraccionArcade);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);
@@ -52,11 +48,8 @@ class AtraccionArcadeController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $data = $request->validate([
-                'nombre' => 'required|string',
-                'descripcion' => 'nullable|string'
-            ]);
-            $atraccionArcade = $this->atraccionArcadeService->update($data, $id);
+
+            $atraccionArcade = $this->atraccionArcadeService->update($request->all(), $id);
             return $this->responseLivewire('success', 'Atracción Arcade actualizada exitosamente', $atraccionArcade);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);

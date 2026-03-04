@@ -10,12 +10,6 @@ new class extends Component
 {
 
     use traitCruds;
-
-    public function refresh()
-    {
-        $this->with();
-    }
-
     public function delete($id)
     {
         try {
@@ -91,11 +85,11 @@ new class extends Component
                     @else
                     <i class="fa-solid fa-building  text-blue-200 mt-1 mr-3"></i>
                     @endif
-                    <h2 class="text-2xl font-bold tracking-tight text-white">{{ $sede->type }}</h2>
+                    <h2 class="text-lg font-bold tracking-tight text-white">{{ $sede->type }}</h2>
                 </div>
                 <div class="flex items-center mb-4">
                     <i class="fa-solid fa-city text-blue-200 mt-1 mr-3"></i>
-                    <h2 class="text-2xl font-bold tracking-tight text-white">{{ $sede->city->name }}</h2>
+                    <h2 class="text-lg font-bold tracking-tight text-white">{{ $sede->city->name }}</h2>
                 </div>
                 <div class="space-y-3 mb-5 flex-1">
 
@@ -126,7 +120,7 @@ new class extends Component
                 </div>
 
 
-                <div class="flex w-full gap-2 h-full mt-auto">
+                <div class="flex w-full gap-2 h-auto mt-auto">
                     <button wire:click="$dispatchTo('panels.locations.components.branches-modal', 'setEditingSede', @js([
                         'id'      => $sede->id,
                         'name'    => $sede->name,

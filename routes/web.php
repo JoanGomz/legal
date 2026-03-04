@@ -9,8 +9,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('profile', 'profile')
         ->name('profile');
 
-    Route::livewire('dependencias', 'panels.locations.branches')
-        ->name('branches');
+    Route::prefix('sedes')->group(function () {
+        Route::livewire('dependencias', 'panels.locations.branches')
+            ->name('branches');
+        Route::livewire('Atracciones', 'panels.locations.atracctions')
+            ->name('atracctions');
+    });
 
     Route::livewire('dashboard', 'panels.dashboard')
         ->name('dashboard');

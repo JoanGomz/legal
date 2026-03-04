@@ -8,18 +8,27 @@
     </div>
 
     <!-- Tarjeta principal para navegación de pestañas -->
-    <div class="bg-white  rounded-xl shadow-md overflow-auto ">
+    <div class="bg-white rounded-xl shadow-md overflow-auto ">
         <!-- Navegación de pestañas -->
         <div class="flex gap-8 py-2 px-4">
-            <a href="{{ route('branches') }}" wire:navigate.hover
-                @class([ 'py-4 text-sm font-bold border-b-2 transition-all' , 'border-brand-purple text-brand-purple'=>
+            <a href="{{ route('branches') }}" wire:navigate @class([ 'py-4 text-sm font-bold border-b-2 transition-all'
+                , 'border-brand-purple text-brand-purple'=>
                 request()->routeIs(
                 'branches'),
                 'border-transparent text-gray-400' => !request()->routeIs('branches'),
                 ])>
                 Parques
             </a>
+            <a href="{{ route('atracctions') }}" wire:navigate
+                @class([ 'py-4 text-sm font-bold border-b-2 transition-all' , 'border-brand-purple text-brand-purple'>
+                request()->routeIs(
+                'atracctions'),
+                'border-transparent text-gray-400' => !request()->routeIs('atracctions'),
+                ])>
+                Atracciones
+            </a>
         </div>
+
         <!-- Contenido de las pestañas -->
         <div class="px-4">
             {{ $slot }}
