@@ -47,7 +47,7 @@ class ConsentService extends BaseService
 
             $code = "STSP" . $park->id . "-" . $conset->id;
 
-            $pdf = Pdf::loadView('pdf.consent', ['registration' => $conset, 'park' => $park, 'arcade' => $arcade, 'code' => $code])
+            $pdf = Pdf::loadView('pdf.consent', ['registration' => $conset, 'arcade' => $arcade, 'code' => $code])
                 ->setPaper('letter', 'portrait')
                 ->setOptions([
                     'isRemoteEnabled' => true,

@@ -40,6 +40,9 @@ class StoreConsentRequest extends FormRequest
             'check_uno' => 'nullable|accepted',
             'check_dos' => 'nullable|accepted',
             'check_tres' => 'nullable|accepted',
+            'check_cuatro' => 'nullable|accepted',
+            'check_cinco' => 'nullable|accepted',
+            'check_seis' => 'nullable|accepted',
         ];
     }
 
