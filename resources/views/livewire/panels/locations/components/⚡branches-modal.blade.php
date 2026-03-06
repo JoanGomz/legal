@@ -67,7 +67,6 @@ new class extends Component {
             $request->merge($dataRequest);
             $this->response = $type == 'create' ? app(ParksController::class)->store($request) : app(ParksController::class)->update($request, $this->id);
             if ($this->response['status'] == 'success') {
-                $this->js("console.log('si entra aca')");
                 $this->dispatch('close-sede-modal');
             }
             $this->endPetition();

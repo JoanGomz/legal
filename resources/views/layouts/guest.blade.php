@@ -92,6 +92,8 @@
         </div>
         @livewireScripts
     </div>
+    @include('components.loading-notification')
+    @include('components.notification')
 </body>
 
 </html>

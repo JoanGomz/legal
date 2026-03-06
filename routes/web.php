@@ -5,6 +5,8 @@ use Livewire\Livewire;
 
 Route::livewire('/', 'pages.auth.login')
     ->name('login');
+Route::livewire('/consentimiento', 'panels.consent-form.consent-atracction')
+    ->name('consent');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('profile', 'profile')
         ->name('profile');
