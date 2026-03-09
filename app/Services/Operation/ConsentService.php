@@ -61,6 +61,7 @@ class ConsentService extends BaseService
 
             $conset->url_pdf = $s3Url;
             $conset->code = $code;
+            $conset->created_at = date('Y-m-d G:i:s');
             $conset->save();
 
             return $conset;

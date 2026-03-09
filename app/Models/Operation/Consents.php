@@ -12,7 +12,7 @@ class Consents extends BaseModel
         'code',
         'url_pdf',
         'park_id',
-        'arcade',
+        'arcade_id',
         'document_number',
         'document_type',
         'full_name',
