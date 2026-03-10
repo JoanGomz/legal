@@ -40,7 +40,25 @@ new #[Layout('layouts.guest')] class extends Component
 
     public function clear()
     {
-        $this->reset();
+        $this->reset(
+            'sede',
+            'Atraccion',
+            'document_number',
+            'type_document',
+            'full_name',
+            'parentesco',
+            'telephone',
+            'email',
+            'document_type_minor',
+            'full_name_minor',
+            'date',
+            'check_uno',
+            'check_dos',
+            'check_tres',
+            'check_cuatro',
+            'check_cinco',
+            'check_seis'
+        );
         $this->step = 1;
     }
     protected function rules()
@@ -50,7 +68,7 @@ new #[Layout('layouts.guest')] class extends Component
             'Atraccion' => 'required|integer',
             'document_number' => 'required|string|min:5|max:20',
             'type_document' => 'required|in:CC,CE,PS',
-            'full_name' => 'required|string|min:3|max:100',
+            'full_name' => 'required|string|min:3|regex:/^([^0-9]*)$/',
             'parentesco' => 'required|string',
             'telephone' => 'required|numeric|digits_between:7,15',
             'email' => 'required|email',
@@ -58,8 +76,8 @@ new #[Layout('layouts.guest')] class extends Component
             // Datos del Menor
             'document_number_minor' => 'required|string|min:5|max:20',
             'document_type_minor' => 'required',
-            'full_name_minor' => 'required|string|min:3',
-            'date' => 'required|date|before:today',
+            'full_name_minor' => 'required|string|min:3|regex:/^([^0-9]*)$/',
+            'date' => 'required|date|before:today' . now()->subYears(2)->format('Y-m-d'),
 
             // Validar que todos los checks sean obligatorios y aceptados
             'check_uno' => 'accepted',
@@ -101,21 +119,37 @@ new #[Layout('layouts.guest')] class extends Component
                 'check_dos' => $this->check_dos,
                 'check_tres' => $this->check_tres,
                 'check_cuatro' => $this->check_cuatro,
-                'check_cinco' => $this->check_cuatro,
+                'check_cinco' => $this->check_cinco,
                 'check_seis' => $this->check_seis,
             ];
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
             $this->response = app(ConsetController::class)->store($request);
             if ($this->response['status'] == 'success') {
+
+                if (isset($this->response['data']['data']['url_pdf'])) {
+                    $this->showInvoice($this->response['data']['data']['url_pdf']);
+                    $this->callNotification('Consentimiento generado', 'success');
+                }
+
                 $this->clear();
-                $this->endPetition();
+            } else {
+
+                $this->callNotification($this->response['message'] ?? 'Error en el servidor', 'error');
             }
             $this->endPetition();
         } catch (\Throwable $th) {
-            $message = 'Ocurrio un error al enviar el formulario';
+            $message = 'Ocurrio un error al enviar el formulario .F';
             $this->handleException($th, $message);
         }
+    }
+    public function showInvoice($url)
+    {
+        // Extraer nombre del archivo para el proxy
+        $filename = basename($url);
+        $proxyUrl = url("/pdf-proxy/{$filename}");
+
+        $this->dispatch('open-pdf-popup', url: $proxyUrl);
     }
 
     public function with()
@@ -130,6 +164,33 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 <div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+
+    <div x-data="{}" @open-pdf-popup.window="
+    const url = $event.detail.url;
+    const width = 700;
+    const height = 500;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    const features = `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
+
+    // Intentar abrir directamente
+    const printWindow = window.open(url, '_blank', features);
+
+    if (printWindow) {
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+                setTimeout(() => {
+                    if (!printWindow.closed) printWindow.close();
+                }, 10000);
+            }, 1000);
+        };
+    } else {
+        // Si falló (bloqueado), lanzamos una alerta visual de respaldo
+        alert('El navegador bloqueó la ventana de impresión. Por favor, permite los pop-ups para este sitio.');
+    }
+            ">
+    </div>
 
     <div class="bg-gray-100 h-2 flex">
         <div class="bg-blue-600 transition-all duration-500" style="width: {{ ($step / 4) * 100 }}%"></div>
@@ -183,7 +244,8 @@ new #[Layout('layouts.guest')] class extends Component
         <div wire:transition class="space-y-4">
             <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 2: Información del Visitante</h2>
             <div class="grid grid-cols-1 gap-4">
-                <input type="text" wire:model="full_name" placeholder="Nombre completo" class="p-3 border rounded-lg">
+                <input type="text" wire:model="full_name" placeholder="Nombre completo"
+                    @input="$el.value = $el.value.replace(/[0-9]/g, '')" class="p-3 border rounded-lg">
                 <select class="p-3 border rounded-lg" wire:model="type_document">
                     <option value="">Escoja un tipo de documento</option>
                     <option value="CC">Cédula</option>
@@ -202,9 +264,9 @@ new #[Layout('layouts.guest')] class extends Component
                 </p>
 
                 <label
-                    class="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer group">
+                    class="flex text-md items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer group">
                     <input type="checkbox" wire:model="check_uno"
-                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        class="w-8 h-7 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                     <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
                         Confirmo mi calidad de representante legal del menor.
                     </span>
@@ -218,8 +280,8 @@ new #[Layout('layouts.guest')] class extends Component
         <div wire:transition class="space-y-4">
             <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Menor</h2>
             <div class="grid grid-cols-1 gap-4">
-                <input type="text" wire:model="full_name_minor" placeholder="Nombre completo del menor"
-                    class="p-3 border rounded-lg">
+                <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')" wire:model="full_name_minor"
+                    placeholder="Nombre completo del menor" class="p-3 border rounded-lg">
                 <select class="p-3 border rounded-lg" wire:model="document_type_minor">
                     <option value="">Elija Tipo de documento</option>
                     <option value="RC">Registro Civil</option>
@@ -227,7 +289,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </select>
                 <input type="text" wire:model="document_number_minor" placeholder="Numero de Documento"
                     class="p-3 border rounded-lg">
-                <label for="date">Año de Nacimiento</label>
+                <label max="{{ date('Y-m-d') }}" for="date">Año de Nacimiento</label>
                 <input type="date" wire:model="date" class="p-3 border rounded-lg">
                 <select class="p-3 border rounded-lg" wire:model="parentesco">
                     <option value="">Elija un parentesco</option>
@@ -283,7 +345,20 @@ new #[Layout('layouts.guest')] class extends Component
                     </p>
                     <label class="flex items-start cursor-pointer group">
                         <input wire:model="check_seis" type="checkbox"
-                            class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded">
+                            class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded" x-on:change="
+                            if($el.checked) {
+                            $wire.check_uno = true;
+                            $wire.check_dos = true;
+                            $wire.check_tres = true;
+                            $wire.check_cuatro = true;
+                            $wire.check_cinco = true;
+                            }else{
+                                $wire.check_uno = false;
+                            $wire.check_dos = false;
+                            $wire.check_tres = false;
+                            $wire.check_cuatro = false;
+                            $wire.check_cinco = false;
+                                }">
                         <span class="ml-3 text-xs font-semibold text-gray-700">Acepto integralmente el consentimiento
                             informado y exoneración de responsabilidad.</span>
                     </label>
@@ -304,8 +379,11 @@ new #[Layout('layouts.guest')] class extends Component
 
             @if($step < 4) <button type="button" wire:click="nextStep"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow-md transition-all"
-                :disabled="($wire.step == 1 && !$wire.Atraccion && $wire.sede) || ($wire.step == 2 && !$wire.check_uno)"
-                :class=" {'bg-red-500 cursor-not-allowed': ($wire.step == 1 && !$wire.Atraccion) || ($wire.step == 2 && !$wire.check_uno)}">
+                :disabled="($wire.step == 1 && (!$wire.sede || !$wire.Atraccion)) 
+                || ($wire.step == 2 && (!$wire.full_name || !$wire.type_document || !$wire.document_number || !$wire.telephone || !$wire.email || !$wire.check_uno)) ||
+                ($wire.step == 3 && (!$wire.full_name_minor || !$wire.document_type_minor || !$wire.document_number_minor || !$wire.date || !$wire.parentesco))
+" :class=" {'bg-gray-600 opacity-25  cursor-not-allowed': ($wire.step == 1 && (!$wire.sede || !$wire.Atraccion)) || ($wire.step == 2 && (!$wire.full_name || !$wire.type_document || !$wire.document_number || !$wire.telephone || !$wire.email || !$wire.check_uno))
+    ||($wire.step == 3 && (!$wire.full_name_minor || !$wire.document_type_minor || !$wire.document_number_minor || !$wire.date || !$wire.parentesco))}">
                 Siguiente
                 </button>
                 @else

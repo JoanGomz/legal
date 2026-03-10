@@ -21,6 +21,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'panels.dashboard')
         ->name('dashboard');
 
+    Route::livewire('admin-consent', 'panels.admin-consent.consent')
+        ->name('Consents');
+
     Route::prefix('accesos')->group(function () {
         Route::livewire('usuarios', 'panels.identity-management.users-directory')
             ->name('access.users');
