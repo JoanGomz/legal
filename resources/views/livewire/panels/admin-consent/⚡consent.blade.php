@@ -26,7 +26,8 @@ new class extends Component
                 $this->dispatch('hide-loading');
             }
         } catch (\Throwable $th) {
-            //throw $th;
+            $message = 'Ocurrio un error al crear el PDF.F';
+            $this->handleException($th, $message);
         }
     }
     public function with()
@@ -64,18 +65,19 @@ new class extends Component
                     <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
                         {{ $item['id']}}
                     </th>
-                    <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
+                    <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap relative"
+                        style="left:3rem;">
                         {{ $item['code']}}
                     </th>
                     <td class="px-2 py-4">
                         <div class="relative group">
                             <!-- Vista limpia - solo lo esencial -->
                             <div class="cursor-pointer">
-                                <div class="text-sm font-medium text-gray-900">
+                                <div class="text-sm font-medium text-gray-900 md:relative" style="left:-2rem;">
                                     {{ $item ['full_name'] }}
                                 </div>
                                 <div class="text-xs text-gray-500 mt-1">
-                                    <i class="fa-solid fa-building mr-1"></i>
+                                    <i style=" left:2rem;" class="fa-solid fa-user mr-1 md:relative"></i>
 
                                 </div>
                             </div>
@@ -114,7 +116,7 @@ new class extends Component
                     <td class="px-2 py-4 items-center">
                         <div class="relative group">
 
-                            <div class="cursor-pointer flex items-center relative" style="right: -33px;">
+                            <div class="cursor-pointer flex items-center md:relative" style="right: 15px;">
                                 <span>{{ $item['minor_full_name'] }}</span>
                                 <i
                                     class="fa-solid fa-info-circle text-gray-400 ml-2 group-hover:text-blue-500 transition-colors"></i>

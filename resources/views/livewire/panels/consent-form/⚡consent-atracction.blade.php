@@ -50,6 +50,7 @@ new #[Layout('layouts.guest')] class extends Component
             'telephone',
             'email',
             'document_type_minor',
+            'document_number_minor',
             'full_name_minor',
             'date',
             'check_uno',
@@ -126,9 +127,8 @@ new #[Layout('layouts.guest')] class extends Component
             $request->merge($data);
             $this->response = app(ConsetController::class)->store($request);
             if ($this->response['status'] == 'success') {
-
-                if (isset($this->response['data']['data']['url_pdf'])) {
-                    $this->showInvoice($this->response['data']['data']['url_pdf']);
+                if (isset($this->response['data']['url_pdf'])) {
+                    $this->showInvoice($this->response['data']['url_pdf']);
                     $this->callNotification('Consentimiento generado', 'success');
                 }
 
@@ -145,7 +145,6 @@ new #[Layout('layouts.guest')] class extends Component
     }
     public function showInvoice($url)
     {
-        // Extraer nombre del archivo para el proxy
         $filename = basename($url);
         $proxyUrl = url("/pdf-proxy/{$filename}");
 
@@ -166,30 +165,28 @@ new #[Layout('layouts.guest')] class extends Component
 <div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
 
     <div x-data="{}" @open-pdf-popup.window="
-    const url = $event.detail.url;
-    const width = 700;
-    const height = 500;
-    const left = (screen.width - width) / 2;
-    const top = (screen.height - height) / 2;
-    const features = `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
+        const url = $event.detail.url;
+        const width = 700;
+        const height = 500;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        const features = `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
 
-    // Intentar abrir directamente
-    const printWindow = window.open(url, '_blank', features);
+        // Intentar abrir directamente
+        const printWindow = window.open(url, '_blank', features);
 
-    if (printWindow) {
-        printWindow.onload = function() {
-            setTimeout(() => {
-                printWindow.print();
+        if (printWindow) {
+            printWindow.onload = function() {
                 setTimeout(() => {
-                    if (!printWindow.closed) printWindow.close();
-                }, 10000);
-            }, 1000);
-        };
-    } else {
-        // Si falló (bloqueado), lanzamos una alerta visual de respaldo
-        alert('El navegador bloqueó la ventana de impresión. Por favor, permite los pop-ups para este sitio.');
-    }
-            ">
+                    printWindow.print();
+                    setTimeout(() => {
+                        if (!printWindow.closed) printWindow.close();
+                    }, 15000);
+                }, 15000);
+            };
+        } else {
+            alert('El navegador bloqueó la ventana de impresión. Por favor, permite los pop-ups para este sitio.');
+        }">
     </div>
 
     <div class="bg-gray-100 h-2 flex">
@@ -353,7 +350,7 @@ new #[Layout('layouts.guest')] class extends Component
                             $wire.check_cuatro = true;
                             $wire.check_cinco = true;
                             }else{
-                                $wire.check_uno = false;
+                            $wire.check_uno = false;
                             $wire.check_dos = false;
                             $wire.check_tres = false;
                             $wire.check_cuatro = false;
@@ -382,8 +379,9 @@ new #[Layout('layouts.guest')] class extends Component
                 :disabled="($wire.step == 1 && (!$wire.sede || !$wire.Atraccion)) 
                 || ($wire.step == 2 && (!$wire.full_name || !$wire.type_document || !$wire.document_number || !$wire.telephone || !$wire.email || !$wire.check_uno)) ||
                 ($wire.step == 3 && (!$wire.full_name_minor || !$wire.document_type_minor || !$wire.document_number_minor || !$wire.date || !$wire.parentesco))
-" :class=" {'bg-gray-600 opacity-25  cursor-not-allowed': ($wire.step == 1 && (!$wire.sede || !$wire.Atraccion)) || ($wire.step == 2 && (!$wire.full_name || !$wire.type_document || !$wire.document_number || !$wire.telephone || !$wire.email || !$wire.check_uno))
-    ||($wire.step == 3 && (!$wire.full_name_minor || !$wire.document_type_minor || !$wire.document_number_minor || !$wire.date || !$wire.parentesco))}">
+                "
+                :class=" {'bg-gray-600 opacity-25  cursor-not-allowed': ($wire.step == 1 && (!$wire.sede || !$wire.Atraccion)) || ($wire.step == 2 && (!$wire.full_name || !$wire.type_document || !$wire.document_number || !$wire.telephone || !$wire.email || !$wire.check_uno))
+                ||($wire.step == 3 && (!$wire.full_name_minor || !$wire.document_type_minor || !$wire.document_number_minor || !$wire.date || !$wire.parentesco))}">
                 Siguiente
                 </button>
                 @else
