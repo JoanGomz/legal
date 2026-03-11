@@ -8,6 +8,7 @@ use App\Models\Operation\Parks;
 use App\Services\BaseService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Polyfill\Uuid\Uuid;
 
 class ConsentService extends BaseService
 {
