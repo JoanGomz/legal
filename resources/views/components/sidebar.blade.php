@@ -87,7 +87,7 @@
                             class="fa-solid fa-building text-lg {{ request()->routeIs('branches') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
                     </div>
 
-                    <span x-show="sidebarOpen" x-transition.opacity.duration.300ms
+                    <span x-show="sidebarOpen" x-tr|ansition.opacity.duration.300ms
                         class="ml-1 text-sm font-semibold whitespace-nowrap">
                         Sedes
                     </span>
@@ -99,15 +99,19 @@
                 </div>
             </li>
             <li class="relative group">
-                <a href="#"
+                <a href="{{route ('Consents') }}"
                     class="flex items-center h-12 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 transition-all">
                     <div class="w-12 h-12 shrink-0 flex items-center justify-center">
                         <i class="fa-solid fa-file-signature text-lg"></i>
                     </div>
                     <span x-show="sidebarOpen" x-transition.opacity class="ml-1 font-medium whitespace-nowrap text-sm">
-                        Nuevas Firmas
+                        Consentimientos
                     </span>
                 </a>
+                <div x-cloak x-show="!sidebarOpen"
+                    class="fixed left-20 ml-2 px-3 py-1 bg-slate-900 text-white text-[11px] font-bold rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] border border-slate-700 pointer-events-none uppercase tracking-wider">
+                    Consentimientos
+                </div>
             </li>
         </ul>
     </nav>
