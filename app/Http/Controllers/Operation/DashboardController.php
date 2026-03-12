@@ -7,45 +7,29 @@ use App\Models\Operation\Consents;
 
 class DashboardController extends Controller
 {
-    //metricas para el dashboard
 
+    /**
+     * Endpoint para obtener las métricas del dashboard
+     */
     public function getMetrics()
     {
         try {
-
             //si es rol super admin, mostrar todas las metricas, sino solo las del parque asignado
-            if (is_null(auth()->user()) || auth()->user()->hasRole('super-admin')) {
-                return $this->getAllMetrics();
+            if (!is_null(auth()->user())) {
+                $data =  $this->getAllMetrics();
             } else {
-                $userParkId = auth()->user()->park_id;
-                $totalConsents = Consents::where('park_id', $userParkId)->count();
-                $consentsByPark = Consents::where('park_id', $userParkId)
-                    ->selectRaw('park_id, COUNT(*) as total')
-                    ->groupBy('park_id')
-                    ->get()
-                    ->mapWithKeys(function ($item) {
-                        return [$item->park_id => $item->total];
-                    });
-                $consentsByArcade = Consents::where('park_id', $userParkId)
-                    ->selectRaw('arcade_id, COUNT(*) as total')
-                    ->groupBy('arcade_id')
-                    ->get()
-                    ->mapWithKeys(function ($item) {
-                        return [$item->arcade_id => $item->total];
-                    });
+                $data = $this->getMetricsByPark();
             }
 
-            $metrics = [
-                'total_consents' => $totalConsents,
-                'chart_data' => $consentsByPark,
-            ];
-
-            return $this->responseLivewire('success', 'Métricas obtenidas exitosamente', $metrics);
+            return $this->responseLivewire('success', 'Métricas obtenidas exitosamente', $data);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);
         }
     }
 
+    /**
+     * Métricas para el dashboard, sin filtrar por parque
+     */
     public function getAllMetrics()
     {
         //* Conteo total de consentimientos
@@ -103,6 +87,35 @@ class DashboardController extends Controller
                 'categories' => $categories
             ],
             'count_parent' => $radialData
+        ];
+    }
+
+    /**
+     * Métricas para el dashboard, filtradas por parque del usuario autenticado
+     */
+    public function getMetricsByPark()
+    {
+        $userParkId = auth()->user()->park_id;
+
+        //* Conteo total de consentimientos del parque
+        $totalConsents = Consents::where('park_id', $userParkId)->where('is_delete', 0)->count();
+
+        //* consentimientos por arcades del parque
+        $consentsByPark = Consents::where('park_id', $userParkId)
+            ->where('is_delete', 0)
+            ->leftJoin('atraccion_arcade', 'consents.arcade_id', '=', 'atraccion_arcade.id')
+            ->selectRaw('COALESCE(atraccion_arcade.nombre, "Sin Arcade") as arcade_name, COUNT(*) as total')
+            ->groupBy('arcade_id', 'atraccion_arcade.nombre')
+            ->get();
+
+        $chartdata = [
+            'labels' => $consentsByPark->pluck('arcade_name')->toArray(),
+            'series' => $consentsByPark->pluck('total')->toArray()
+        ];
+
+        return [
+            'total_consents' => $totalConsents,
+            'chart_data' => $chartdata,
         ];
     }
 }
