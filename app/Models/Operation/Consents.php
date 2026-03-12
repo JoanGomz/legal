@@ -9,16 +9,16 @@ class Consents extends BaseModel
 {
     protected $table = 'consents';
 
-    // protected static function booted()
-    // {
-    //     static::creating(function ($model) {
-    //         $model->uuid = (string) Str::uuid();
-    //     });
-    // }
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->uuid = (string) Str::uuid();
+        });
+    }
 
     protected $fillable = [
         'id',
-        // 'uuid',
+        'uuid',
         'code',
         'url_pdf',
         'park_id',

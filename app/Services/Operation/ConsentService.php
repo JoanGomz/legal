@@ -55,7 +55,7 @@ class ConsentService extends BaseService
                     'isHtml5ParserEnabled' => true
                 ]);
 
-            $fileName = 'consents/consentimiento_' . $conset->minor_document_number . '_' . $conset->id . '.pdf';
+            $fileName = 'consents/consentimiento_' . $conset->uuid . '_' . $conset->id . '.pdf';
             Storage::disk('s3')->put($fileName, $pdf->output());
 
             $s3Url = Storage::disk('s3')->url($fileName);

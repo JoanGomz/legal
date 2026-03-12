@@ -11,14 +11,22 @@ class DashboardController extends Controller
     /**
      * Endpoint para obtener las métricas del dashboard
      */
-    public function getMetrics()
+    public function getMetrics($since = null, $until = null)
     {
         try {
-            //si es rol super admin, mostrar todas las metricas, sino solo las del parque asignado
-            if (!is_null(auth()->user())) {
-                $data =  $this->getAllMetrics();
+            if (!is_null($since) && !is_null($until)) {
+                $sinceDate = date('Y-m-d 00:00:00', strtotime($since));
+                $untilDate = date('Y-m-d 23:59:59', strtotime($until));
             } else {
-                $data = $this->getMetricsByPark();
+                $sinceDate = date('Y-m-d 00:00:00', strtotime('-30 days'));
+                $untilDate = date('Y-m-d 23:59:59');
+            }
+
+            //si es rol (superAdmin,gestor,user) mostrar todas las metricas, sino solo las del parque asignado
+            if (auth()->user()->hasRole('superAdmin') || auth()->user()->hasRole('gestor') || auth()->user()->hasRole('user')) {
+                $data =  $this->getAllMetrics($sinceDate, $untilDate);
+            } else {
+                $data = $this->getMetricsByPark($sinceDate, $untilDate);
             }
 
             return $this->responseLivewire('success', 'Métricas obtenidas exitosamente', $data);
@@ -30,13 +38,14 @@ class DashboardController extends Controller
     /**
      * Métricas para el dashboard, sin filtrar por parque
      */
-    public function getAllMetrics()
+    public function getAllMetrics($sinceDate, $untilDate)
     {
         //* Conteo total de consentimientos
-        $totalConsents = Consents::where('is_delete', 0)->count();
+        $totalConsents = Consents::where('is_delete', 0)->whereBetween('created_at', [$sinceDate, $untilDate])->count();
 
         //* Conteo para gráfico barras por parque y arcade
         $rawData = Consents::where('consents.is_delete', 0)
+            ->whereBetween('consents.created_at', [$sinceDate, $untilDate])
             ->join('parks', 'consents.park_id', '=', 'parks.id')
             ->leftJoin('atraccion_arcade', 'consents.arcade_id', '=', 'atraccion_arcade.id')
             ->selectRaw("
@@ -67,6 +76,7 @@ class DashboardController extends Controller
 
         //* Conteo para gráfico parentesco
         $countParent = Consents::where('is_delete', 0)
+            ->whereBetween('created_at', [$sinceDate, $untilDate])
             ->selectRaw('relationship, COUNT(*) as total')
             ->groupBy('relationship')
             ->get();
