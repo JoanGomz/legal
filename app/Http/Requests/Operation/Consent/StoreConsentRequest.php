@@ -31,7 +31,7 @@ class StoreConsentRequest extends FormRequest
             'email' => 'nullable|email',
 
             // Datos del Menor
-            'minor_document_number' => 'required|string|min:5|max:20',
+            'minor_document_number' => 'nullable|string|min:5|max:20',
             'minor_document_type' => 'nullable|string|in:RC,TI', // Registro Civil, Tarjeta Identidad
             'minor_full_name' => 'required|string|min:3|max:255',
             'minor_birth_date' => 'nullable|date|before:today',

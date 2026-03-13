@@ -1,15 +1,30 @@
 <?php
 
+use App\Http\Controllers\Operation\DashboardController;
 use Livewire\Volt\Component;
+use Carbon\Carbon;
 
 new class extends Component {
     public $start_date;
     public $end_date;
+
+    public function with()
+    {
+        $this->start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
+
+        $this->end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $data = app(DashboardController::class)->getAllMetrics($this->start_date, $this->end_date);
+        $park = app(DashboardController::class)->getMetricsByPark();
+        return [
+            'data' => $data,
+            'park' => $park
+        ];
+    }
 }; ?>
 
 <div class="py-4">
-    <div x-data="{filter:false}" class=" space-x-4 mx-auto px-4">
-        <div class=" flex justify-between p-4 bg-white shadow sm:rounded-lg">
+    <div x-data="{filter:false}" class="space-x-4 mx-auto px-4">
+        <div class="flex justify-between p-4 bg-white shadow sm:rounded-lg">
             <h1 class="text-xl font-semibold text-gray-900">
                 Bienvenid@ <a href="{{ route('profile') }}" class="text-[#0078B6]">{{ auth()->user()->name }}</a> al
                 área legal de StarPark
@@ -24,99 +39,84 @@ new class extends Component {
                 <label for="end_date">Hasta: </label>
                 <input wire:model="end_date" class="rounded-xl" type="date" id="end_date" min="2026-01-01"
                     max="2030-01-01">
-
             </div>
         </div>
     </div>
-    <div class=" mx-auto sm:px-4 lg:px-4">
 
+    <div class="w-full sm:px-2 lg:px-2">
         <div id="charts-container"></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
-            <div class="row mt-4">
-                <div class="col-md-5 mb-4">
-                    <div class="bg-white p-5 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ">
-                        <div id="sparkline3"></div>
+            <div class="mt-4">
+                <div wire:ignore
+                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
+                    <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
+                        <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-file-signature text-blue-600 text-2xl"></i>
+                        </div>
+
+                        <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
+                            Consentimientos Totales
+                        </h3>
+
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-6xl font-black text-gray-900 tracking-tighter">
+                                {{ number_format($data['total_consents']) }}
+                            </span>
+                        </div>
+
+
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white shadowCard hover:shadow overflow-hidden rounded-lg">
-                <div class="p-4">
-                    <div class="w-full flex justify-center" style="min-height: 300px" id="chart2">
+            <div class="mt-4">
+                <div wire:ignore class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
+                    <div class="p-4">
+                        <h3 class="text-sm font-bold text-gray-700 mb-2">Acompañantes Frecuentes </h3>
+                        <div class="w-full" style="min-height: 400px" id="chart_radial"
+                            data-series="{{ json_encode($data['count_parent']['series']) }}"
+                            data-labels="{{ json_encode($data['count_parent']['labels'] ?? ['A', 'B', 'C']) }}"
+                            data-total="{{ $data['total_consents'] }}">
+                        </div>
                     </div>
                 </div>
             </div>
 
-
-            <div class="bg-white shadowCard hover:shadow overflow-hidden rounded-lg p-8 text-center">
-                <h3 class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
-
-                </h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">
-
-                </div>
-                <p class="text-gray-400 text-sm">
-
-                </p>
-            </div>
-
-
-            <div class="bg-white shadowCard hover:shadow overflow-hidden rounded-lg">
+        </div>
+        <div class="w-full mt-4">
+            <div wire:ignore class="w-full bg-white shadowCard hover:shadow rounded-lg">
                 <div class="p-4">
-                    <div class="w-full flex justify-center" style="min-height: 300px" id="chart3">
+                    <div class="w-full" style="min-height: 500px" id="chart2"
+                        data-series="{{ json_encode($data['chart_data']['series']) }}"
+                        data-categories="{{ json_encode($data['chart_data']['categories'] ?? ['A', 'B', 'C']) }}">
                     </div>
                 </div>
             </div>
         </div>
+        <div class="mt-4">
+            @dump($park)
+            <div wire:ignore
+                class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
+                    <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-file-signature text-blue-600 text-2xl"></i>
+                    </div>
+
+                    <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
+                        Consentimientos Totales
+                    </h3>
+
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-6xl font-black text-gray-900 tracking-tighter">
+                            {{ number_format($data['total_consents']) }}
+                        </span>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
-@script
-<script>
-    const spark3 = {
-        chart: {
-            id: 'sparkline3',
-            type: 'line',
-            height: 100,
-            sparkline: {
-                enabled: true
-            },
-            group: 'sparklines'
-        },
-        series: [{
-            name: 'red',
-            data: [47, 45, 74, 32, 56, 31, 44, 33, 45, 19]
-        }],
-        stroke: {
-            curve: 'smooth'
-        },
-        markers: {
-            size: 0
-        },
-        tooltip: {
-            fixed: {
-                enabled: true,
-                position: 'right',
-
-            },
-            x: {
-                show: true
-            }
-        },
-        colors: ['#020617'],
-        title: {
-            text: '577',
-            style: {
-                fontSize: '26px'
-            }
-        },
-        xaxis: {
-            crosshairs: {
-                width: 1
-            },
-        }
-    }
-    new ApexCharts(document.querySelector("#sparkline3"), spark3).render();
-</script>
-
-@endscript
+</div> @vite(['resources/js/chart.js'])
