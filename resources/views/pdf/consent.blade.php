@@ -143,7 +143,7 @@
         </div>
 
         <div class="data-field-centered" style="top: 82%;">
-            {{$registration->minor_birth_date->format('d/m/Y')}}
+            {{$registration->minor_birth_date}}
         </div>
 
     </div>
