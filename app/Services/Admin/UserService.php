@@ -17,8 +17,8 @@ class UserService implements UserServiceInterface
         $query = User::where('status', 1)->with('roles:name')->with('mall');
 
         // si el usuario tiene el permiso viewAll se muestran todas las registros si no se filtra por el id del centro comercial
-        if (auth()->check() && !auth()->user()->can('viewAll')) {
-            $query = $query->where('park_id', Auth::user()->park_id);
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('park_id', auth()->user()->park_id);
         }
 
         return $query->get();
