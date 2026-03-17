@@ -61,6 +61,9 @@ class UserService implements UserServiceInterface
 
         $query->with('roles:name');
 
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('park_id', auth()->user()->park_id);
+        }
 
         // buscador - AGRUPA TODAS LAS CONDICIONES DE BÚSQUEDA
         if (!empty($search)) {
