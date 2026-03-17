@@ -103,12 +103,12 @@ class DashboardController extends Controller
     /**
      * Métricas para el dashboard, filtradas por parque del usuario autenticado
      */
-    public function getMetricsByPark()
+    public function getMetricsByPark($sinceDate, $untilDate)
     {
         $userParkId = auth()->user()->park_id;
 
         //* Conteo total de consentimientos del parque
-        $totalConsents = Consents::where('park_id', $userParkId)->where('is_delete', 0)->count();
+        $totalConsents = Consents::where('park_id', $userParkId)->where('is_delete', 0)->whereBetween('created_at', [$sinceDate, $untilDate])->count();
 
         //* consentimientos por arcades del parque
         $consentsByPark = Consents::where('park_id', $userParkId)
