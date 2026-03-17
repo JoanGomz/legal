@@ -91,13 +91,13 @@ new class extends Component {
         </div>
 
         <div class="w-full mt-4">
-            <div wire:key="park-{{ $start_date }}-{{ $end_date }}"
+            <div wire:key="park-{{ $start_date }}-{{ $end_date }}" wire:ignore
                 class="w-full bg-white shadowCard hover:shadow rounded-lg">
                 <div class="p-4">
                     <h3>Consentimientos por parque y atracción</h3>
                     <div class="w-full" style="min-height: 500px" id="chart2"
                         data-series="{{ json_encode($data['chart_data']['series']) }}"
-                        data-categories="{{ json_encode($data['chart_data']['categories'] ?? ['A', 'B', 'C']) }}">
+                        data-labels="{{ json_encode($data['chart_data']['categories'] ?? ['A', 'B', 'C']) }}">
                     </div>
                 </div>
             </div>

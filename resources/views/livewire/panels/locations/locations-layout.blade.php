@@ -19,6 +19,7 @@
                 ])>
                 Parques
             </a>
+            @can('atraccion')
             <a href="{{ route('atracctions') }}" wire:navigate
                 @class([ 'py-4 text-sm font-bold border-b-2 transition-all' , 'border-brand-purple text-brand-purple'>
                 request()->routeIs(
@@ -27,6 +28,7 @@
                 ])>
                 Atracciones
             </a>
+            @endcan
         </div>
 
         <!-- Contenido de las pestañas -->

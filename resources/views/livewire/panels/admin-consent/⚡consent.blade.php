@@ -32,7 +32,8 @@ new class extends Component
     }
     public function with()
     {
-        $consent = app(ConsetController::class)->indexPaginated($this->page, $this->search);
+
+        $consent = app(ConsetController::class)->indexPaginated($this->page, $this->perPage, $this->search);
         return [
             'consent' => $consent,
         ];
@@ -61,10 +62,6 @@ new class extends Component
             </thead>
             <tbody>
                 @forelse ($consent['data'] as $item )
-                @php
-                if(auth()->user()->rol == 'Admin' && auth()->user()->park_id != $item->park_id) {
-                continue;}
-                @endphp
                 <tr class="bg-neutral-primary-soft border-b  border-default">
                     <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
                         {{ $item['id']}}
@@ -164,9 +161,8 @@ new class extends Component
                     </td>
                 </tr>
                 @empty
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800">No se encontraron Consentimienos</h3>
-                </div>
+
+                <h3 class="text-lg font-bold text-gray-800">No se encontraron Consentimienos</h3>
                 @endforelse
             </tbody>
         </table>

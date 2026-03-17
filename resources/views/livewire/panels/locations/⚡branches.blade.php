@@ -50,7 +50,7 @@ new class extends Component
     }" class="space-y-4 pb-4">
 
     <div class="flex justify-between items-center px-4">
-        <x-input-search mode="tableSearch" placeholder="Buscar Sede"></x-input-search>
+        <x-input-search mode="tableSearch" id="searchInput" placeholder="Buscar Sede"></x-input-search>
         @can('sede.create')
         <button @click="prepareModal('create','Crear Sede')"
             class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-opacity-90 transition-all">
@@ -62,7 +62,7 @@ new class extends Component
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 bg-neutral-primary-soft shadow-xs rounded-base relative">
         @foreach( $sedes['data'] as $sede )
         <div
-            class="p-4 bg-gradient-to-r from-slate-800 to-slate-950 rounded-xl shadow-xl overflow-hidden relative flex flex-col min-h-[400px]">
+            class="div p-4 bg-gradient-to-r from-slate-800 to-slate-950 rounded-xl shadow-xl overflow-hidden relative flex flex-col min-h-[400px]">
             <div class="p-4 relative z-10 flex-1 flex flex-col">
                 <span
                     class="absolute top-3 right-3 bg-black/30 backdrop-blur-sm px-3 py-1 text-xs font-mono rounded-full text-white/90 font-semibold">

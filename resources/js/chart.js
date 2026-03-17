@@ -1,16 +1,25 @@
 import ApexCharts from "apexcharts";
 
+let chart2Instance = null;
+let userGraphInstance = null;
 function chart1() {
     const el = document.querySelector("#chart2");
-    if (el) {
+
+    if (el && el.dataset.series && el.dataset.labels) {
+        if (chart2Instance) {
+            chart2Instance.destroy();
+            chart2Instance = null;
+        }
+
         el.innerHTML = "";
 
         const options = {
-            series: JSON.parse(el.dataset.series),
+            // Obtenemos los datos frescos que Livewire inyectó en el dataset
+            series: JSON.parse(el.dataset.series || "[]"),
             chart: {
                 type: "bar",
                 height: 450,
-                width: 1750,
+                width: "1800px",
                 stacked: true,
             },
             plotOptions: {
@@ -50,12 +59,13 @@ function chart1() {
                 fontSize: "15px",
             },
             xaxis: {
-                categories: JSON.parse(el.dataset.categories),
+                categories: JSON.parse(el.dataset.labels || "[]"),
             },
         };
 
-        const chart = new ApexCharts(el, options);
-        chart.render();
+        // 4. Crear la nueva instancia y renderizar
+        chart2Instance = new ApexCharts(el, options);
+        chart2Instance.render();
     }
 
     //Grafica Radial
@@ -98,9 +108,16 @@ function chart1() {
         }
     }
     // Grafica de usuarios
+
     const userGraph = document.querySelector("#chart_by_park");
 
     if (userGraph && userGraph.dataset.series && userGraph.dataset.labels) {
+        // 2. Destruir la instancia previa si existe para evitar que desaparezca o se duplique
+        if (userGraphInstance) {
+            userGraphInstance.destroy();
+            userGraphInstance = null;
+        }
+
         userGraph.innerHTML = "";
 
         try {
@@ -117,6 +134,7 @@ function chart1() {
                 ],
                 chart: {
                     height: 350,
+                    width: "100%", // Aseguramos que llene el contenedor tras el filtro
                     type: "bar",
                     events: {
                         click: function (chart, w, e) {},
@@ -144,25 +162,28 @@ function chart1() {
                 },
             };
 
-            new ApexCharts(userGraph, optionsUserGraph).render();
+            // 3. Guardamos la nueva instancia en la variable global
+            userGraphInstance = new ApexCharts(userGraph, optionsUserGraph);
+            userGraphInstance.render();
         } catch (error) {
-            console.error("Error al renderizar chart:", error);
+            console.error("Error al renderizar chart_by_park:", error);
         }
     }
 }
 
-document.addEventListener("DOMContentLoaded", chart1);
+document.addEventListener("livewire:navigated", chart1);
 
-document.addEventListener("livewire:navigated", () => {
-    chart1();
-});
 document.addEventListener("livewire:initialized", () => {
     Livewire.hook("morph.updated", ({ el, component }) => {
-        chart1();
+        const hasCharts = el.querySelector(
+            "#chart2, #chart_by_park, #chart_radial",
+        );
+        if (hasCharts) {
+            setTimeout(() => {
+                chart1();
+            }, 50);
+        }
     });
 });
-document.addEventListener("livewire:load", chart1);
 
-window.addEventListener("livewire:updated", (event) => {
-    chart1();
-});
+document.addEventListener("DOMContentLoaded", chart1);
