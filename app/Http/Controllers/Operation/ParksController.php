@@ -14,7 +14,11 @@ class ParksController extends Controller
     public function index()
     {
         try {
-            $parks = Parks::where('is_deleted', 0)->get();
+            $query = Parks::query()->where('is_deleted', 0);
+            if (auth()->user()->hasRole('Admin')) {
+                $query->where('id', auth()->user()->park_id);
+            }
+            $parks = $query->get();
             return $this->responseLivewire('success', '', $parks);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);

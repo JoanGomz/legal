@@ -22,6 +22,10 @@ class ConsentService extends BaseService
     {
         $query = $this->model->query();
 
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('park_id', auth()->user()->park_id);
+        }
+
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');
         }
