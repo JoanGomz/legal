@@ -27,7 +27,11 @@ class ConsentService extends BaseService
         }
 
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%$search%")
+                    ->orWhere('document_number', 'like', "%$search%")
+                    ->orWhere('minor_document_number', 'like', "%$search%");
+            });
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($items, ['*'], 'page', $page);
