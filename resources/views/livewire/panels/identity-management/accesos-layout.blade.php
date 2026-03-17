@@ -12,31 +12,35 @@
         <!-- Navegación de pestañas -->
         <div>
             <div class="flex gap-8 py-2 px-4">
-                <a href="{{ route('access.users') }}" wire:navigate @class([
-                    'py-4 text-sm font-bold border-b-2 transition-all',
-                    'border-brand-purple text-brand-purple' => request()->routeIs(
-                        'access.users'),
+                <a href="{{ route('access.users') }}" wire:navigate
+                    @class([ 'py-4 text-sm font-bold border-b-2 transition-all'
+                    , 'border-brand-purple text-brand-purple'=> request()->routeIs(
+                    'access.users'),
                     'border-transparent text-gray-400' => !request()->routeIs('access.users'),
-                ])>
+                    ])>
                     Usuarios
                 </a>
-                <a href="{{ route('access.roles') }}" wire:navigate @class([
-                    'py-4 text-sm font-bold border-b-2 transition-all',
-                    'border-brand-purple text-brand-purple' => request()->routeIs(
-                        'access.roles'),
+                @can('Roles')
+                <a href="{{ route('access.roles') }}" wire:navigate
+                    @class([ 'py-4 text-sm font-bold border-b-2 transition-all'
+                    , 'border-brand-purple text-brand-purple'=> request()->routeIs(
+                    'access.roles'),
                     'border-transparent text-gray-400' => !request()->routeIs('access.roles'),
-                ])>
+                    ])>
                     Roles
                 </a>
-                <a href="{{ route('access.permissions') }}" wire:navigate @class([
-                    'py-4 text-sm font-bold border-b-2 transition-all',
-                    'border-brand-purple text-brand-purple' => request()->routeIs(
-                        'access.permissions'),
+                @endcan
+                @can('permisos')
+                <a href="{{ route('access.permissions') }}" wire:navigate
+                    @class([ 'py-4 text-sm font-bold border-b-2 transition-all'
+                    , 'border-brand-purple text-brand-purple'=> request()->routeIs(
+                    'access.permissions'),
                     'border-transparent text-gray-400' => !request()->routeIs(
-                        'access.permissions'),
-                ])>
+                    'access.permissions'),
+                    ])>
                     Permisos
                 </a>
+                @endcan
             </div>
         </div>
         <!-- Contenido de las pestañas -->

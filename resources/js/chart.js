@@ -10,7 +10,7 @@ function chart1() {
             chart: {
                 type: "bar",
                 height: 450,
-                width: 1800,
+                width: 1750,
                 stacked: true,
             },
             plotOptions: {
@@ -21,7 +21,7 @@ function chart1() {
                             enabled: true,
                             offsetX: 0,
                             style: {
-                                fontSize: "13px",
+                                fontSize: "15px",
                                 fontWeight: 900,
                             },
                         },
@@ -31,11 +31,15 @@ function chart1() {
             stroke: {
                 width: 1,
             },
-            title: {
-                text: "Consentimientos por parques",
-            },
             grid: {
                 padding: { left: 0, right: 20, bottom: 0, top: 0 },
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        fontSize: "15px",
+                    },
+                },
             },
             legend: {
                 position: "bottom",
@@ -43,7 +47,7 @@ function chart1() {
                 inverseOrder: false,
                 tooltipHoverFormatter: undefined,
                 height: 60,
-                fontSize: "20 px",
+                fontSize: "15px",
             },
             xaxis: {
                 categories: JSON.parse(el.dataset.categories),
@@ -93,12 +97,70 @@ function chart1() {
             console.error("Error al renderizar RadialBar:", error);
         }
     }
+    // Grafica de usuarios
+    const userGraph = document.querySelector("#chart_by_park");
+
+    if (userGraph && userGraph.dataset.series && userGraph.dataset.labels) {
+        userGraph.innerHTML = "";
+
+        try {
+            const seriesData = JSON.parse(userGraph.dataset.series);
+            const labelsData = JSON.parse(userGraph.dataset.labels);
+
+            const optionsUserGraph = {
+                labels: labelsData,
+                series: [
+                    {
+                        name: "Consentimientos",
+                        data: seriesData,
+                    },
+                ],
+                chart: {
+                    height: 350,
+                    type: "bar",
+                    events: {
+                        click: function (chart, w, e) {},
+                    },
+                },
+                plotOptions: {
+                    bar: {
+                        columnWidth: "45%",
+                        distributed: true,
+                    },
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                legend: {
+                    show: false,
+                },
+                xaxis: {
+                    categories: labelsData,
+                    labels: {
+                        style: {
+                            fontSize: "12px",
+                        },
+                    },
+                },
+            };
+
+            new ApexCharts(userGraph, optionsUserGraph).render();
+        } catch (error) {
+            console.error("Error al renderizar chart:", error);
+        }
+    }
 }
 
 document.addEventListener("DOMContentLoaded", chart1);
 
-document.addEventListener("livewire:navigated", chart1);
-
+document.addEventListener("livewire:navigated", () => {
+    chart1();
+});
+document.addEventListener("livewire:initialized", () => {
+    Livewire.hook("morph.updated", ({ el, component }) => {
+        chart1();
+    });
+});
 document.addEventListener("livewire:load", chart1);
 
 window.addEventListener("livewire:updated", (event) => {

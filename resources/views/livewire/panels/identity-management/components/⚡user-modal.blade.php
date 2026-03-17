@@ -26,7 +26,7 @@ new class extends Component {
         return [
             'name' => 'required|min:3|string',
             'email' => 'required|min:4|email',
-            'park_id' => 'required|integer',
+            'park_id' => 'required',
             'role_check' => 'required|string',
             'password' => ['required', 'min:8', Password::min(8)->mixedCase()],
             'password_verify' => 'required|same:password',
@@ -52,7 +52,7 @@ new class extends Component {
         $this->name = $user->name;
         $this->email = $user->email;
         $this->park_id = $user->park_id;
-        $this->role_check = $user->roles->first()->name;
+        //$this->role_check = $user->roles->first()->name;
         $this->js("window.prepareModal('update', 'Actualizar Usuario')");
     }
     public function sendPetition($type)
@@ -65,7 +65,6 @@ new class extends Component {
                 'role_check' => $this->role_check,
                 'park_id' => (int)$this->park_id,
             ];
-            dd($dataRequest);
             $this->password ? ($dataRequest['password'] = $this->password) : '';
             $request = new \Illuminate\Http\Request();
             $request->merge($dataRequest);
@@ -133,16 +132,14 @@ new class extends Component {
                         Seleccionar Parque
                     </label>
 
-                    <select wire:model="role_check" id="role_select"
+                    <select wire:model="park_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        @forelse($park['data'] as $item)
-                        <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
-                        @empty
-                        <option value="">No hay opciones disponibles</option>
-                        @endforelse
+                        @foreach ( $park['data'] as $item )
+                        <option value="{{ $item['id'] }}"> {{ $item['name'] }}</option>
+                        @endforeach
                     </select>
 
-                    <x-input-error :messages="$errors->get('role_check')" />
+                    <x-input-error :messages="$errors->get('park_id')" />
                 </div>
             </div>
             <div class="mb-5 flex gap-4">
@@ -151,7 +148,7 @@ new class extends Component {
                         Seleccionar Rol
                     </label>
 
-                    <select wire:model="park_id" id="park"
+                    <select wire:model="role_check" id="park"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         @if ($roles['data']['roles'])
                         <option value="">Selecciona un rol</option>

@@ -51,10 +51,12 @@ new class extends Component
 
     <div class="flex justify-between items-center px-4">
         <x-input-search mode="tableSearch" placeholder="Buscar Sede"></x-input-search>
+        @can('sede.create')
         <button @click="prepareModal('create','Crear Sede')"
             class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-opacity-90 transition-all">
             <i class="fa-solid fa-building mr-2"></i> Nueva Sede
         </button>
+        @endcan
     </div>
     <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 bg-neutral-primary-soft shadow-xs rounded-base relative">
@@ -118,9 +120,9 @@ new class extends Component
                         </div>
                     </div>
                 </div>
-
-
+                @can('park')
                 <div class="flex w-full gap-2 h-auto mt-auto">
+                    @can('edit.park')
                     <button wire:click="$dispatchTo('panels.locations.components.branches-modal', 'setEditingSede', @js([
                         'id'      => $sede->id,
                         'name'    => $sede->name,
@@ -131,13 +133,16 @@ new class extends Component
                         class="bg-white/10  hover:bg-white/20 text-white text-base font-bold px-4 py-2 rounded-lg flex-1 border border-white/10 flex items-center justify-center">
                         <i class="fa-solid fa-pen-to-square mr-2"></i> Editar
                     </button>
-
+                    @endcan
+                    @can('delete.park')
                     <button
                         @click="window.dispatchEvent(new CustomEvent('show-delete-modal', { detail: { id: {{ $sede->id }}, name: '{{ $sede->name }}' } }))"
                         class="bg-red-500/70 hover:bg-red-600/90 text-white text-base font-bold px-4 py-2 rounded-lg flex-1 border border-red-500/30 flex items-center justify-center">
                         <i class="fa-solid fa-trash-can mr-2"></i> Eliminar
                     </button>
+                    @endcan
                 </div>
+                @endcan
             </div>
 
             <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-400/20 rounded-full blur-xl"></div>

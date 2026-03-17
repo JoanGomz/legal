@@ -61,6 +61,10 @@ new class extends Component
             </thead>
             <tbody>
                 @forelse ($consent['data'] as $item )
+                @php
+                if(auth()->user()->rol == 'Admin' && auth()->user()->park_id != $item->park_id) {
+                continue;}
+                @endphp
                 <tr class="bg-neutral-primary-soft border-b  border-default">
                     <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
                         {{ $item['id']}}

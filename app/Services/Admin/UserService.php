@@ -18,7 +18,7 @@ class UserService implements UserServiceInterface
 
         // si el usuario tiene el permiso viewAll se muestran todas las registros si no se filtra por el id del centro comercial
         if (auth()->check() && !auth()->user()->can('viewAll')) {
-            $query = $query->where('id_centro_comercial', Auth::user()->id_centro_comercial);
+            $query = $query->where('park_id', Auth::user()->park_id);
         }
 
         return $query->get();
@@ -29,7 +29,7 @@ class UserService implements UserServiceInterface
         $request->validate(['name' => 'required', 'email' => 'required|email', 'password' => 'required']);
         $request['password'] = Hash::make($request->password);
 
-        return User::create($request->only(['name', 'email', 'password', 'id_centro_comercial']));
+        return User::create($request->only(['name', 'email', 'password', 'park_id']));
     }
 
     public function updateUser(Request $request, User $user)

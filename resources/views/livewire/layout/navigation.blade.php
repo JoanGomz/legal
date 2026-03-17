@@ -49,7 +49,9 @@ new class extends Component
                             </div>
                             <div class="hidden md:block text-left">
                                 <p class="text-xs font-bold text-gray-800 leading-none">{{ auth()->user()->name }}</p>
-                                <p class="text-[10px] text-gray-500 leading-tight">Gestor Jurídico</p>
+                                <p class="text-[10px] text-gray-500 leading-tight">
+                                    {{ auth()->user()->roles->first()?->name ?? 'Sin Rol' }}
+                                </p>
                             </div>
                             <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 mr-2"></i>
                         </button>

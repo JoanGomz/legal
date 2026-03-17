@@ -8,17 +8,21 @@ new class extends Component {
     public $start_date;
     public $end_date;
 
-    public function with()
+    public function mount()
     {
         $this->start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
 
         $this->end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+    }
+    public function render(): mixed
+    {
         $data = app(DashboardController::class)->getAllMetrics($this->start_date, $this->end_date);
-        $park = app(DashboardController::class)->getMetricsByPark();
-        return [
+        $park = app(DashboardController::class)->getMetricsByPark($this->start_date, $this->end_date);
+
+        return view('livewire.panels.dashboard', [
             'data' => $data,
             'park' => $park
-        ];
+        ]);
     }
 }; ?>
 
@@ -34,25 +38,25 @@ new class extends Component {
             </button>
             <div class="space-x-4" x-show="filter === true">
                 <label for="date">Desde: </label>
-                <input wire:model="start_date" class="rounded-xl" type="date" id="date" min="2026-01-01"
+                <input wire:model.live="start_date" class="rounded-xl" type="date" id="date" min="2026-01-01"
                     max="2030-01-01">
                 <label for="end_date">Hasta: </label>
-                <input wire:model="end_date" class="rounded-xl" type="date" id="end_date" min="2026-01-01"
+                <input wire:model.live="end_date" class="rounded-xl" type="date" id="end_date" min="2026-01-01"
                     max="2030-01-01">
             </div>
         </div>
     </div>
-
     <div class="w-full sm:px-2 lg:px-2">
         <div id="charts-container"></div>
+        @can('graphs.sa')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
             <div class="mt-4">
-                <div wire:ignore
-                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <div wire:key="graph-{{ $start_date }}-{{ $end_date }}" wire:ignore class=" bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100
+                    transition-all duration-300">
                     <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
                         <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                            <i class="fas fa-file-signature text-blue-600 text-2xl"></i>
+                            <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
                         </div>
 
                         <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
@@ -71,7 +75,8 @@ new class extends Component {
             </div>
 
             <div class="mt-4">
-                <div wire:ignore class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
+                <div wire:key="parient-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                    class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
                     <div class="p-4">
                         <h3 class="text-sm font-bold text-gray-700 mb-2">Acompañantes Frecuentes </h3>
                         <div class="w-full" style="min-height: 400px" id="chart_radial"
@@ -84,9 +89,12 @@ new class extends Component {
             </div>
 
         </div>
+
         <div class="w-full mt-4">
-            <div wire:ignore class="w-full bg-white shadowCard hover:shadow rounded-lg">
+            <div wire:key="park-{{ $start_date }}-{{ $end_date }}"
+                class="w-full bg-white shadowCard hover:shadow rounded-lg">
                 <div class="p-4">
+                    <h3>Consentimientos por parque y atracción</h3>
                     <div class="w-full" style="min-height: 500px" id="chart2"
                         data-series="{{ json_encode($data['chart_data']['series']) }}"
                         data-categories="{{ json_encode($data['chart_data']['categories'] ?? ['A', 'B', 'C']) }}">
@@ -94,29 +102,44 @@ new class extends Component {
                 </div>
             </div>
         </div>
-        <div class="mt-4">
-            @dump($park)
-            <div wire:ignore
-                class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
-                <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
-                    <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-file-signature text-blue-600 text-2xl"></i>
+        @endcan
+        @can('graph.admin')
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div class="mt-4">
+                <div wire:key="total-{{ $start_date }}-{{ $end_date }}"
+                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
+                    <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
+                        <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
+                        </div>
+
+                        <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
+                            Consentimientos Totales
+                        </h3>
+
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-6xl font-black text-gray-900 tracking-tighter">
+                                {{ number_format($park['total_consents']) }}
+                            </span>
+                        </div>
                     </div>
-
-                    <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
-                        Consentimientos Totales
-                    </h3>
-
-                    <div class="flex items-baseline space-x-1">
-                        <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                            {{ number_format($data['total_consents']) }}
-                        </span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div wire:key="consent-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                    class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
+                    <div class="p-4">
+                        <h3 class="text-sm font-bold text-gray-700 mb-2">Consentimientos por Atracción</h3>
+                        <div class="w-full" style="min-height: 400px" id="chart_by_park"
+                            data-series="{{ json_encode($park['chart_data']['series']) }}"
+                            data-labels="{{ json_encode($park['chart_data']['labels'] ?? ['A', 'B', 'C']) }}">
+                        </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
-
+        @endcan
     </div>
+
+</div>
 </div> @vite(['resources/js/chart.js'])
