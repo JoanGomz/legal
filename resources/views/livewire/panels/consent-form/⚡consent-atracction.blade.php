@@ -146,7 +146,12 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 <div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
-
+    <div class="flex w-sm justify-center text-center p-4 space-y-6">
+        <img width="250px" height="250px" src="images/logohori.png" alt="Logo de star Park">
+    </div>
+    <div class="absolute bottom-4 right-4 opacity-50 z-50">
+        <img width="80px" src="images\spoon-trasp.png" alt="logo de Spoon">
+    </div>
     <div x-data="{}" @open-pdf-popup.window="
         const url = $event.detail.url;
         const width = 700;
