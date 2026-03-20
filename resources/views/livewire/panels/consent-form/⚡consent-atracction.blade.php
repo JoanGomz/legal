@@ -146,6 +146,8 @@ new #[Layout('layouts.guest')] class extends Component
 };
 ?>
 <div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+    <div class="h-2 bg-blue-600 transition-all duration-500 z-1" :style="`width: ${($wire.step / 4) * 100}%`">
+    </div>
     <div class="flex w-sm justify-center text-center p-4 space-y-6">
         <img width="250px" height="250px" src="images/logohori.png" alt="Logo de star Park">
     </div>
@@ -177,8 +179,6 @@ new #[Layout('layouts.guest')] class extends Component
         }">
     </div>
 
-    <div class="bg-blue-600 transition-all duration-500" :style="'width: ${($wire.step / 4) * 100}%'">
-    </div>
 
     <div class="p-8" x-data="{ 
 
@@ -228,7 +228,7 @@ new #[Layout('layouts.guest')] class extends Component
 
                 <div class="space-y-2">
 
-                    <label for="atracciones" class="block text-sm font-semibold text-gray-700 flex items-center">
+                    <label for="atracciones" class="text-sm font-semibold text-gray-700 flex items-center">
                         <i class="fa-solid fa-ticket mr-2 text-blue-600"></i> Atracciones Asignadas
                     </label>
                     <select wire:model.live="Atraccion" id="atracciones" name="atracciones"
