@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Operation\AtraccionArcadeController;
 use App\Http\Controllers\Operation\ConsetController;
 use App\Http\Controllers\Operation\ParksController;
@@ -151,8 +152,8 @@ new #[Layout('layouts.guest')] class extends Component
     <div class="flex w-sm justify-center text-center p-4 space-y-6">
         <img width="250px" height="250px" src="images/logohori.png" alt="Logo de star Park">
     </div>
-    <div class="absolute bottom-4 right-4 opacity-50 z-50">
-        <img width="80px" src="images\spoon-trasp.png" alt="logo de Spoon">
+    <div class="md:fixed md:right-4 md:bottom-4 absolute bottom-[-1.5rem] right-[11.5rem] opacity-50 z-50">
+        <img class="md:w-[70px] w-[60px]" src="images\spoon-trasp.png" alt="logo de Spoon">
     </div>
     <div x-data="{}" @open-pdf-popup.window="
         const url = $event.detail.url;

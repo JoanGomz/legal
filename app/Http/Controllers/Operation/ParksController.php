@@ -15,7 +15,7 @@ class ParksController extends Controller
     {
         try {
             $query = Parks::query()->where('is_deleted', 0);
-            if (auth()->user()->hasRole('Admin')) {
+            if (auth()->check() && auth()->user()->hasRole('Admin')) {
                 $query->where('id', auth()->user()->park_id);
             }
             $parks = $query->get();

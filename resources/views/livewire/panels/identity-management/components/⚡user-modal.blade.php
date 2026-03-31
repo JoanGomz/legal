@@ -134,6 +134,7 @@ new class extends Component {
 
                     <select wire:model="park_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Eliga una opcion</option>
                         @foreach ( $park['data'] as $item )
                         <option value="{{ $item['id'] }}"> {{ $item['name'] }}</option>
                         @endforeach
