@@ -27,9 +27,7 @@ new #[Layout('layouts.guest')] class extends Component
 
     //Campos Paso 3
     public $full_name_minor;
-    public $document_type_minor;
-    public $document_number_minor;
-    public $date;
+    public $event_file;
     public $parentesco;
 
     //Campos Paso 4
@@ -96,17 +94,17 @@ new #[Layout('layouts.guest')] class extends Component
                 'document_number' => $this->document_number,
                 'document_type' => $this->type_document,
                 'full_name' => $this->full_name,
-                'relationship' => $this->parentesco,
                 'phone' => $this->telephone,
                 'email' => $this->email,
-                'minor_full_name' => $this->full_name_minor,
-                'minor_birth_date' => $this->date,
+                'url_file' => $this->event_file,
+                'event_date' => $this->date,
                 'check_uno' => $this->check_uno,
                 'check_dos' => $this->check_dos,
                 'check_tres' => $this->check_tres,
                 'check_cuatro' => $this->check_cuatro,
                 'check_cinco' => $this->check_cinco,
                 'check_seis' => $this->check_seis,
+                'is_event' => 1,
             ];
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
@@ -288,6 +286,7 @@ new #[Layout('layouts.guest')] class extends Component
                     <option value="">Escoja un tipo de documento</option>
                     <option value="CC">Cédula</option>
                     <option value="CE">Cédula Extranjera</option>
+                    <option value="NIT">NIT</option>
                     <option value="PS">Pasaporte</option>
                 </select>
                 <input wire:model="document_number" type="tel" placeholder="Número de Documento"
@@ -323,14 +322,11 @@ new #[Layout('layouts.guest')] class extends Component
             <div class="grid grid-cols-1 gap-4">
                 <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')" wire:model="full_name_minor"
                     placeholder="Nombre completo del menor" class="p-3 border rounded-lg">
-                <label max="{{ date('Y-m-d') }}" for="date">Año de Nacimiento</label>
+                <label max="{{ date('Y-m-d') }}" for="date">Fecha del evento</label>
                 <input type="date" wire:model="date" class="p-3 border rounded-lg">
-                <select class="p-3 border rounded-lg" wire:model="parentesco">
-                    <option value="">Elija un parentesco</option>
-                    <option value="Padre">Padre</option>
-                    <option value="Madre">Madre</option>
-                    <option value="Acudiente">Acudiente</option>
-                </select>
+                <label max="{{ date('Y-m-d') }}" for="date">Archivo con los niños que van a asistir</label>
+                <input type="file" wire:model="event_file" class="p-3 border rounded-lg">
+
             </div>
         </div>
 
