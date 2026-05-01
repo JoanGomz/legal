@@ -7,6 +7,8 @@ Route::livewire('/', 'pages.auth.login')
     ->name('login');
 Route::livewire('/consentimiento', 'panels.consent-form.consent-atracction')
     ->name('consent');
+Route::livewire('/eventsconsent', 'panels.consent-form.event-consent')
+    ->name('consent.events');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('profile', 'profile')
         ->name('profile');
@@ -20,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::livewire('dashboard', 'panels.dashboard')
         ->name('dashboard');
+
+    Route::livewire('admin-consent', 'panels.admin-consent.consent')
+        ->name('Consents');
 
     Route::prefix('accesos')->group(function () {
         Route::livewire('usuarios', 'panels.identity-management.users-directory')

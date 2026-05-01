@@ -8,6 +8,7 @@ use App\Models\Operation\Parks;
 use App\Services\BaseService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Polyfill\Uuid\Uuid;
 
 class ConsentService extends BaseService
 {
@@ -21,8 +22,16 @@ class ConsentService extends BaseService
     {
         $query = $this->model->query();
 
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('park_id', auth()->user()->park_id);
+        }
+
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%$search%")
+                    ->orWhere('document_number', 'like', "%$search%")
+                    ->orWhere('minor_document_number', 'like', "%$search%");
+            });
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($items, ['*'], 'page', $page);
@@ -54,13 +63,14 @@ class ConsentService extends BaseService
                     'isHtml5ParserEnabled' => true
                 ]);
 
-            $fileName = 'consents/consentimiento_' . $conset->minor_document_number . '_' . $conset->id . '.pdf';
+            $fileName = 'consents/consentimiento_' . $conset->uuid . '_' . $conset->id . '.pdf';
             Storage::disk('s3')->put($fileName, $pdf->output());
 
             $s3Url = Storage::disk('s3')->url($fileName);
 
             $conset->url_pdf = $s3Url;
             $conset->code = $code;
+            $conset->created_at = date('Y-m-d G:i:s');
             $conset->save();
 
             return $conset;

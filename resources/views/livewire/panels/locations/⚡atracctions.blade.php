@@ -48,10 +48,12 @@ new class extends Component
 
     <div class="flex justify-between items-center px-4">
         <x-input-search mode="tableSearch" placeholder="Buscar Sede"></x-input-search>
+        @can('create.atracction')
         <button @click="atracctionForm = true; prepareModal('create','Crear Atracción')"
             class="bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-opacity-90 transition-all">
             <i class="fa-solid fa-plus mr-2"></i> Nueva Atraccion
         </button>
+        @endcan
     </div>
 
     <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
@@ -205,6 +207,7 @@ new class extends Component
                         </div>
                     </td>
                     <td class="px-2 py-4 flex gap-2 relative" style="right:-13px;">
+                        @can('edit.atracction')
                         <button aria-label="Editar atracción" type="button" wire:loading.attr="disabled"
                             @click="atracctionForm = true; prepareModal('update', 'Actualizar Atracciones')"
                             wire:loading.class="opacity-50 cursor-not-allowed" wire:click="$dispatchTo('panels.locations.components.atracctions-modal','setEditingAtracction', 
@@ -225,6 +228,8 @@ new class extends Component
                     })">
                             <i class="fa-solid fa-square-pen fa-xl text-blue-500"></i>
                         </button>
+                        @endcan
+                        @can('delete.atracction')
                         <button type="button" aria-label="Eliminar Atraccion" wire:loading.attr="disabled"
                             wire:loading.class="opacity-50 cursor-not-allowed" @click="window.dispatchEvent(new CustomEvent('show-delete-modal', {
                                                     detail: {
@@ -234,6 +239,7 @@ new class extends Component
                                                 }))">
                             <i class="fa-solid fa-trash fa-xl text-red-500"></i>
                         </button>
+                        @endcan
                     </td>
                 </tr>
                 @empty

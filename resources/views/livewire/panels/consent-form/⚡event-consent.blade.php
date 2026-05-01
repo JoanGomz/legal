@@ -6,10 +6,12 @@ use App\Http\Controllers\Operation\ParksController;
 use App\Traits\traitCruds;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads; 
+use Aws\S3\S3Client;
 
 new #[Layout('layouts.guest')] class extends Component
 {
-    use traitCruds;
+    use traitCruds, WithFileUploads;
     public $step = 1;
 
     // Campos Paso 1
@@ -26,11 +28,8 @@ new #[Layout('layouts.guest')] class extends Component
     public $check_uno;
 
     //Campos Paso 3
-    public $full_name_minor;
-    public $document_type_minor;
-    public $document_number_minor;
     public $date;
-    public $parentesco;
+    public $event_file;
 
     //Campos Paso 4
     public $check_dos = false;
@@ -47,10 +46,8 @@ new #[Layout('layouts.guest')] class extends Component
             'document_number',
             'type_document',
             'full_name',
-            'parentesco',
             'telephone',
             'email',
-            'full_name_minor',
             'date',
             'check_uno',
             'check_dos',
@@ -67,15 +64,15 @@ new #[Layout('layouts.guest')] class extends Component
             'sede' => 'required',
             'Atraccion' => 'required|integer',
             'document_number' => 'required|string|min:5|max:20',
-            'type_document' => 'required|in:CC,CE,PS',
+            'type_document' => 'required|in:CC,NIT,CE,PS',
             'full_name' => 'required|string|min:3|regex:/^([^0-9]*)$/',
-            'parentesco' => 'required|string',
             'telephone' => 'required|numeric|digits_between:7,15',
             'email' => 'required|email',
+            'event_file' => 'required|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048',
 
             // Datos del Menor
-            'full_name_minor' => 'required|string|min:3|regex:/^([^0-9]*)$/',
-            'date' => 'required|date|before:today' . now()->subYears(2)->format('Y-m-d'),
+            
+            'date' => 'required|date|after_or_equal:today',
 
             // Validar que todos los checks sean obligatorios y aceptados
             'check_uno' => 'accepted',
@@ -90,26 +87,56 @@ new #[Layout('layouts.guest')] class extends Component
     public function create()
     {
         try {
+            // $finalUrl = null;
+            // if ($this->event_file && !is_string($this->event_file)) {
+            //     $s3Client = new S3Client([
+            //         'version' => 'latest',
+            //         'region' => env('AWS_DEFAULT_REGION', 'us-east-2'),
+            //         'credentials' => [
+            //             'key' => env('AWS_ACCESS_KEY_ID'),
+            //             'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            //         ],
+                    
+            //     ]);
+                
+
+            //     $bucket = env('AWS_BUCKET');
+            //     $fileName = time() . '_' . $this->event_file->getClientOriginalName();
+            //     $key = 'legal/pdf/' . $fileName;
+
+            //     $result = $s3Client->putObject([
+            //         'Bucket' => $bucket,
+            //         'Key' => $key,
+            //         'Body' => file_get_contents($this->event_file->getRealPath()),
+            //         'ContentType' => $this->event_file->getMimeType(),
+            //     ]);
+
+            //     $finalUrl = $result['ObjectURL'];
+            // } else {
+
+            //     $finalUrl = $this->event_file; 
+            // }
             $data = [
                 'park_id' => $this->sede,
                 'arcade_id' => (int)$this->Atraccion,
                 'document_number' => $this->document_number,
                 'document_type' => $this->type_document,
                 'full_name' => $this->full_name,
-                'relationship' => $this->parentesco,
                 'phone' => $this->telephone,
                 'email' => $this->email,
-                'minor_full_name' => $this->full_name_minor,
-                'minor_birth_date' => $this->date,
+                // 'url_file' => $finalUrl,
+                'event_date' => $this->date,
                 'check_uno' => $this->check_uno,
                 'check_dos' => $this->check_dos,
                 'check_tres' => $this->check_tres,
                 'check_cuatro' => $this->check_cuatro,
                 'check_cinco' => $this->check_cinco,
                 'check_seis' => $this->check_seis,
+                
             ];
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
+            dd($request->all());
             $this->response = app(ConsetController::class)->store($request);
             if ($this->response['status'] == 'success') {
                 if (isset($this->response['data']['url_pdf'])) {
@@ -196,7 +223,7 @@ new #[Layout('layouts.guest')] class extends Component
                     get canGoNext() {
                         if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_siete;
                         if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno;
-                        if (this.step == 3) return this.$wire.full_name_minor && this.$wire.date && this.$wire.parentesco;
+                        if (this.step == 3) return this.$wire.date && this.$wire.event_file;
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
                     },
@@ -288,6 +315,7 @@ new #[Layout('layouts.guest')] class extends Component
                     <option value="">Escoja un tipo de documento</option>
                     <option value="CC">Cédula</option>
                     <option value="CE">Cédula Extranjera</option>
+                    <option value="NIT">NIT</option>
                     <option value="PS">Pasaporte</option>
                 </select>
                 <input wire:model="document_number" type="tel" placeholder="Número de Documento"
@@ -319,18 +347,21 @@ new #[Layout('layouts.guest')] class extends Component
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             wire:transition class="space-y-4">
-            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Menor</h2>
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Evento</h2>
             <div class="grid grid-cols-1 gap-4">
-                <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')" wire:model="full_name_minor"
-                    placeholder="Nombre completo del menor" class="p-3 border rounded-lg">
-                <label max="{{ date('Y-m-d') }}" for="date">Año de Nacimiento</label>
-                <input type="date" wire:model="date" class="p-3 border rounded-lg">
-                <select class="p-3 border rounded-lg" wire:model="parentesco">
-                    <option value="">Elija un parentesco</option>
-                    <option value="Padre">Padre</option>
-                    <option value="Madre">Madre</option>
-                    <option value="Acudiente">Acudiente</option>
-                </select>
+
+                <label for="date">Fecha del evento</label>
+                <input type="date" 
+                    wire:model.live="date" 
+                    min="{{ date('Y-m-d') }}" 
+                    class="p-3 border rounded-lg">
+                <x-input-error :messages="$errors->get('date')" />
+                <label max="{{ date('Y-m-d') }}" for="date">Archivo con los niños que van a asistir</label>
+                <input type="file" wire:model="event_file" class="p-3 border rounded-lg">
+                <div wire:loading wire:target="event_file" class="text-sm text-blue-500">
+                    Subiendo archivo...
+                </div>
+
             </div>
         </div>
 

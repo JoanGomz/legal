@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Contracts\Admin\UserServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Operation\ParksController;
 use App\Models\Operation\CentroComercial;
 use App\Models\User;
 use App\Services\Operation\CentroComercialService;
+use App\Services\Operation\ParksService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -46,14 +48,6 @@ class UserController extends Controller
     {
         try {
             $this->validateEmail($request->email);
-
-            if ($request->id_centro_comercial) {
-                $mall = new CentroComercialService(new CentroComercial())->findById($request->id_centro_comercial);
-                if (!$mall instanceof CentroComercial) {
-                    return $this->responseLivewire('error', 'El centro comercial no existe');
-                }
-            }
-
 
             $user = $this->userService->createUser($request);
             $user->syncRoles($request->role_check);

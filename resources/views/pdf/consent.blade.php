@@ -20,21 +20,16 @@
             background-size: 100% 100%;
             background-repeat: no-repeat;
             width: 216mm;
-            /* Tamaño carta */
             height: 279mm;
             position: relative;
         }
 
-        /* 3. Clase para centrado automático */
         .data-field-centered-bold {
             position: absolute;
             width: 100%;
-            /* Ocupa todo el ancho de la hoja */
             left: 0;
             text-align: center;
-            /* Centra el texto respecto al ancho */
             font-size: 24px;
-            /* Ajusté un poco el tamaño para que nombres largos no se amontonen */
             color: #fff;
             font-weight: bold;
             text-transform: uppercase;
@@ -43,12 +38,9 @@
         .data-field-centered {
             position: absolute;
             width: 100%;
-            /* Ocupa todo el ancho de la hoja */
             left: 0;
             text-align: center;
-            /* Centra el texto respecto al ancho */
             font-size: 24px;
-            /* Ajusté un poco el tamaño para que nombres largos no se amontonen */
             color: #fff;
             text-transform: uppercase;
         }
@@ -56,18 +48,14 @@
         .data-field-title {
             position: absolute;
             width: 100%;
-            /* Ocupa todo el ancho de la hoja */
             left: 0;
             text-align: center;
-            /* Centra el texto respecto al ancho */
             font-size: 24px;
-            /* Ajusté un poco el tamaño para que nombres largos no se amontonen */
             color: #1b0069;
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        /* 4. Clase para campos alineados a la izquierda (como el footer) */
         .data-field-left {
             position: absolute;
             font-size: 22px;
@@ -75,9 +63,6 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-
-        /* 5. Coordenadas Verticales (TOP) */
-        /* El 'left' ya no es necesario en los centrados porque usamos width 100% */
 
         #arcade {
             top: 11%;
@@ -109,11 +94,12 @@
 <body>
 
     <div class="page-bg">
-
+        <!-- Arcade -->
         <div id="arcade" class="data-field-title">
             {{ $arcade->nombre }}
         </div>
 
+        <!-- Parent Info -->
         <div class="data-field-centered" style="top: 23.9%;">
             {{ $registration->created_at->format('d/m/Y H:i') }}
         </div>
@@ -142,10 +128,12 @@
             {{ $registration->phone }}
         </div>
 
+        <!-- Code registration -->
         <div id="code" class="data-field-centered-bold">
             {{ $code }}
         </div>
 
+        <!-- Minor Info -->
         <div class="data-field-centered-bold" style="top: 75.5%;">
             Nombre y Apellido:
         </div>
@@ -155,7 +143,7 @@
         </div>
 
         <div class="data-field-centered" style="top: 82%;">
-            {{$registration->minor_document_type}}. {{ $registration->minor_document_number }}
+            {{$registration->minor_birth_date}}
         </div>
 
     </div>

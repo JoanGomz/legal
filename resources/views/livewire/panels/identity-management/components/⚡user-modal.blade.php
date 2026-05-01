@@ -4,14 +4,18 @@ use Livewire\Component;
 use Illuminate\Validation\Rules\Password;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Operation\ParksController;
 use App\Traits\traitCruds;
 use Livewire\Attributes\On;
 use App\Models\User;
+
 new class extends Component {
     use traitCruds;
     public $id;
     public $name;
     public $email;
+    public $park_id;
+    public $park;
     public $password;
     public $password_verify;
     public $role_check;
@@ -22,6 +26,7 @@ new class extends Component {
         return [
             'name' => 'required|min:3|string',
             'email' => 'required|min:4|email',
+            'park_id' => 'required',
             'role_check' => 'required|string',
             'password' => ['required', 'min:8', Password::min(8)->mixedCase()],
             'password_verify' => 'required|same:password',
@@ -46,7 +51,8 @@ new class extends Component {
         $this->id = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->role_check = $user->roles->first()->name;
+        $this->park_id = $user->park_id;
+        //$this->role_check = $user->roles->first()->name;
         $this->js("window.prepareModal('update', 'Actualizar Usuario')");
     }
     public function sendPetition($type)
@@ -57,6 +63,7 @@ new class extends Component {
                 'name' => $this->name,
                 'email' => $this->email,
                 'role_check' => $this->role_check,
+                'park_id' => (int)$this->park_id,
             ];
             $this->password ? ($dataRequest['password'] = $this->password) : '';
             $request = new \Illuminate\Http\Request();
@@ -78,6 +85,7 @@ new class extends Component {
     public function mount()
     {
         $this->roles = app(RoleController::class)->index();
+        $this->park = app(ParksController::class)->index();
     }
 };
 ?>
@@ -112,7 +120,7 @@ new class extends Component {
                 <div class="mb-5 flex-1">
                     <label for="email" class="block mb-2 text-sm font-medium text-gray-9xt-">Correo
                         Electronico</label>
-                    <input wire:model="email" type="email" id="email" autocomplete="username"  novalidate
+                    <input wire:model="email" type="email" id="email" autocomplete="username" novalidate
                         class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                         placeholder="Ej: example@example.com" />
                     <x-input-error :messages="$errors->get('email')" />
@@ -121,18 +129,35 @@ new class extends Component {
             <div class="mb-5 flex gap-4">
                 <div class="flex-1">
                     <label for="role_select" class="block mb-2 text-sm font-medium text-gray-900">
+                        Seleccionar Parque
+                    </label>
+
+                    <select wire:model="park_id"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Eliga una opcion</option>
+                        @foreach ( $park['data'] as $item )
+                        <option value="{{ $item['id'] }}"> {{ $item['name'] }}</option>
+                        @endforeach
+                    </select>
+
+                    <x-input-error :messages="$errors->get('park_id')" />
+                </div>
+            </div>
+            <div class="mb-5 flex gap-4">
+                <div class="flex-1">
+                    <label for="park" class="block mb-2 text-sm font-medium text-gray-900">
                         Seleccionar Rol
                     </label>
 
-                    <select wire:model="role_check" id="role_select"
+                    <select wire:model="role_check" id="park"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         @if ($roles['data']['roles'])
-                            <option value="">Selecciona un rol</option>
+                        <option value="">Selecciona un rol</option>
                         @endif
                         @forelse($roles['data']['roles'] as $item)
-                            <option value="{{ $item['name'] }}">{{ $item['name'] }}</option>
+                        <option value="{{ $item['name'] }}">{{ $item['name'] }}</option>
                         @empty
-                            <option value="">No hay opciones disponibles</option>
+                        <option value="">No hay opciones disponibles</option>
                         @endforelse
                     </select>
 
