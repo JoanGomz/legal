@@ -64,6 +64,16 @@
             text-transform: uppercase;
         }
 
+        .data-event {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            text-align: center;
+            font-size: 22px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
         #arcade {
             top: 11%;
         }
@@ -87,6 +97,10 @@
 
         #minor_name {
             top: 78.5%;
+        }
+
+        #event_date {
+            top: 75.5%;
         }
     </style>
 </head>
@@ -134,6 +148,18 @@
         </div>
 
         <!-- Minor Info -->
+        @if($registration->url_file && $registration->event_date)
+
+        <div id="event_date" class="data-event">
+            Estara sujeto al archivo del formulario cargado anteriormente,
+            con fecha de evento:
+        </div>
+
+        <div class="data-field-centered-bold" style="top: 82%;">
+            {{ $registration->event_date }}
+        </div>
+
+        @else
         <div class="data-field-centered-bold" style="top: 75.5%;">
             Nombre y Apellido:
         </div>
@@ -145,6 +171,7 @@
         <div class="data-field-centered" style="top: 82%;">
             {{$registration->minor_birth_date}}
         </div>
+        @endif
 
     </div>
 
