@@ -6,7 +6,7 @@ use App\Http\Controllers\Operation\ParksController;
 use App\Traits\traitCruds;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\WithFileUploads; 
+use Livewire\WithFileUploads;
 use Aws\S3\S3Client;
 
 new #[Layout('layouts.guest')] class extends Component
@@ -68,10 +68,10 @@ new #[Layout('layouts.guest')] class extends Component
             'full_name' => 'required|string|min:3|regex:/^([^0-9]*)$/',
             'telephone' => 'required|numeric|digits_between:7,15',
             'email' => 'required|email',
-            'event_file' => 'required|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048',
+            'event_file' => 'required|file|mimes:pdf,doc,docx,png,jpg,jpeg,webp|max:2048',
 
             // Datos del Menor
-            
+
             'date' => 'required|date|after_or_equal:today',
 
             // Validar que todos los checks sean obligatorios y aceptados
@@ -87,35 +87,35 @@ new #[Layout('layouts.guest')] class extends Component
     public function create()
     {
         try {
-            // $finalUrl = null;
-            // if ($this->event_file && !is_string($this->event_file)) {
-            //     $s3Client = new S3Client([
-            //         'version' => 'latest',
-            //         'region' => env('AWS_DEFAULT_REGION', 'us-east-2'),
-            //         'credentials' => [
-            //             'key' => env('AWS_ACCESS_KEY_ID'),
-            //             'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            //         ],
-                    
-            //     ]);
-                
+            $finalUrl = null;
+            if ($this->event_file && !is_string($this->event_file)) {
+                $s3Client = new S3Client([
+                    'version' => 'latest',
+                    'region' => env('AWS_DEFAULT_REGION', 'us-east-2'),
+                    'credentials' => [
+                        'key' => env('AWS_ACCESS_KEY_ID'),
+                        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                    ],
 
-            //     $bucket = env('AWS_BUCKET');
-            //     $fileName = time() . '_' . $this->event_file->getClientOriginalName();
-            //     $key = 'legal/pdf/' . $fileName;
+                ]);
 
-            //     $result = $s3Client->putObject([
-            //         'Bucket' => $bucket,
-            //         'Key' => $key,
-            //         'Body' => file_get_contents($this->event_file->getRealPath()),
-            //         'ContentType' => $this->event_file->getMimeType(),
-            //     ]);
 
-            //     $finalUrl = $result['ObjectURL'];
-            // } else {
+                $bucket = env('AWS_BUCKET');
+                $fileName = time() . '_' . $this->event_file->getClientOriginalName();
+                $key = 'legal/pdf/' . $fileName;
 
-            //     $finalUrl = $this->event_file; 
-            // }
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucket,
+                    'Key' => $key,
+                    'Body' => file_get_contents($this->event_file->getRealPath()),
+                    'ContentType' => $this->event_file->getMimeType(),
+                ]);
+
+                $finalUrl = $result['ObjectURL'];
+            } else {
+
+                $finalUrl = $this->event_file;
+            }
             $data = [
                 'park_id' => $this->sede,
                 'arcade_id' => (int)$this->Atraccion,
@@ -124,7 +124,7 @@ new #[Layout('layouts.guest')] class extends Component
                 'full_name' => $this->full_name,
                 'phone' => $this->telephone,
                 'email' => $this->email,
-                // 'url_file' => $finalUrl,
+                'url_file' => $finalUrl,
                 'event_date' => $this->date,
                 'check_uno' => $this->check_uno,
                 'check_dos' => $this->check_dos,
@@ -132,11 +132,10 @@ new #[Layout('layouts.guest')] class extends Component
                 'check_cuatro' => $this->check_cuatro,
                 'check_cinco' => $this->check_cinco,
                 'check_seis' => $this->check_seis,
-                
+
             ];
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
-            dd($request->all());
             $this->response = app(ConsetController::class)->store($request);
             if ($this->response['status'] == 'success') {
                 if (isset($this->response['data']['url_pdf'])) {
@@ -351,10 +350,7 @@ new #[Layout('layouts.guest')] class extends Component
             <div class="grid grid-cols-1 gap-4">
 
                 <label for="date">Fecha del evento</label>
-                <input type="date" 
-                    wire:model.live="date" 
-                    min="{{ date('Y-m-d') }}" 
-                    class="p-3 border rounded-lg">
+                <input type="date" wire:model.live="date" min="{{ date('Y-m-d') }}" class="p-3 border rounded-lg">
                 <x-input-error :messages="$errors->get('date')" />
                 <label max="{{ date('Y-m-d') }}" for="date">Archivo con los niños que van a asistir</label>
                 <input type="file" wire:model="event_file" class="p-3 border rounded-lg">

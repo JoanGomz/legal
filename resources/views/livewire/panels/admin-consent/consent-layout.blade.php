@@ -28,4 +28,5 @@
     </div>
     <!--MODAL DE CONFIRMACIÓN-->
     @include('components.confirmation-modal')
+    @include('components.loading-notification')
 </div>
