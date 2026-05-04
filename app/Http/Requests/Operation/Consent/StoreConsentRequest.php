@@ -24,7 +24,7 @@ class StoreConsentRequest extends FormRequest
             'park_id' => 'required|integer',
             'arcade_id' => 'nullable|integer',
             'document_number' => 'required|string|min:5|max:13',
-            'document_type' => 'nullable|string|in:CC,CE,PS', // Cédula, Extranjería, Pasaporte
+            'document_type' => 'nullable|string|in:CC,CE,PS,NIT', // Cédula, Extranjería, Pasaporte
             'full_name' => 'required|string|min:3|max:255',
             'relationship' => 'nullable|string|max:50',
             'phone' => 'required|string|min:7|max:15',
@@ -33,7 +33,7 @@ class StoreConsentRequest extends FormRequest
             // Datos del Menor
             'minor_document_number' => 'nullable|string|min:5|max:20',
             'minor_document_type' => 'nullable|string|in:RC,TI', // Registro Civil, Tarjeta Identidad
-            'minor_full_name' => 'required|string|min:3|max:255',
+            'minor_full_name' => 'nullable|string|min:3|max:255',
             'minor_birth_date' => 'nullable|date|before:today',
 
             // Validaciones de consentimiento (deben ser aceptadas)
