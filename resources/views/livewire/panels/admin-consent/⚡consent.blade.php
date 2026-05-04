@@ -48,121 +48,130 @@ new class extends Component
         <x-input-search mode="tableSearch" placeholder="Buscar consentimiento"></x-input-search>
     </div>
 
-    <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
-        <table class="w-full text-sm text-left rtl:text-right text-body">
-            <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
                 <tr>
-                    <th scope="col" class="px-6 py-3 font-medium">Id</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Codigo Consentimiento</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Adulto</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Menor</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Parque</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Acciones</th>
+                    <th scope="col" class="px-4 py-3 font-bold">ID</th>
+                    <th scope="col" class="px-4 py-3 font-bold">Código</th>
+                    <th scope="col" class="px-4 py-3 font-bold">Adulto Responsable</th>
+                    <th scope="col" class="px-4 py-3 font-bold">Menor</th>
+                    <th scope="col" class="px-4 py-3 font-bold">Parque</th>
+                    <th scope="col" class="px-4 py-3 font-bold">Fecha del Evento</th>
+                    <th scope="col" class="px-4 py-3 font-bold text-center">Docs</th>
+                    <th scope="col" class="px-4 py-3 font-bold text-center">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse ($consent['data'] as $item )
-                <tr class="bg-neutral-primary-soft border-b  border-default">
-                    <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                        {{ $item['id']}}
-                    </th>
-                    <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap relative"
-                        style="left:3rem;">
-                        {{ $item['code']}}
-                    </th>
-                    <td class="px-2 py-4">
-                        <div class="relative group">
-                            <!-- Vista limpia - solo lo esencial -->
-                            <div class="cursor-pointer">
-                                <div class="text-sm font-medium text-gray-900 md:relative" style="left:-2rem;">
-                                    {{ $item ['full_name'] }}
-                                </div>
-                                <div class="text-xs text-gray-500 mt-1">
-                                    <i style=" left:2rem;" class="fa-solid fa-user mr-1 md:relative"></i>
+            <tbody class="divide-y divide-gray-200">
+                @forelse ($consent['data'] as $item)
+                <tr class="bg-white hover:bg-gray-50 transition-colors">
+                    <!-- ID -->
+                    <td class="px-4 py-4 font-medium text-gray-900">
+                        #{{ $item['id'] }}
+                    </td>
 
-                                </div>
+                    <!-- Código -->
+                    <td class="px-4 py-4">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                            {{ $item['code'] }}
+                        </span>
+                    </td>
+
+                    <!-- Adulto con Tooltip -->
+                    <td class="px-4 py-4">
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-circle-user text-gray-400 mr-2"></i>
+                                <span class="text-gray-900 font-medium border-b border-dotted border-gray-400">
+                                    {{ $item['full_name'] }}
+                                </span>
                             </div>
-                            <!-- Tooltip con información completa -->
+
+                            <!-- Tooltip -->
                             <div
-                                class="absolute left-0 top-full mt-2 w-72 bg-slate-950 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-xl">
-                                <h4 class="font-semibold text-yellow-400 mb-2">Detalles del Adulto</h4>
-                                <div class="space-y-1">
-                                    <div><span class="font-semibold">Parentesco:</span>
-                                        {{ $item['relationship']}}
-                                    </div>
-
-                                    <div><span class="font-semibold">Tipo de documento:</span>
-                                        {{ $item['document_type']}}
-                                    </div>
-
-                                    <div><span class="font-semibold">Núnero de Documento:</span>
-                                        {{ $item['document_number']}}
-
-                                    </div>
-                                    <div><span class="font-semibold">Telefono:</span>
-                                        {{ $item['phone']}}
-
-                                    </div>
-                                    <div><span class="font-semibold">Email:</span>
-                                        {{ $item['email']}}
-                                    </div>
-                                </div>
-                                <!-- Flecha del tooltip -->
-                                <div class="absolute -top-1 left-4 w-2 h-2 bg-gray-800 transform rotate-45">
-                                </div>
+                                class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 bottom-full mb-2 left-0 w-64 p-3 bg-gray-900 text-white rounded-lg shadow-xl text-xs">
+                                <p class="font-bold text-blue-400 mb-1 border-b border-gray-700 pb-1">Detalles del
+                                    Adulto</p>
+                                <ul class="space-y-1 mt-2">
+                                    <li><span class="text-gray-400">Parentesco:</span> {{ $item['relationship'] }}</li>
+                                    <li><span class="text-gray-400">Doc:</span> {{ $item['document_type'] }}
+                                        {{ $item['document_number'] }}
+                                    </li>
+                                    <li><span class="text-gray-400">Tel:</span> {{ $item['phone'] }}</li>
+                                    <li><span class="text-gray-400">Email:</span> {{ $item['email'] }}</li>
+                                </ul>
+                                <div class="absolute h-2 w-2 bg-gray-900 rotate-45 -bottom-1 left-4"></div>
                             </div>
                         </div>
                     </td>
 
-                    <td class="px-2 py-4 items-center">
-                        <div class="relative group">
-
-                            <div class="cursor-pointer flex items-center md:relative" style="right: 15px;">
-                                <span>{{ $item['minor_full_name'] }}</span>
-                                <i
-                                    class="fa-solid fa-info-circle text-gray-400 ml-2 group-hover:text-blue-500 transition-colors"></i>
+                    <!-- Menor con Tooltip -->
+                    <td class="px-4 py-4">
+                        <div class="relative group cursor-help">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-child text-gray-400 mr-2"></i>
+                                <span
+                                    class="border-b border-dotted border-gray-400">{{ $item['minor_full_name'] }}</span>
                             </div>
-                            <!-- Tooltip con información completa -->
+
                             <div
-                                class="absolute left-0 top-full mt-2 w-72 bg-white text-black text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-xl">
-                                <h4 class="font-semibold text-center text-black mb-2">Detalles del Menor</h4>
-                                <div class="space-y-1">
-
-                                    <div><span class="font-semibold">Tipo de documento</span>
-                                        {{ $item['minor_document_type'] }}
-                                    </div>
-
-                                    <div><span class="font-semibold">Número de documento:</span>
+                                class="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 bottom-full mb-2 left-0 w-64 p-3 bg-white text-gray-800 border border-gray-200 rounded-lg shadow-xl text-xs">
+                                <p class="font-bold text-indigo-600 mb-1 border-b border-gray-100 pb-1">Detalles del
+                                    Menor</p>
+                                <ul class="space-y-1 mt-2">
+                                    <li><span class="text-gray-500">Doc:</span> {{ $item['minor_document_type'] }}
                                         {{ $item['minor_document_number'] }}
-
-                                    </div>
-
-                                    <div><span class="font-semibold">Fecha de nacimiento:</span>
-                                        {{ $item['minor_birth_date'] }}
-                                    </div>
-
+                                    </li>
+                                    <li><span class="text-gray-500">Nacimiento:</span> {{ $item['minor_birth_date'] }}
+                                    </li>
+                                </ul>
+                                <div
+                                    class="absolute h-2 w-2 bg-white border-r border-b border-gray-200 rotate-45 -bottom-1 left-4">
                                 </div>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4">
-                        {{ $item->park->name }}
+
+                    <!-- Parque -->
+                    <td class="px-4 py-4">
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            {{ $item->park->name }}
+                        </span>
                     </td>
-                    <td class="px-2 py-4 flex gap-2 relative" style="right:-13px;">
-                        <button aria-label="Descargar factura" wire:loading.attr="disabled"
-                            wire:loading.class="cursor-default opacity-50" @click="window.dispatchEvent(new CustomEvent('show-loading', {
-                                            detail: { message: 'Generando el consentimiento...' }
-                                        }))" wire:click="download('{{ $item->url_pdf }}')">
-                            <i class="fa-solid fa-download fa-xl"></i>
+
+                    <td class="px-4 py-4 font-medium text-gray-900">
+                        {{ $item['event_date'] ?? '--' }}
+                    </td>
+
+                    <!-- Doc Evento -->
+                    <td class="px-4 py-4 text-center">
+                        <button wire:click="download('{{ $item->url_file }}')"
+                            class="text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fa-solid fa-file-pdf fa-lg"></i>
                         </button>
-                        <a href="{{ $item->url_pdf }}" aria-label="Ver Consentimiento" target="__blank">
-                            <i class="fa-regular fa-eye fa-xl"></i>
-                        </a>
+                    </td>
+
+                    <!-- Acciones -->
+                    <td class="px-4 py-4 text-center">
+                        <div class="flex justify-center gap-3">
+                            <button wire:click="download('{{ $item->url_pdf }}')"
+                                class="text-gray-600 hover:text-green-600 transition-colors" title="Descargar Factura">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                            <a href="{{ $item->url_pdf }}" target="_blank"
+                                class="text-gray-600 hover:text-blue-600 transition-colors" title="Ver Online">
+                                <i class="fa-regular fa-eye"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 @empty
-
-                <h3 class="text-lg font-bold text-gray-800">No se encontraron Consentimienos</h3>
+                <tr>
+                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                        <i class="fa-solid fa-folder-open fa-2x mb-3 block text-gray-300"></i>
+                        No se encontraron consentimientos.
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
