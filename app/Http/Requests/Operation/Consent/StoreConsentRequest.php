@@ -45,7 +45,7 @@ class StoreConsentRequest extends FormRequest
             'check_seis' => 'nullable|accepted',
 
             //Validar evento
-            'event_date' => 'nullable|date|before_or_equal:today',
+            'event_date' => 'nullable|date|after_or_equal:today',
             'url_file' => 'nullable',
         ];
     }
@@ -58,7 +58,7 @@ class StoreConsentRequest extends FormRequest
         return [
             'accepted' => 'Debes aceptar todos los términos de consentimiento para continuar.',
             'minor_birth_date.before' => 'La fecha de nacimiento no puede ser futura.',
-            'event_date.before_or_equal' => 'La fecha del evento no puede ser futura.',
+            'event_date.after_or_equal' => 'La fecha del evento no puede ser anterior a la fecha actual.',
             'url_file.file' => 'El archivo cargado no es válido.',
         ];
     }
