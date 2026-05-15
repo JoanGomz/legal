@@ -181,7 +181,8 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <div class="w-full md:w-auto flex justify-center">
-            <img src="images/modo-karting.png" alt="Logo de Modo Karting" class="h-10 md:h-24 w-auto object-contain">
+            <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1778875667_modo-karting.png"
+                alt="Logo de Modo Karting" class="h-10 md:h-24 w-auto object-contain">
         </div>
     </div>
     <div class="md:fixed md:right-4 md:bottom-4 absolute bottom-[-3rem] right-[11.5rem] opacity-50 z-50">
