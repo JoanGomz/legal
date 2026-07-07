@@ -30,12 +30,6 @@ class StoreConsentRequest extends FormRequest
             'phone' => 'required|string|min:7|max:15',
             'email' => 'nullable|email',
 
-            // Datos del Menor
-            'minor_document_number' => 'nullable|string|min:5|max:20',
-            'minor_document_type' => 'nullable|string|in:RC,TI', // Registro Civil, Tarjeta Identidad
-            'minor_full_name' => 'nullable|string|min:3|max:255',
-            'minor_birth_date' => 'nullable|date|before:today',
-
             // Validaciones de consentimiento (deben ser aceptadas)
             'check_uno' => 'nullable|accepted',
             'check_dos' => 'nullable|accepted',
@@ -47,6 +41,13 @@ class StoreConsentRequest extends FormRequest
             //Validar evento
             'event_date' => 'nullable|date|after_or_equal:today',
             'url_file' => 'nullable',
+
+            //childrens
+            'childrens' => 'nullable|array',
+            'childrens.*.minor_document_number' => 'nullable|string|min:5|max:20',
+            'childrens.*.minor_document_type' => 'nullable|string|in:RC,TI',
+            'childrens.*.minor_full_name' => 'nullable|string|min:3|max:255',
+            'childrens.*.minor_birth_date' => 'nullable|date|before:today',
         ];
     }
 

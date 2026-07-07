@@ -37,7 +37,7 @@ class ConsentService extends BaseService
         return $query->orderBy('created_at', 'desc')->paginate($items, ['*'], 'page', $page);
     }
 
-    public function saveConset($data)
+    public function saveConsent(array $data)
     {
         try {
             $park = Parks::find($data['park_id']);
@@ -50,30 +50,62 @@ class ConsentService extends BaseService
                 throw new \Exception('La atracción arcade no existe');
             }
 
-            $conset = new Consents();
-            $conset->fill($data);
-            $conset->save();
+            $dataSave = $data;
+            $firstConsent = null;
+            $count = 1;
 
-            $code = "STSP" . $park->id . "-" . $conset->id;
+            foreach ($data['childrens'] as $child) {
+                $dataSave['minor_document_number'] = $child['minor_document_number'];
+                $dataSave['minor_document_type'] = $child['minor_document_type'];
+                $dataSave['minor_full_name'] = $child['minor_full_name'];
+                $dataSave['minor_birth_date'] = $child['minor_birth_date'];
 
-            $pdf = Pdf::loadView('pdf.consent', ['registration' => $conset, 'arcade' => $arcade, 'code' => $code])
+                $consent = new Consents();
+                if ($count == 1) {
+                    $consent->fill($dataSave);
+                    $consent->save();
+                    $firstConsent = $consent;
+                } else {
+                    $dataSave['consents_id'] = $firstConsent->id ?? null;
+                    $consent->fill($dataSave);
+                    $consent->save();
+                }
+                $count++;
+            }
+
+            $code = "STSP" . $park->id . "-" . $firstConsent->id;
+
+            $pdf = Pdf::loadView('pdf.consent', [
+                'registration' => $firstConsent,
+                'arcade' => $arcade,
+                'code' => $code,
+                'data' => $data
+            ])
                 ->setPaper('letter', 'portrait')
                 ->setOptions([
                     'isRemoteEnabled' => true,
                     'isHtml5ParserEnabled' => true
                 ]);
 
-            $fileName = 'consents/consentimiento_' . $conset->uuid . '_' . $conset->id . '.pdf';
+            $fileName = 'consents/consentimiento_' . $firstConsent->uuid . '_' . $firstConsent->id . '.pdf';
             Storage::disk('s3')->put($fileName, $pdf->output());
 
             $s3Url = Storage::disk('s3')->url($fileName);
 
-            $conset->url_pdf = $s3Url;
-            $conset->code = $code;
-            $conset->created_at = date('Y-m-d G:i:s');
-            $conset->save();
+            $firstConsent->url_pdf = $s3Url;
+            $firstConsent->code = $code;
+            $firstConsent->created_at = date('Y-m-d G:i:s');
+            $firstConsent->save();
 
-            return $conset;
+            $consents = Consents::where('consents_id', $firstConsent->id)->get();
+            foreach ($consents as $consent) {
+                $consent->url_pdf = $s3Url;
+                $consent->code = $code;
+                $consent->created_at = date('Y-m-d G:i:s');
+                $consent->save();
+            }
+
+            return $firstConsent;
         } catch (\Exception $ex) {
             throw new \Exception('Error al guardar el consentimiento: ' . $ex->getMessage());
         }

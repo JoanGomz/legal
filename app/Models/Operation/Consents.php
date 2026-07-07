@@ -20,6 +20,7 @@ class Consents extends BaseModel
         'id',
         'uuid',
         'code',
+        'consents_id',
         'url_pdf',
         'park_id',
         'arcade_id',
@@ -55,5 +56,10 @@ class Consents extends BaseModel
     public function acarde()
     {
         return $this->belongsTo(AtraccionArcade::class, 'arcade_id');
+    }
+
+    public function consents()
+    {
+        return $this->belongsTo(Consents::class, 'consents_id');
     }
 }

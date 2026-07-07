@@ -36,7 +36,7 @@ class ConsetController extends Controller
             $requestData['ip_address'] = $request->ip();
             $requestData['user_agent'] = $request->header('User-Agent');
 
-            $conset = $this->ConsetService->saveConset($requestData);
+            $conset = $this->ConsetService->saveConsent($requestData);
             return $this->responseLivewire('success', 'El consentimiento se creó exitosamente', $conset);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);
