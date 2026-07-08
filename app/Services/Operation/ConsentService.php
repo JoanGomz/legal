@@ -55,8 +55,8 @@ class ConsentService extends BaseService
             $count = 1;
 
             foreach ($data['childrens'] as $child) {
-                $dataSave['minor_document_number'] = $child['minor_document_number'];
-                $dataSave['minor_document_type'] = $child['minor_document_type'];
+                $dataSave['minor_document_number'] = $child['minor_document_number'] ?? null;
+                $dataSave['minor_document_type'] = $child['minor_document_type'] ?? null;
                 $dataSave['minor_full_name'] = $child['minor_full_name'];
                 $dataSave['minor_birth_date'] = $child['minor_birth_date'];
 
