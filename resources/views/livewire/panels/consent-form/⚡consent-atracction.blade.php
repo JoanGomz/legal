@@ -27,8 +27,7 @@ new #[Layout('layouts.guest')] class extends Component
 
     //Campos Paso 3
     public $full_name_minor;
-    public $document_type_minor;
-    public $document_number_minor;
+    public $childrens = [];
     public $date;
     public $parentesco;
 
@@ -60,6 +59,8 @@ new #[Layout('layouts.guest')] class extends Component
             'check_seis'
         );
         $this->step = 1;
+        $this->childrens = [];
+        $this->dispatch('resetDataAlpine');
     }
     protected function rules()
     {
@@ -99,8 +100,7 @@ new #[Layout('layouts.guest')] class extends Component
                 'relationship' => $this->parentesco,
                 'phone' => $this->telephone,
                 'email' => $this->email,
-                'minor_full_name' => $this->full_name_minor,
-                'minor_birth_date' => $this->date,
+                'childrens' => $this->childrens,
                 'check_uno' => $this->check_uno,
                 'check_dos' => $this->check_dos,
                 'check_tres' => $this->check_tres,
@@ -188,7 +188,7 @@ new #[Layout('layouts.guest')] class extends Component
 
 
     <div class="p-8" x-data="{ 
-
+                    items: [], 
                     get step() { 
                         return this.$wire.step 
                     },
@@ -196,7 +196,7 @@ new #[Layout('layouts.guest')] class extends Component
                     get canGoNext() {
                         if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_siete;
                         if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno;
-                        if (this.step == 3) return this.$wire.full_name_minor && this.$wire.date && this.$wire.parentesco;
+                        if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && this.$wire.parentesco; 
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
                     },
@@ -211,10 +211,40 @@ new #[Layout('layouts.guest')] class extends Component
                         if(this.step > 1) {
                             this.$wire.step--;
                         }
+                    },
+                resetDataAlpine(){
+                this.items.length = 0;
+                },
+                addChildren() {
+                    this.items.push({
+                        minor_full_name: '',
+                        minor_birth_date: '' ,
+                     });
+                    },
+                    loadChildren(items){
+                      if (items.children_details.length > 0) {
+                                items.children_details.forEach(item => {
+                                    this.items.push({
+                                        minor_full_name: item.minor_full_name,
+                                        minor_birth_date: item.minor_birth_date,
+                                    });
+                                });
                     }
-                }">
+                    },
+                    async prepararDetallesEvento() {
+                            await Promise.all([
+                                this.$wire.set('childrens', this.items)
+                            ]);
+                        },
+                    async guardar(livewireMethod) {
+                            await this.prepararDetallesEvento();
+                            await this.$nextTick();
+                            await this.$wire[livewireMethod]();
+                            this.resetDataAlpine();
+                        },
+                }" @reset-data-alpine.window="resetDataAlpine()">
 
-        <div x-show="step == 1"
+        <div x-show=" step==1"
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-8">
@@ -315,22 +345,65 @@ new #[Layout('layouts.guest')] class extends Component
 
 
 
-        <div x-show="$wire.step == 3" x-cloak
-            x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+        <div x-show="$wire.step == 3" x-cloak x-transition:enter="transition ease-out duration-200 delay-100"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
-            wire:transition class="space-y-4">
+            class="space-y-4">
+
             <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Menor</h2>
-            <div class="grid grid-cols-1 gap-4">
-                <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')" wire:model="full_name_minor"
-                    placeholder="Nombre completo del menor" class="p-3 border rounded-lg">
-                <label max="{{ date('Y-m-d') }}" for="date">Año de Nacimiento</label>
-                <input type="date" wire:model="date" class="p-3 border rounded-lg">
-                <select class="p-3 border rounded-lg" wire:model="parentesco">
-                    <option value="">Elija un parentesco</option>
+            <div class="flex justify-between">
+                <button type="button" @click="addChildren()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg  transition-colors"
+                    :class="items.length >= 5  ? 'bg-gray-300 text-black cursor-not-allowed hover:bg-none' : 'bg-blue-600'"
+                    :disabled="items.length >= 5">
+                    Añadir niño
+                </button>
+                <select class="p-3 border rounded-lg bg-white" wire:model="parentesco">
+                    <option value=""> Parentesco</option>
                     <option value="Padre">Padre</option>
                     <option value="Madre">Madre</option>
                     <option value="Acudiente">Acudiente</option>
                 </select>
+            </div>
+            <template x-for="(item, index) in items" :key="index">
+                <div class="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50 relative mt-4">
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-gray-600">Datos del Menor #<span
+                                x-text="index + 1"></span></span>
+
+                        <button type="button" @click="items.splice(index, 1)"
+                            class="text-red-500 hover:text-red-700 hover:bg-red-100 p-2 rounded-full transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')"
+                        x-model="item.minor_full_name" placeholder="Nombre completo del menor"
+                        class="p-3 border rounded-lg bg-white">
+
+                    <label class="block text-sm font-medium text-gray-700 -mb-2">Fecha de Nacimiento</label>
+                    <input min="{{ date('Y-m-d', strtotime('-30 year')) }}"
+                        max="{{ date('Y-m-d' , strtotime('-6 months')) }}" type="date" x-model="item.minor_birth_date"
+                        class="p-3 border rounded-lg bg-white">
+                </div>
+            </template>
+            <div x-show="items.length >= 5" x-transition
+                class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 border border-blue-200 mt-4"
+                role="alert">
+                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                </svg>
+                <div>
+                    <span class="font-semibold">Límite de menores alcanzado:</span> Este formulario permite un máximo de
+                    5 niños por inscripción. Si necesitas añadir más, por favor completa el registro actual y genera uno
+                    nuevo.
+                </div>
             </div>
         </div>
 
@@ -424,7 +497,7 @@ new #[Layout('layouts.guest')] class extends Component
                 <button type="button" @click="
                     if(canGoNext) {
                         window.dispatchEvent(new CustomEvent('show-loading', { detail: { message: 'Cargando...' } }));
-                        $wire.create();
+                        guardar('create');
                     }
                 " :disabled="!canGoNext" class="text-white font-bold py-2 px-8 rounded-lg shadow-md transition-all"
                     :class="{
