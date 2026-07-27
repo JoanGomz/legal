@@ -52,24 +52,20 @@ new class extends Component {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
             <div class="mt-4">
-                <div wire:key="graph-{{ $start_date }}-{{ $end_date }}" wire:ignore class=" bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100
-                    transition-all duration-300">
+                <div
+                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
                     <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
                         <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                             <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
                         </div>
-
                         <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
                             Consentimientos Totales
                         </h3>
-
                         <div class="flex items-baseline space-x-1">
                             <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                                {{ number_format($data['total_consents']) }}
+                                {{ number_format($data['total_consents'] ?? 0) }}
                             </span>
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -80,9 +76,10 @@ new class extends Component {
                     <div class="p-4">
                         <h3 class="text-sm font-bold text-gray-700 mb-2">Acompañantes Frecuentes </h3>
                         <div class="w-full" style="min-height: 400px" id="chart_radial"
-                            data-series="{{ json_encode($data['count_parent']['series']) }}"
-                            data-labels="{{ json_encode($data['count_parent']['labels'] ?? ['A', 'B', 'C']) }}"
-                            data-total="{{ $data['total_consents'] }}">
+                            x-init="$nextTick(() => safeInitCharts())"
+                            data-series="{{ json_encode($data['count_parent']['series'] ?? []) }}"
+                            data-labels="{{ json_encode($data['count_parent']['labels'] ?? []) }}"
+                            data-total="{{ $data['total_consents'] ?? 0 }}">
                         </div>
                     </div>
                 </div>
@@ -95,9 +92,9 @@ new class extends Component {
                 class="w-full bg-white shadowCard hover:shadow rounded-lg">
                 <div class="p-4">
                     <h3>Consentimientos por parque y atracción</h3>
-                    <div class="w-full" style="min-height: 500px" id="chart2"
-                        data-series="{{ json_encode($data['chart_data']['series']) }}"
-                        data-labels="{{ json_encode($data['chart_data']['categories'] ?? ['A', 'B', 'C']) }}">
+                    <div class="w-full" style="min-height: 500px" id="chart2" x-init="$nextTick(() => safeInitCharts())"
+                        data-series="{{ json_encode($data['chart_data']['series'] ?? []) }}"
+                        data-labels="{{ json_encode($data['chart_data']['categories'] ?? []) }}">
                     </div>
                 </div>
             </div>
@@ -106,7 +103,7 @@ new class extends Component {
         @can('graph.admin')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div class="mt-4">
-                <div wire:key="total-{{ $start_date }}-{{ $end_date }}"
+                <div
                     class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
                     <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
                         <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -119,7 +116,7 @@ new class extends Component {
 
                         <div class="flex items-baseline space-x-1">
                             <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                                {{ number_format($park['total_consents']) }}
+                                {{ number_format($park['total_consents'] ?? 0) }}
                             </span>
                         </div>
                     </div>
@@ -131,8 +128,9 @@ new class extends Component {
                     <div class="p-4">
                         <h3 class="text-sm font-bold text-gray-700 mb-2">Consentimientos por Atracción</h3>
                         <div class="w-full" style="min-height: 400px" id="chart_by_park"
-                            data-series="{{ json_encode($park['chart_data']['series']) }}"
-                            data-labels="{{ json_encode($park['chart_data']['labels'] ?? ['A', 'B', 'C']) }}">
+                            x-init="$nextTick(() => safeInitCharts())"
+                            data-series="{{ json_encode($park['chart_data']['series'] ?? []) }}"
+                            data-labels="{{ json_encode($park['chart_data']['labels'] ?? []) }}">
                         </div>
                     </div>
                 </div>
@@ -142,4 +140,3 @@ new class extends Component {
     </div>
 
 </div>
-</div> @vite(['resources/js/chart.js'])
