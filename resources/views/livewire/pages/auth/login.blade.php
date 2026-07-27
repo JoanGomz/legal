@@ -14,7 +14,7 @@ new #[Layout('layouts.guest')] class extends Component
      */
     public function login(): void
     {
-        $this->validate();
+        $this->form->validate();
 
         $this->form->authenticate();
 
@@ -46,6 +46,7 @@ new #[Layout('layouts.guest')] class extends Component
                             <input wire:model="form.email" type="email" required placeholder="Correo Electrónico"
                                 class="w-full pl-10 pr-4 py-4 bg-slate-900/50 text-white placeholder-slate-500 rounded-xl border border-white/5 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent outline-none transition-all">
                         </div>
+                        <x-input-error :messages="$errors->get('form.email')" class="mt-1 text-red-400 text-sm" />
 
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -55,7 +56,7 @@ new #[Layout('layouts.guest')] class extends Component
                                 class="w-full pl-10 pr-4 py-4 bg-slate-900/50 text-white placeholder-slate-500 rounded-xl border border-white/5 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent outline-none transition-all">
                         </div>
 
-                        <x-input-error :messages="$errors->get('form.password')" />
+                        <x-input-error :messages="$errors->get('form.password')" class="mt-2 text-red-400 text-md" />
 
                         <button type="submit" wire:loading.attr="disabled" wire:loading.class=" cursor-progress"
                             class="w-full bg-[#111a2c]  hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
