@@ -33,7 +33,7 @@ function chart1() {
                 chart: {
                     type: "bar",
                     height: 450,
-                    width: "1700px",
+                    width: "100%",
                     stacked: true,
                 },
                 plotOptions: {
