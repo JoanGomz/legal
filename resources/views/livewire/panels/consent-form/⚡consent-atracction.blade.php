@@ -386,7 +386,7 @@ new #[Layout('layouts.guest')] class extends Component
                         class="p-3 border rounded-lg bg-white">
 
                     <label class="block text-sm font-medium text-gray-700 -mb-2">Fecha de Nacimiento</label>
-                    <input min="{{ date('Y-m-d', strtotime('-30 year')) }}"
+                    <input min="{{ date('Y-m-d', strtotime('-80 year')) }}"
                         max="{{ date('Y-m-d' , strtotime('-6 months')) }}" type="date" x-model="item.minor_birth_date"
                         class="p-3 border rounded-lg bg-white">
                 </div>
