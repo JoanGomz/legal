@@ -29,6 +29,7 @@ class StoreConsentRequest extends FormRequest
             'relationship' => 'nullable|string|max:50',
             'phone' => 'required|string|min:7|max:15',
             'email' => 'nullable|email',
+            'unique_person' => 'nullable',
 
             // Validaciones de consentimiento (deben ser aceptadas)
             'check_uno' => 'nullable|accepted',

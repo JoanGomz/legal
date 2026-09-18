@@ -180,20 +180,20 @@
         </div>
 
         @else
-        <!-- Contenedor dinámico que evita que se encimen los niños -->
         <div class="minors-container">
             @php
-            $totalChildren = count($data['childrens']);
-            // Si hay muchos niños achicamos la fuente un poco para que entren todos sin salirse
+            $childrens = $data['childrens'] ?? [];
+            $totalChildren = count($childrens);
             $fontSize = '22px';
+
             if ($totalChildren >= 5) { $fontSize = '17px'; }
             elseif ($totalChildren >= 4) { $fontSize = '19px'; }
             elseif ($totalChildren >= 3) { $fontSize = '20px'; }
             @endphp
 
-            @foreach($data['childrens'] as $child)
+            @foreach($childrens as $child)
             <div class="minor-row" style="font-size: {{ $fontSize }};">
-                {{ $child['minor_full_name'] }} - {{ $child['minor_birth_date'] }}
+                {{ $child['minor_full_name'] ?? 'Sin nombre' }} - {{ $child['minor_birth_date'] ?? 'Sin fecha' }}
             </div>
             @endforeach
         </div>

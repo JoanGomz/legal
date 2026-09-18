@@ -35,6 +35,7 @@ class Consents extends BaseModel
         'minor_full_name',
         'minor_birth_date',
         'event_date',
+        'unique_person',
         'url_file',
         'check_uno',
         'check_dos',
