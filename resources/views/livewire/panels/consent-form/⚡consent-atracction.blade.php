@@ -24,6 +24,7 @@ new #[Layout('layouts.guest')] class extends Component
     public $telephone;
     public $email;
     public $check_uno;
+    public $income;
 
     //Campos Paso 3
     public $full_name_minor;
@@ -56,7 +57,9 @@ new #[Layout('layouts.guest')] class extends Component
             'check_tres',
             'check_cuatro',
             'check_cinco',
-            'check_seis'
+            'check_seis',
+            'check_siete',
+            'income'
         );
         $this->step = 1;
         $this->childrens = [];
@@ -91,23 +94,46 @@ new #[Layout('layouts.guest')] class extends Component
     public function create()
     {
         try {
-            $data = [
-                'park_id' => $this->sede,
-                'arcade_id' => (int)$this->Atraccion,
-                'document_number' => $this->document_number,
-                'document_type' => $this->type_document,
-                'full_name' => $this->full_name,
-                'relationship' => $this->parentesco,
-                'phone' => $this->telephone,
-                'email' => $this->email,
-                'childrens' => $this->childrens,
-                'check_uno' => $this->check_uno,
-                'check_dos' => $this->check_dos,
-                'check_tres' => $this->check_tres,
-                'check_cuatro' => $this->check_cuatro,
-                'check_cinco' => $this->check_cinco,
-                'check_seis' => $this->check_seis,
-            ];
+            if ($this->income == true) {
+                $this->income = 1;
+                $data = [
+                    'park_id' => $this->sede,
+                    'arcade_id' => (int)$this->Atraccion,
+                    'document_number' => $this->document_number,
+                    'document_type' => $this->type_document,
+                    'full_name' => $this->full_name,
+                    'relationship' => $this->parentesco,
+                    'phone' => $this->telephone,
+                    'email' => $this->email,
+                    'unique_person' => $this->income,
+                    'check_uno' => $this->check_uno,
+                    'check_dos' => $this->check_dos,
+                    'check_tres' => $this->check_tres,
+                    'check_cuatro' => $this->check_cuatro,
+                    'check_cinco' => $this->check_cinco,
+                    'check_seis' => $this->check_seis,
+                ];
+            } else {
+                $this->income = 0;
+                $data = [
+                    'park_id' => $this->sede,
+                    'arcade_id' => (int)$this->Atraccion,
+                    'document_number' => $this->document_number,
+                    'document_type' => $this->type_document,
+                    'full_name' => $this->full_name,
+                    'relationship' => $this->parentesco,
+                    'phone' => $this->telephone,
+                    'email' => $this->email,
+                    'childrens' => $this->childrens,
+                    'unique_person' => $this->income,
+                    'check_uno' => $this->check_uno,
+                    'check_dos' => $this->check_dos,
+                    'check_tres' => $this->check_tres,
+                    'check_cuatro' => $this->check_cuatro,
+                    'check_cinco' => $this->check_cinco,
+                    'check_seis' => $this->check_seis,
+                ];
+            }
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
             $this->response = app(ConsetController::class)->store($request);
@@ -145,7 +171,8 @@ new #[Layout('layouts.guest')] class extends Component
     }
 };
 ?>
-<div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+<div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100" x-data="{income:@entangle('income').live,
+    atracction:@entangle('Atraccion').live}">
     <div class="h-2 bg-blue-600 transition-all duration-500 z-1" :style="`width: ${($wire.step / 4) * 100}%`">
     </div>
     <div
@@ -196,19 +223,24 @@ new #[Layout('layouts.guest')] class extends Component
                     get canGoNext() {
                         if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_siete;
                         if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno;
-                        if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && this.$wire.parentesco; 
+                        if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && (this.$wire.Atraccion == 10 || !!this.$wire.parentesco);; 
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
                     },
 
-                    next() { 
-                        if(this.canGoNext) {
+                   next() { 
+                        if (income && this.$wire.step == 2 ) {
+                            this.$wire.step = 4;
+                        } else if (this.canGoNext) {
                             this.$wire.step++; 
                         }
                     },
                     
                     back() { 
-                        if(this.step > 1) {
+                        if(this.step == 4 && income == true){
+                            this.$wire.step = 2;
+                        }
+                        else if(this.step > 1) {
                             this.$wire.step--;
                         }
                     },
@@ -339,6 +371,14 @@ new #[Layout('layouts.guest')] class extends Component
                         Confirmo mi calidad de representante legal del menor.
                     </span>
                 </label>
+                <label
+                    class="flex text-md items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer group">
+                    <input type="checkbox" wire:model="income"
+                        class="w-8 h-7 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
+                        Ingreso Solo.
+                    </span>
+                </label>
             </div>
         </div>
 
@@ -349,15 +389,15 @@ new #[Layout('layouts.guest')] class extends Component
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-4">
 
-            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Menor</h2>
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Visitante</h2>
             <div class="flex justify-between">
                 <button type="button" @click="addChildren()"
                     class="bg-blue-600 text-white px-4 py-2 rounded-lg  transition-colors"
                     :class="items.length >= 5  ? 'bg-gray-300 text-black cursor-not-allowed hover:bg-none' : 'bg-blue-600'"
                     :disabled="items.length >= 5">
-                    Añadir niño
+                    <span x-text="atracction !=10 ? 'Agregar Menor' : 'Agregar Visitante'"> </span>
                 </button>
-                <select class="p-3 border rounded-lg bg-white" wire:model="parentesco">
+                <select x-show="atracction != 10 " class="p-3 border rounded-lg bg-white" wire:model="parentesco">
                     <option value=""> Parentesco</option>
                     <option value="Padre">Padre</option>
                     <option value="Madre">Madre</option>
@@ -368,7 +408,7 @@ new #[Layout('layouts.guest')] class extends Component
                 <div class="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50 relative mt-4">
 
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-semibold text-gray-600">Datos del Menor #<span
+                        <span class="text-sm font-semibold text-gray-600">Datos del Visitante #<span
                                 x-text="index + 1"></span></span>
 
                         <button type="button" @click="items.splice(index, 1)"
@@ -382,7 +422,7 @@ new #[Layout('layouts.guest')] class extends Component
                     </div>
 
                     <input type="text" @input="$el.value = $el.value.replace(/[0-9]/g, '')"
-                        x-model="item.minor_full_name" placeholder="Nombre completo del menor"
+                        x-model="item.minor_full_name" placeholder="Nombre completo del Visitante"
                         class="p-3 border rounded-lg bg-white">
 
                     <label class="block text-sm font-medium text-gray-700 -mb-2">Fecha de Nacimiento</label>
@@ -400,8 +440,9 @@ new #[Layout('layouts.guest')] class extends Component
                         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                 </svg>
                 <div>
-                    <span class="font-semibold">Límite de menores alcanzado:</span> Este formulario permite un máximo de
-                    5 niños por inscripción. Si necesitas añadir más, por favor completa el registro actual y genera uno
+                    <span class="font-semibold">Límite de Visitantes alcanzado:</span> Este formulario permite un máximo
+                    de 5 Visitantes por inscripción. Si necesitas añadir más, por favor completa el registro actual y
+                    genera uno
                     nuevo.
                 </div>
             </div>
