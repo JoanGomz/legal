@@ -324,8 +324,7 @@ new #[Layout('layouts.guest')] class extends Component
                             <span class="font-semibold text-gray-700">Política de Tratamiento de Datos Personales</span>
                             y Condiciones de Uso de Star Park.
                         </p>
-                        <a href="https://www.starpark.com.co/_files/ugd/3d37ac_dcce5a8525d140baaa959eca88cfe1e2.pdf"
-                            target="_blank"
+                        <a href="https://starpark.spoondecolombia.com/politica.php" target="_blank"
                             class="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center transition-colors ml-1 font-medium">
                             <i class="fa-solid fa-file-pdf mx-1"></i>
                             Ver Política de Privacidad
