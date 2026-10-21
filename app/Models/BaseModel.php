@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class BaseModel extends Model
 {
@@ -33,6 +34,10 @@ class BaseModel extends Model
                 if (Schema::hasColumn($table, 'user_last_update')) {
                     $model->user_last_update = $userId;
                 }
+            }
+
+            if (Schema::hasColumn($table, 'uuid')) {
+                $model->uuid = (string) Str::uuid();
             }
         });
 

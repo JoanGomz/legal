@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 abstract class Controller
 {
-    public function responseLivewire($status = 'success', $message, $data = [])
+    public function responseLivewire(string $status, string $message, $data = [])
     {
         return [
             'status' => $status,

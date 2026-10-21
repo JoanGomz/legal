@@ -10,6 +10,7 @@ class Parks extends BaseModel
     protected $table = 'parks';
     protected $fillable = [
         'id',
+        'uuid',
         'city_id',
         'name',
         'address',

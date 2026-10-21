@@ -47,7 +47,7 @@ class ConsentService extends BaseService
 
             $arcade = AtraccionArcade::find($data['arcade_id']);
             if (!$arcade) {
-                throw new \Exception('La atracciÃ³n arcade no existe');
+                throw new \Exception('La atracción arcade no existe');
             }
 
             $dataSave = $data;
@@ -55,8 +55,6 @@ class ConsentService extends BaseService
             $count = 1;
 
             if (isset($data['childrens'])) {
-
-
                 foreach ($data['childrens'] as $child) {
                     $dataSave['minor_document_number'] = $child['minor_document_number'] ?? null;
                     $dataSave['minor_document_type'] = $child['minor_document_type'] ?? null;
@@ -84,7 +82,9 @@ class ConsentService extends BaseService
 
             $code = "STSP" . $park->id . "-" . $firstConsent->id;
 
-            $pdf = Pdf::loadView('pdf.consent', [
+            $view = str_contains($park->name, 'arranquilla') ? 'pdf.Consents.generic' : 'pdf.Consents.consent';
+
+            $pdf = Pdf::loadView($view, [
                 'registration' => $firstConsent,
                 'arcade' => $arcade,
                 'code' => $code,

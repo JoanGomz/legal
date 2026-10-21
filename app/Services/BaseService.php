@@ -21,7 +21,7 @@ class BaseService implements BaseServiceInterface
         return $this->model::where('is_deleted', 0)->get();
     }
 
-    public function getPaginated($page, $items, $search = '')
+    public function getPaginated($page = 1, $items = 10, $search = '')
     {
         $query = $this->model->query();
         $query->where('is_deleted', 0);
