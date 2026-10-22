@@ -27,11 +27,19 @@ new class extends Component {
 }; ?>
 
 <div class="py-4">
+    @php
+    $user = Auth::user();
+    @endphp
     <div x-data="{filter:false}" class="space-x-4 mx-auto px-4">
         <div class="flex justify-between p-4 bg-white shadow sm:rounded-lg">
             <h1 class="text-xl font-semibold text-gray-900">
                 Bienvenid@ <a href="{{ route('profile') }}" class="text-[#0078B6]">{{ auth()->user()->name }}</a> al
-                área legal de StarPark
+                área legal de
+                @if (in_array($user['park_id'], [1, 2,3,4,5,6,7,8,9,10,11,12]))
+                <span> Starpark </span>
+                @else
+                <span>JumpingLand</span>
+                @endif
             </h1>
             <button @click="filter = !filter" :class="filter ? 'hidden' : 'visible' ">
                 <i class="fa-solid fa-sliders fa-rotate-90"></i>

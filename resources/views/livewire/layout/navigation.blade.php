@@ -16,6 +16,9 @@ new class extends Component
     }
 }; ?>
 <nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 w-full">
+    @php
+    $user = Auth::user();
+    @endphp
     <div class="mx-auto px-4">
         <div class="flex justify-between h-16">
 
@@ -26,7 +29,12 @@ new class extends Component
                     <i class="fa-solid" :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
                 </button>
                 <div class="shrink-0 flex items-center ">
-                    <img src="{{ asset('images/logohori.png') }}" alt="StarPark Legal" class="w-40 h-auto">
+                    @if ($user['park_id'] != 13 )
+                    <img src="{{ asset('images/logohori.png') }}" alt="Logo del Comercio" class="w-40 h-auto">
+                    @else
+                    <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1791921261_jumpingland.png"
+                        alt=" Logo del Comercio" class="w-20 h-auto">
+                    @endif
                 </div>
 
                 <div class="hidden md:flex items-center ml-4 text-gray-400">

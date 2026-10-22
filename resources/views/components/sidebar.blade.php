@@ -135,7 +135,7 @@
             </div>
 
             <p class="text-[9px] text-slate-600 mt-2 whitespace-nowrap">
-                © 2026 Todos los derechos reservados
+                © {{ now()->year }} Todos los derechos reservados
             </p>
         </div>
     </div>

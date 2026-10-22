@@ -19,6 +19,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "ably": "^2.30.0",
         "apexcharts": "^5.10.3"
     }
 }

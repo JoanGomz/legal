@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Events\conversationUpdate;
 use App\Events\MessageSent;
-use App\Models\Eventrix\Mall;
-use App\Models\Eventrix\Participant;
 use App\Models\LandbotConversations;
 use App\Models\LandbotMessage;
 use App\Models\Operation\Clients;
@@ -163,7 +161,7 @@ class LandbotService
 
         if (!$conversation) {
             $client = Clients::where('phone', $data['customer']['phone'])
-                ->where('status', 1)
+                ->where('is_deleted', 1)
                 ->first();
 
             $conversation = LandbotConversations::create([
@@ -313,7 +311,7 @@ class LandbotService
             });
         }
 
-        $query->where('bot_id', auth()->user()->mall->bot_id);
+        $query->where('bot_id', auth()->user()->park->bot_id);
 
         return $query->orderBy('updated_at', 'desc')->get();
     }
