@@ -18,12 +18,15 @@ class ConsentService extends BaseService
         parent::__construct($model);
     }
 
-    public function getPaginated($page, $items, $search = '')
+    public function getPaginated($page = 1, $items = 10, $search = '', $brandId = 1, $parkId = 12)
     {
         $query = $this->model->query();
 
         if (auth()->user()->hasRole('Admin')) {
             $query->where('park_id', auth()->user()->park_id);
+        } else {
+            $query->where('brand_id', $brandId);
+            $query->where('park_id', $parkId);
         }
 
         if ($search) {

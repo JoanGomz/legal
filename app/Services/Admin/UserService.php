@@ -3,26 +3,30 @@
 namespace App\Services\Admin;
 
 use App\Contracts\Admin\UserServiceInterface;
-use App\Models\Operation\CentroComercial;
 use App\Models\User;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserService implements UserServiceInterface
 {
-    public function getAllActiveUsers(array $columns = ['*'])
+    public function getAllActiveUsers($brandId = 2, $parkId = 13, array $columns = ['*'])
     {
-        $query = User::where('status', 1)->with('roles:name')->with('mall');
+        $query = User::where('status', 1)
+            ->with('roles:name')
+            ->with('park');
 
         // si el usuario tiene el permiso viewAll se muestran todas las registros si no se filtra por el id del centro comercial
         if (auth()->user()->hasRole('Admin')) {
             $query->where('park_id', auth()->user()->park_id);
+        } else {
+            $query->where('park_id', $parkId);
+            $query->where('brand_id', $brandId);
         }
 
         return $query->get();
     }
+
 
     public function createUser(Request $request)
     {
@@ -55,7 +59,7 @@ class UserService implements UserServiceInterface
      * @param int $items
      * @param string $search
      */
-    public function getPaginated($page, $items, $search = '')
+    public function getPaginated($page, $items, $search = '', $brandId = 1, $parkId = 12)
     {
         $query = User::query();
 
@@ -63,6 +67,9 @@ class UserService implements UserServiceInterface
 
         if (auth()->user()->hasRole('Admin')) {
             $query->where('park_id', auth()->user()->park_id);
+        } else {
+            $query->where('park_id', $parkId);
+            $query->where('brand_id', $brandId);
         }
 
         // buscador - AGRUPA TODAS LAS CONDICIONES DE BÚSQUEDA

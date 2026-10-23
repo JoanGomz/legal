@@ -22,6 +22,7 @@ class PermissionController extends Controller
         $permissions = $this->permissionService->getAllActivePermissions();
         return $permissions;
     }
+
     public function indexPaginated($page, $items, $search = '')
     {
         try {
@@ -31,6 +32,7 @@ class PermissionController extends Controller
             return $this->responseLivewire('error', $ex->getMessage(), []);
         }
     }
+
     public function store(Request $request)
     {
         if ($request->name) {

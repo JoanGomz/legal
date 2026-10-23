@@ -11,12 +11,14 @@ use Illuminate\Http\Request;
 class ParksController extends Controller
 {
 
-    public function index()
+    public function index($brandId = 1)
     {
         try {
             $query = Parks::query()->where('is_deleted', 0);
             if (auth()->check() && auth()->user()->hasRole('Admin')) {
                 $query->where('id', auth()->user()->park_id);
+            } else {
+                $query->where('brand_id', $brandId);
             }
             $parks = $query->get();
             return $this->responseLivewire('success', '', $parks);

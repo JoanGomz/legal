@@ -18,6 +18,7 @@ class LandbotMessage extends BaseModel
         'landbot_chat_id',
         'conversation_id',
         'status',
+        'brand_id',
         'created_at',
         'updated_at',
         'deleted_at',

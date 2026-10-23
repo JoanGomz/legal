@@ -34,6 +34,7 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'status',
+        'brand_id',
         'user_creator',
         'user_last_update'
     ];

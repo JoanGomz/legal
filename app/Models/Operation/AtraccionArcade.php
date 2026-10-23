@@ -23,6 +23,7 @@ class AtraccionArcade extends BaseModel
         'id_park',
         'ubicacion',
         'estado',
+        'brand_id',
         'is_deleted',
         'created_at',
         'updated_at',

@@ -21,7 +21,7 @@ class BaseService implements BaseServiceInterface
         return $this->model::where('is_deleted', 0)->get();
     }
 
-    public function getPaginated($page = 1, $items = 10, $search = '')
+    public function getPaginated($page = 1, $items = 10, $search = '', $brandId = 1, $parkId = 12)
     {
         $query = $this->model->query();
         $query->where('is_deleted', 0);
@@ -30,6 +30,9 @@ class BaseService implements BaseServiceInterface
             $query->where('nombre', 'like', '%' . $search . '%');
             $query->orWhere('id', 'like', '%' . $search . '%');
         }
+
+        $query->where('brand_id', $brandId);
+        $query->where('park_id', $parkId);
 
         return $query->orderBy('created_at', 'desc')->paginate($items, ['*'], 'page', $page);
     }

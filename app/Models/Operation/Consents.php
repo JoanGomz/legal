@@ -36,6 +36,7 @@ class Consents extends BaseModel
         'check_cuatro',
         'check_cinco',
         'check_seis',
+        'brand_id',
         'is_delete',
         'ip_address',
         'user_agent',

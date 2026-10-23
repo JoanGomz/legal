@@ -20,10 +20,10 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function index(): array
+    public function index($brandId, $parkId): array
     {
         try {
-            $users = $this->userService->getAllActiveUsers();
+            $users = $this->userService->getAllActiveUsers($brandId, $parkId);
             return $this->responseLivewire('success', '', $users);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);
@@ -33,10 +33,10 @@ class UserController extends Controller
     /**
      * retorna todas los items paginadas
      */
-    public function indexPaginated($page, $items, $search = '')
+    public function indexPaginated($page, $items, $search = '', $brandId = 1, $parkId = 12)
     {
         try {
-            $response = $this->userService->getPaginated($page, $items, $search);
+            $response = $this->userService->getPaginated($page, $items, $search, $brandId, $parkId);
 
             return $this->responseLivewire('success', 'success', $response);
         } catch (\Exception $ex) {

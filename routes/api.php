@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Base\BrandsController;
 use App\Http\Controllers\LandbotWebhookController;
 use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\ConsetController;
@@ -26,3 +27,9 @@ Route::put('clients/{id}', [ClientController::class, 'update']);
 Route::delete('clients/{id}', [ClientController::class, 'delete']);
 Route::post('clients/landbot', [ClientController::class, 'addClientLandbot']);
 Route::post('clients/exist', [ClientController::class, 'existClientByPhone']);
+
+//Brands
+Route::get('brands', [BrandsController::class, 'indexPaginated']);
+Route::post('brands', [BrandsController::class, 'store']);
+Route::put('brands/{id}', [BrandsController::class, 'update']);
+Route::delete('brands/{id}', [BrandsController::class, 'delete']);

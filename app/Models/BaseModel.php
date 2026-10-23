@@ -39,6 +39,15 @@ class BaseModel extends Model
             if (Schema::hasColumn($table, 'uuid')) {
                 $model->uuid = (string) Str::uuid();
             }
+
+            if (Schema::hasColumn($table, 'brand_id')) {
+                $user = Auth::user();
+
+                if ($user && $user->brand_id) {
+                    // Usuario con brand: siempre la suya
+                    $model->brand_id = $user->brand_id;
+                }
+            }
         });
 
         static::updating(function ($model) {

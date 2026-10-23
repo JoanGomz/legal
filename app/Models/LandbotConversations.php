@@ -22,6 +22,7 @@ class LandbotConversations extends BaseModel
         'is_assigned',
         'user_assign_id',
         'bot_id',
+        'brand_id',
         'created_at',
         'updated_at',
         'deleted_at',

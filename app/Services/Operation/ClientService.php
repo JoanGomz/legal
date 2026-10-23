@@ -14,7 +14,7 @@ class ClientService extends BaseService
         parent::__construct($model);
     }
 
-    public function getAllPaginated(int $page, int $itms, string $search): array
+    public function getAllPaginated(int $page, int $itms, string $search, int $brandId = 1, int $parkId = 12): array
     {
         $query = $this->model->query();
         $query->where('is_deleted', 0);
@@ -26,6 +26,13 @@ class ClientService extends BaseService
                     ->orWhere('email', 'like', "%$search%")
                     ->orWhere('phone', 'like', "%$search%");
             });
+        }
+
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('park_id', auth()->user()->park_id);
+        } else {
+            $query->where('park_id', $parkId);
+            $query->where('brand_id', $brandId);
         }
 
         $total = $query->count();
