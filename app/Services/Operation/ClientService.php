@@ -31,7 +31,7 @@ class ClientService extends BaseService
         if (auth()->user()->hasRole('Admin')) {
             $query->where('park_id', auth()->user()->park_id);
         } else {
-            $query->where('park_id', $parkId);
+            $query->where('parks_id', $parkId);
             $query->where('brand_id', $brandId);
         }
 
