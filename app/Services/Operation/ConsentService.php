@@ -85,7 +85,7 @@ class ConsentService extends BaseService
 
             $code = "STSP" . $park->id . "-" . $firstConsent->id;
 
-            $view = str_contains($park->name, 'arranquilla') ? 'pdf.Consents.generic' : 'pdf.Consents.consent';
+            $view = str_contains($park->name, 'Barranquilla') ? 'pdf.Consents.generic' : 'pdf.Consents.consent';
 
             $pdf = Pdf::loadView($view, [
                 'registration' => $firstConsent,
