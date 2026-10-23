@@ -32,8 +32,7 @@ new #[Layout('layouts.guest')] class extends Component
 
             <div class="flex w-full bg-slate-800/100 rounded-ee-3xl rounded-se-3xl justify-center p-8 lg:p-12">
                 <div class="flex flex-col w-full items-center justify-center h-full">
-                    <img width="80" height="80" src="images/spoon-trasp.webp" alt="Logo de Spoon de Colombia"
-                        class="mb-6">
+                    <img width="80" height="80" src="images/spoon.png" alt="Logo de Spoon de Colombia" class="mb-6">
 
                     <h2 class="text-white text-2xl font-semibold mb-2">Bienvenido</h2>
                     <p class="text-white forn-bold text-sm mb-8 text-center">Ingresa tus credenciales para continuar</p>
@@ -80,11 +79,11 @@ new #[Layout('layouts.guest')] class extends Component
                         frente a riesgos operativos o legales.
                     </p>
 
-                    <div
+                    <!-- <div
                         class="flex bg-slate-800/10 backdrop-blur-md p-4 rounded-2xl justify-center items-center border border-slate-400">
                         <img height="180 px" width="180 px" class="justify-center" src="images/STARP.webp"
                             alt="Imagen de Star Park">
-                    </div>
+                    </div> -->
                 </div>
 
 
