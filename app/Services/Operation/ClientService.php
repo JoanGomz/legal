@@ -18,7 +18,7 @@ class ClientService extends BaseService
     {
         $query = $this->model->query();
         $query->where('is_deleted', 0);
-        $query->with('mall');
+        $query->with('park');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {

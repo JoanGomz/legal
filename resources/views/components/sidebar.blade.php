@@ -78,6 +78,27 @@
                 </div>
             </li>
             <li class="relative group">
+                <a href="{{ route ('clients') }}" wire:navigate
+                    class="flex items-center h-12 rounded-xl transition-all duration-300
+                {{ request()->routeIs('clients') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100' }}">
+
+                    <div class="w-12 h-12 shrink-0 flex items-center justify-center">
+                        <i
+                            class="fa-solid fa-user-group text-lg {{ request()->routeIs('clients') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                    </div>
+
+                    <span x-show="sidebarOpen" x-tr|ansition.opacity.duration.300ms
+                        class="ml-1 text-sm font-semibold whitespace-nowrap">
+                        Clientes
+                    </span>
+                </a>
+
+                <div x-cloak x-show="!sidebarOpen"
+                    class="fixed left-20 ml-2 px-3 py-1 bg-slate-900 text-white text-[11px] font-bold rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] border border-slate-700 pointer-events-none uppercase tracking-wider">
+                    Clientes
+                </div>
+            </li>
+            <li class="relative group">
                 <a href="{{ route ('branches') }}" wire:navigate
                     class="flex items-center h-12 rounded-xl transition-all duration-300
                 {{ request()->routeIs('#') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100' }}">
@@ -111,6 +132,27 @@
                 <div x-cloak x-show="!sidebarOpen"
                     class="fixed left-20 ml-2 px-3 py-1 bg-slate-900 text-white text-[11px] font-bold rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] border border-slate-700 pointer-events-none uppercase tracking-wider">
                     Consentimientos
+                </div>
+            </li>
+            <li class="relative group">
+                <a href="{{ route ('config') }}" wire:navigate
+                    class="flex items-center h-12 rounded-xl transition-all duration-300
+                {{ request()->routeIs('config') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100' }}">
+
+                    <div class="w-12 h-12 shrink-0 flex items-center justify-center">
+                        <i
+                            class="fa-solid fa-gears text-lg {{ request()->routeIs('config') ? 'text-white' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                    </div>
+
+                    <span x-show="sidebarOpen" x-tr|ansition.opacity.duration.300ms
+                        class="ml-1 text-sm font-semibold whitespace-nowrap">
+                        Configuración
+                    </span>
+                </a>
+
+                <div x-cloak x-show="!sidebarOpen"
+                    class="fixed left-20 ml-2 px-3 py-1 bg-slate-900 text-white text-[11px] font-bold rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] border border-slate-700 pointer-events-none uppercase tracking-wider">
+                    Configuración
                 </div>
             </li>
         </ul>
