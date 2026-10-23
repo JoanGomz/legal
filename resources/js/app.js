@@ -1,4 +1,5 @@
 import "./bootstrap";
+import "emoji-picker-element";
 import * as Ably from "ably";
 // import "emoji-picker-element";
 const cardSearch = () => import("./cardSearch.js");

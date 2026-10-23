@@ -229,7 +229,7 @@ class LandbotService
         }
 
         if (!$conversation->user_asing_id && $data['_raw']['author_type'] == 'user') {
-            $advisors = User::role('Asesor web')->get();
+            $advisors = User::role('Asesor')->get();
 
             foreach ($advisors as $advisor) {
                 $advisor->notify(new NewChatMessagePush($newMessage, $conversation));

@@ -15,5 +15,5 @@ new #[Layout('layouts.sidebar-asesor')] class extends Component {
 <div class="flex" style="height: calc(100vh - 65px);">
     @livewire('panels.asesor.conversation_list')
     @livewire('panels.asesor.chat-panel')
-    {{--@livewire('panels.asesor.contact_info')--}}
+    @livewire('panels.asesor.contact_info')
 </div>

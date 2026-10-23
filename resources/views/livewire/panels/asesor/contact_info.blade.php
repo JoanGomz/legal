@@ -136,7 +136,7 @@ new class extends Component
         </div>
     </div>
 </div>
-@push('scripts')
+@script
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const mensajesPredeterminados = document.querySelectorAll('.message-pred');
@@ -151,4 +151,4 @@ new class extends Component
         });
     });
 </script>
-@endpush
+@endscript

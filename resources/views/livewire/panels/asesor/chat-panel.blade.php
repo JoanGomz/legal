@@ -277,18 +277,18 @@ new class extends Component
 <div class="flex-1 flex flex-col resize-x z-10" x-data="{infoCliente: false}">
     <!-- Cabecera de la conversación -->
     <div
-        class="relative px-5 py-4 flex bg-slate-800 dark:bg-white/5 dark:backdrop-blur-2xl dark:border-b dark:border-white/10 justify-between items-center font-bold dark:text-white z-20">
+        class="relative px-5 py-3.5 flex bg-[#0A3C55] justify-between items-center font-bold z-20 shadow-lg shadow-black/30">
         <div class="flex items-center">
             <div class="relative mr-3">
                 <div
-                    class="w-10 h-10 rounded-full bg-linear-to-br from-[#FD7A0F] via-[#FF3A3B] to-[#C9155D] flex items-center justify-center text-white font-bold shadow-lg shadow-[#FD7A0F]">
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] flex items-center justify-center text-[#0A3C55] text-sm font-bold shadow-md shadow-black/40 ring-2 ring-white/15">
                     {{ strtoupper(substr($userName ?? 'C', 0, 2)) }}
                 </div>
-                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 @if ($conversationStatus === 'pendiente') bg-yellow-400
+                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0A3C55] @if ($conversationStatus === 'pendiente') bg-yellow-400
                             @elseif($conversationStatus === 'asignado a')
                                 bg-blue-400
                             @elseif($conversationStatus === 'en espera')
-                                bg-purple-400
+                                bg-sky-400
                             @elseif($conversationStatus === 'finalizado')
                                 bg-gray-400
                             @else
@@ -296,23 +296,23 @@ new class extends Component
                 </span>
             </div>
             <div>
-                <div class="font-bold dark:text-white text-slate-200">
+                <div class="font-semibold text-white tracking-wide">
                     {{ $userName ? (strlen($name = explode(' ', $userName)[0] ?? '') > 2 ? $name : $userName) : '--' }}
                 </div>
                 <div class="flex items-center text-sm">
                     <span id="estado-chat"
-                        class="font-normal text-slate-400 capitalize">{{ $conversationStatus ? $conversationStatus : '--' }}</span>
+                        class="font-normal text-[#E8C987]/80 text-xs capitalize">{{ $conversationStatus ? $conversationStatus : '--' }}</span>
                 </div>
             </div>
         </div>
         <div class="flex gap-2 items-center">
             <button @click="window.dispatchEvent(new CustomEvent('toggle-info-cliente'))"
-                class="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium text-slate-300 bg-white/10 backdrop-blur-md border dark:border-slate-600 border-white/10 hover:bg-purple-500/20 hover:text-purple-300 hover:border-purple-400/30 transition-all">
+                class="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium text-slate-200 bg-white/10 border border-white/10 hover:bg-[#E8C987]/15 hover:text-[#E8C987] hover:border-[#E8C987]/30 transition-all">
                 <i class="fa-solid fa-circle-info text-[11px]"></i>
                 Información
             </button>
             <select wire:model.live="status"
-                class="form-select text-white text-xs font-medium bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-3.5 py-2 dark:border-slate-600 hover:bg-purple-500/20 hover:border-purple-400/30 transition-all {{ !$canWrite || $conversationStatus === 'finalizado' ? 'cursor-not-allowed opacity-40' : '' }}"
+                class="form-select text-white text-xs font-medium bg-white/10 border border-white/10 rounded-full px-3.5 py-2 hover:bg-[#E8C987]/15 hover:border-[#E8C987]/30 focus:ring-2 focus:ring-[#E8C987]/40 transition-all {{ !$canWrite || $conversationStatus === 'finalizado' ? 'cursor-not-allowed opacity-40' : '' }}"
                 {{ !$canWrite || $conversationStatus === 'finalizado' ? 'disabled' : '' }}>
                 <option value="" class="text-black">Estado</option>
                 <option value="en espera" class="text-black">En espera</option>
@@ -324,16 +324,9 @@ new class extends Component
     <!-- Historial de mensajes -->
     <div
         class="flex-1 flex flex-col relative min-h-0 overflow-hidden bg-slate-950 bg-[url('https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1792684115_fondo%20chat%20general%202.png')] bg-cover bg-repeat bg-center">
-        <div class="absolute inset-0 bg-black/70 pointer-events-none"></div>
-        <div class="pointer-events-none absolute -top-20 -left-20 w-96 h-96 rounded-full bg-purple-600/20 blur-3xl">
-        </div>
-        <div
-            class="pointer-events-none absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-fuchsia-600/20 blur-3xl">
-        </div>
-        <div class="pointer-events-none absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-indigo-600/10 blur-3xl">
-        </div>
+        <div class="absolute inset-0 bg-[#06202E]/90 pointer-events-none"></div>
         <div class="flex-1 flex flex-col relative z-10 h-full ">
-            <div class="flex-1 p-4 overflow-y-auto overflow-x-hidden space-y-2" x-data="{ 
+            <div class="flex-1 px-6 py-4 overflow-y-auto overflow-x-hidden space-y-1" x-data="{ 
         scrollToBottom() { 
             $el.scrollTop = $el.scrollHeight; 
         } 
@@ -342,6 +335,7 @@ new class extends Component
                 @php
                 $count = 0;
                 $lastDate;
+                $prevGroupKey = null;
                 @endphp
                 @forelse ($mensajes["data"]['messages'] as $item)
                 @php
@@ -381,9 +375,9 @@ new class extends Component
                 @endphp
 
                 @if ($count === 1)
-                <div class="flex justify-center mb-4">
+                <div class="flex justify-center my-4">
                     <div
-                        class="bg-white/10 backdrop-blur-md text-slate-300 text-[11px] font-medium rounded-full px-3 py-1 border border-white/10">
+                        class="bg-[#0A3C55]/80 text-[#E8C987] text-[11px] font-medium tracking-wide rounded-full px-3.5 py-1 shadow-md shadow-black/30">
                         {{ \Carbon\Carbon::parse($item['created_at'])->format('d/m/Y') }}
                     </div>
                 </div>
@@ -392,9 +386,9 @@ new class extends Component
                 @endphp
                 @else
                 @if ($lastDate !== $currentDate)
-                <div class="flex justify-center mb-4">
+                <div class="flex justify-center my-4">
                     <div
-                        class="bg-white/10 backdrop-blur-md text-slate-300 text-[11px] font-medium rounded-full px-3 py-1 border border-white/10">
+                        class="bg-[#0A3C55]/80 text-[#E8C987] text-[11px] font-medium tracking-wide rounded-full px-3.5 py-1 shadow-md shadow-black/30">
                         {{ \Carbon\Carbon::parse($item['created_at'])->format('d/m/Y') }}
                     </div>
                 </div>
@@ -403,12 +397,34 @@ new class extends Component
                 @endphp
                 @endif
                 @endif
+                @php
+                // Solo el primer mensaje de una racha (mismo autor y mismo día) muestra avatar y nombre
+                $grupoKey = $item['author_type'] . '|' . $currentDate;
+                $esPrimero = $prevGroupKey !== $grupoKey;
+                $prevGroupKey = $grupoKey;
+                @endphp
                 @if ($item['author_type'] === 'client')
                 <!-- Mensaje del cliente -->
-                <div wire:key="message-{{ $item['id'] ?? $loop->index }}" class="mb-4 flex justify-start min-w-[400px]">
+                <div wire:key="message-{{ $item['id'] ?? $loop->index }}"
+                    class="flex items-start gap-2 justify-start min-w-[400px] {{ $esPrimero ? 'pt-3' : '' }}">
+                    {{-- Avatar --}}
                     <div
-                        class="max-w-md rounded-2xl rounded-bl-md p-4 shadow-lg shadow-black/20 {{ $conversationStatus === 'finalizado' ? 'bg-white/5 backdrop-blur-xl border border-white/5 text-slate-500' : 'bg-white/10 backdrop-blur-xl border border-white/10 text-slate-100' }}">
+                        class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] flex items-center justify-center text-[11px] font-bold text-[#0A3C55] shadow-md shadow-black/40 ring-2 ring-white/10 {{ $esPrimero ? '' : 'invisible' }}">
+                        {{ strtoupper(substr($userName ?? 'C', 0, 2)) }}
+                    </div>
+                    <div
+                        class="relative max-w-md rounded-2xl {{ $esPrimero ? 'rounded-tl-sm' : '' }} pl-5 pr-4 py-3 text-[15px] leading-relaxed {{ $conversationStatus === 'finalizado' ? 'bg-white/5 border border-white/5 text-slate-500' : 'bg-gradient-to-br from-white to-[#F1ECE2] text-slate-800 shadow-[0_10px_28px_-10px_rgba(0,0,0,0.7)] ring-1 ring-black/5' }}">
 
+                        {{-- Acento dorado --}}
+                        <span
+                            class="absolute left-2 top-3 bottom-3 w-[3px] rounded-full bg-gradient-to-b from-[#E8C987] to-[#B8913F]"></span>
+
+                        {{-- Nombre (solo en el primero del grupo) --}}
+                        @if ($esPrimero)
+                        <div class="text-[11px] font-semibold tracking-wide text-[#0A3C55] mb-0.5">
+                            {{ $userName ? explode(' ', $userName)[0] : 'Cliente' }}
+                        </div>
+                        @endif
                         @php
                         $extension = isset($conversationData['url'])
                         ? strtolower(pathinfo($conversationData['url'], PATHINFO_EXTENSION))
@@ -426,7 +442,7 @@ new class extends Component
                         {{-- Imagen --}}
                         <div class="mb-2">
                             <img src="{{ $conversationData['url'] }}" alt="Imagen"
-                                class="max-w-full h-auto rounded-lg cursor-pointer" style="max-height: 300px;"
+                                class="max-w-full h-auto rounded-xl cursor-pointer" style="max-height: 300px;"
                                 @click="window.open('{{ $conversationData['url'] }}', '_blank')">
                         </div>
                         @elseif ($isVideo)
@@ -450,8 +466,8 @@ new class extends Component
                         {{-- Archivo no reconocido --}}
                         <div class="mb-2">
                             <a href="{{ $conversationData['url'] }}" target="_blank"
-                                class="text-purple-300 hover:text-purple-200 underline">
-                                <i class="fa-solid fa-file mr-2"></i>Ver archivo
+                                class="inline-flex items-center gap-2 rounded-xl bg-[#0A3C55]/10 px-3 py-2 text-sm font-medium text-[#0A3C55] hover:bg-[#0A3C55]/15 transition">
+                                <i class="fa-solid fa-file-lines text-[#B8913F]"></i>Ver archivo
                             </a>
                         </div>
                         @endif
@@ -465,17 +481,34 @@ new class extends Component
                         <div>{!! nl2br(e(str_replace('\n', "\n", $getBodyText($conversationData)))) !!}</div>
                         @endif
 
-                        <div class="text-[10px] mt-1.5 text-slate-400">
+                        <div class="flex items-center justify-end gap-1 text-[10px] mt-1.5 text-slate-500">
+                            <i class="fa-regular fa-clock text-[9px]"></i>
                             {{ \Carbon\Carbon::parse($item['created_at'])->format('g:i A') }}
                         </div>
                     </div>
                 </div>
                 @else
                 <!-- Mensaje del asesor -->
-                <div wire:key="message-{{ $item['id'] ?? $loop->index }}" class="mb-4 flex justify-end">
+                <div wire:key="message-{{ $item['id'] ?? $loop->index }}"
+                    class="flex flex-row-reverse items-start gap-2 justify-start {{ $esPrimero ? 'pt-3' : '' }}">
+                    {{-- Avatar --}}
                     <div
-                        class="max-w-md rounded-2xl rounded-br-md p-4 shadow-lg {{ $conversationStatus === 'finalizado' ? 'bg-white/5 backdrop-blur-xl border border-white/5 text-slate-500' : 'bg-linear-to-br from-[#FD7A0F] via-[#FF3A3B] to-[#C9155D] text-white shadow-[#FD7A0F]/40' }}">
+                        class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-[#14678C] to-[#0A3C55] flex items-center justify-center shadow-md shadow-black/40 ring-2 ring-[#E8C987]/40 {{ $esPrimero ? '' : 'invisible' }}">
+                        <i class="fa-regular fa-user text-[11px] text-[#E8C987]"></i>
+                    </div>
+                    <div
+                        class="relative max-w-md rounded-2xl {{ $esPrimero ? 'rounded-tr-sm' : '' }} pl-4 pr-5 py-3 text-[15px] leading-relaxed {{ $conversationStatus === 'finalizado' ? 'bg-white/5 border border-white/5 text-slate-500' : 'bg-gradient-to-br from-[#14678C] via-[#0F4F6E] to-[#0A3C55] text-white shadow-[0_10px_28px_-10px_rgba(0,0,0,0.8)] ring-1 ring-white/10' }}">
 
+                        {{-- Acento dorado --}}
+                        <span
+                            class="absolute right-2 top-3 bottom-3 w-[3px] rounded-full bg-gradient-to-b from-[#E8C987] to-[#B8913F]"></span>
+
+                        {{-- Nombre del asesor (solo en el primero del grupo) --}}
+                        @if ($esPrimero)
+                        <div class="text-[11px] font-semibold tracking-wide text-[#E8C987] mb-0.5 text-right">
+                            {{ auth()->user()->name ? explode(' ', auth()->user()->name)[0] : 'Asesor' }}
+                        </div>
+                        @endif
                         @php
                         $extension = isset($conversationData['url'])
                         ? strtolower(pathinfo($conversationData['url'], PATHINFO_EXTENSION))
@@ -493,7 +526,7 @@ new class extends Component
                         {{-- Imagen --}}
                         <div class="mb-2">
                             <img src="{{ $conversationData['url'] }}" alt="Imagen"
-                                class="max-w-full h-auto rounded-lg cursor-pointer" style="max-height: 300px;"
+                                class="max-w-full h-auto rounded-xl cursor-pointer" style="max-height: 300px;"
                                 onclick="window.open('{{ $conversationData['url'] }}', '_blank')">
                         </div>
                         @elseif ($isVideo)
@@ -517,8 +550,8 @@ new class extends Component
                         {{-- Archivo no reconocido --}}
                         <div class="mb-2">
                             <a href="{{ $conversationData['url'] }}" target="_blank"
-                                class="text-white hover:text-purple-100 underline">
-                                <i class="fa-solid fa-file mr-2"></i>Ver archivo
+                                class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
+                                <i class="fa-solid fa-file-lines text-[#E8C987]"></i>Ver archivo
                             </a>
                         </div>
                         @endif
@@ -535,10 +568,10 @@ new class extends Component
 
                         <!-- Header del mensaje -->
                         @if (isset($conversationData['header']['text']))
-                        <div class="font-bold text-lg mb-2">{{ $conversationData['header']['text'] }}
+                        <div class="font-semibold text-base mb-1">{{ $conversationData['header']['text'] }}
                         </div>
                         @elseif (isset($conversationData['title']))
-                        <div class="font-bold">{{ $conversationData['title'] }}</div>
+                        <div class="font-semibold">{{ $conversationData['title'] }}</div>
                         @endif
 
                         <!-- Cuerpo del mensaje -->
@@ -560,7 +593,7 @@ new class extends Component
                         @foreach ($conversationData['buttons'] as $button)
                         <div class="mt-2">
                             <button
-                                class="bg-white/15 backdrop-blur-md border border-white/10 hover:bg-white/25 text-white px-4 py-2 rounded-lg w-full text-left transition-colors">
+                                class="bg-white/10 border border-white/15 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-xl w-full text-left transition-colors">
                                 {{ is_array($button) ? $button['label'] ?? '' : $button }}
                             </button>
                         </div>
@@ -572,7 +605,7 @@ new class extends Component
                         is_array($conversationData['action']['sections']))
                         <div class="mt-3">
                             @if (isset($conversationData['action']['button']))
-                            <div class="text-sm font-medium mb-2 text-purple-100">
+                            <div class="text-xs font-semibold uppercase tracking-wide mb-2 text-[#E8C987]">
                                 {{ $conversationData['action']['button'] }}
                             </div>
                             @endif
@@ -582,11 +615,11 @@ new class extends Component
                             <div class="space-y-1">
                                 @foreach ($section['rows'] as $row)
                                 <div
-                                    class="bg-white/15 backdrop-blur-md border border-white/10 hover:bg-white/25 rounded-lg p-3 cursor-pointer transition-colors">
+                                    class="bg-white/10 border border-white/15 hover:bg-white/20 rounded-xl px-3 py-2.5 cursor-pointer transition-colors">
                                     <div class="font-medium">{{ $row['title'] ?? '' }}
                                     </div>
                                     @if (isset($row['description']) && $row['description'])
-                                    <div class="text-xs text-purple-100 mt-1">
+                                    <div class="text-xs text-white/60 mt-0.5">
                                         {{ $row['description'] }}
                                     </div>
                                     @endif
@@ -598,26 +631,26 @@ new class extends Component
                         </div>
                         @endif
                         @endif
-                        <div class="flex justify-end">
-                            <div class="text-[10px] mt-1.5 right-2 text-purple-100/70">
-                                {{ \Carbon\Carbon::parse($item['created_at'])->format('g:i A') }}
-                            </div>
+                        <div class="flex items-center justify-end gap-1 text-[10px] mt-1.5 text-white/60">
+                            <i class="fa-regular fa-clock text-[9px]"></i>
+                            {{ \Carbon\Carbon::parse($item['created_at'])->format('g:i A') }}
+                            <i class="fa-solid fa-check-double ml-0.5 text-[#E8C987]"></i>
                         </div>
                     </div>
                 </div>
                 @endif
                 @empty
-                <div class="text-center text-slate-400">No hay mensajes</div>
+                <div class="py-16 text-center text-sm text-slate-400">No hay mensajes en esta conversación</div>
                 @endforelse
                 @endif
             </div>
-            <div class="p-3">
+            <div class="px-4 pb-4 pt-2">
                 <form
-                    class="flex items-center gap-2 bg-white/10 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/30 rounded-full px-4 py-2"
+                    class="flex items-center gap-2 bg-[#0A3C55]/70 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/40 rounded-full pl-3 pr-2 py-1.5 focus-within:border-[#E8C987]/40 transition-colors"
                     wire:submit.prevent="sendMessage">
 
                     {{-- Botón reiniciar bot --}}
-                    <div class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full text-purple-300 hover:bg-white/10 transition-colors {{ $conversationStatus === 'finalizado' ? 'cursor-not-allowed opacity-40' : '' }}"
+                    <div class="cursor-pointer w-9 h-9 flex items-center justify-center rounded-full text-[#E8C987] hover:bg-white/10 transition-colors {{ $conversationStatus === 'finalizado' ? 'cursor-not-allowed opacity-40' : '' }}"
                         title="Reiniciar bot" @if ($canWrite && $conversationStatus !=='finalizado' )
                         wire:click="launchBot" @endif>
                         <i
@@ -640,7 +673,7 @@ new class extends Component
                         {{-- Mostrar archivo seleccionado --}}
                         @if ($attachment)
                         <div
-                            class="absolute bottom-full mb-2 left-0 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-3 text-sm z-50 min-w-[200px]">
+                            class="absolute bottom-full mb-2 left-0 bg-[#0B2F42] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-3 text-sm z-50 min-w-[220px]">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
                                     @php
@@ -652,11 +685,11 @@ new class extends Component
                                     @endphp
 
                                     @if ($isImage)
-                                    <i class="fa-solid fa-image text-purple-400 mr-2"></i>
+                                    <i class="fa-solid fa-image text-[#E8C987] mr-2"></i>
                                     @elseif($isVideo)
-                                    <i class="fa-solid fa-video text-fuchsia-400 mr-2"></i>
+                                    <i class="fa-solid fa-video text-sky-300 mr-2"></i>
                                     @elseif($isAudio)
-                                    <i class="fa-solid fa-music text-emerald-400 mr-2"></i>
+                                    <i class="fa-solid fa-music text-emerald-300 mr-2"></i>
                                     @elseif($isPdf)
                                     <i class="fa-solid fa-file-pdf text-red-400 mr-2"></i>
                                     @else
@@ -737,10 +770,10 @@ new class extends Component
                         </div>
 
                         {{-- Modal de emojis --}}
-                        <div x-show="showEmojis" x-transition @click.away="showEmojis = false"
-                            class="absolute bottom-full mb-2 right-0 z-50 bg-slate-900/90 backdrop-blur-2xl rounded-xl shadow-2xl shadow-black/50 border border-white/10">
+                        <div x-show="showEmojis" x-transition @click.outside="showEmojis = false"
+                            class="absolute bottom-full mb-3 right-0 z-50 bg-[#0B2F42] overflow-hidden rounded-2xl shadow-2xl shadow-black/50 border border-white/10">
                             <emoji-picker
-                                @emoji-click="$wire.set('text', ($wire.text || '') + $event.data.unicode); showEmojis = false"
+                                @emoji-click="$wire.set('text', ($wire.text || '') + $event.detail.unicode); showEmojis = false"
                                 class="border-0">
                             </emoji-picker>
                         </div>
@@ -756,8 +789,8 @@ new class extends Component
                     {{-- Botón enviar --}}
                     <button type="submit" x-ref="submitBtn" wire:loading.attr="disabled"
                         wire:loading.class="opacity-50 cursor-progress"
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-linear-to-br from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-900/50 transition-all shrink-0
-               {{ $conversationStatus === 'finalizado' || !$canWrite ? 'cursor-not-allowed opacity-40' : 'hover:shadow-purple-500/50' }}"
+                        class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] text-[#0A3C55] shadow-lg shadow-black/40 transition-all shrink-0
+               {{ $conversationStatus === 'finalizado' || !$canWrite ? 'cursor-not-allowed opacity-40' : 'hover:scale-105 hover:shadow-[#E8C987]/30' }}"
                         {{ $conversationStatus === 'finalizado' || !$canWrite ? 'disabled' : '' }}
                         title="{{ !$canWrite ? 'Chat bloqueado' : ($conversationStatus === 'finalizado' ? 'Conversación finalizada' : 'Enviar mensaje') }}">
                         @if ($attachment)
@@ -771,24 +804,25 @@ new class extends Component
         </div>
     </div>
     @if ($showConfirmModal)
-    <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50"
+    <div class="fixed inset-0 bg-[#06202E]/70 backdrop-blur-sm flex items-center justify-center z-50"
         wire:click="$set('showConfirmModal', false)">
-        <div class="bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl shadow-black/50"
+        <div class="bg-[#0B2F42] border border-white/10 rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl shadow-black/50"
             @click.stop>
-            <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+            <div
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] flex items-center justify-center mb-4 shadow-lg shadow-black/30">
+                <i class="fa-solid fa-gavel text-[#0A3C55]"></i>
             </div>
-            <h3 class="text-lg font-semibold text-white mb-1.5">Confirmar Finalización</h3>
+            <h3 class="text-lg font-semibold text-white mb-1.5">Finalizar consulta</h3>
             <p class="text-slate-400 text-sm mb-6">¿Estás seguro de que deseas finalizar esta conversación?</p>
 
             <div class="flex justify-end space-x-3">
                 <button wire:click="$set('showConfirmModal', false)"
-                    class="px-4 py-2 text-sm font-medium text-slate-300 border border-white/10 rounded-lg hover:bg-white/10 transition-colors">
+                    class="px-4 py-2 text-sm font-medium text-slate-300 border border-white/10 rounded-full hover:bg-white/10 transition-colors">
                     Cancelar
                 </button>
                 <button wire:click="endConversation"
                     onclick="window.dispatchEvent(new CustomEvent('show-loading', { detail: { message: 'Cargando...' } }));"
-                    class="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    class="px-5 py-2 text-sm font-semibold bg-red-600 text-white rounded-full shadow-lg shadow-red-900/40 hover:bg-red-700 transition-colors">
                     Finalizar
                 </button>
             </div>
@@ -796,7 +830,6 @@ new class extends Component
     </div>
     @endif
 </div>
-@push('scripts')
 @script
 <script>
     const messagesContainer = document.getElementById("content-conversation");
@@ -808,14 +841,14 @@ new class extends Component
     function showBrowserNotification(data) {
         if (Notification.permission !== 'granted') return;
 
-        if (data?.message?.author_type !== 'cliente') return;
+        if (data?.message?.author_type !== 'client') return;
 
         const bodyText = data?.message?.conversation_data?.body ?? 'Nuevo mensaje recibido';
 
         const notification = new Notification('Nuevo mensaje', {
             body: typeof bodyText === 'string' ? bodyText : 'Nuevo mensaje recibido',
             icon: '/favicon.ico',
-            tag: 'chat' + (data?.conversation_id ?? 'general'),
+            tag: 'chat de Legal' + (data?.conversation_id ?? 'general'),
         });
 
         notification.onclick = () => {
@@ -845,6 +878,7 @@ new class extends Component
     conectarPrueba();
 
     function scrollChat() {
+        if (!messagesContainer) return;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
@@ -852,7 +886,7 @@ new class extends Component
         scrollChat();
     });
     async function initPush() {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        if (!('serviceWorker' in navigator) || !('PushManager' in window) || !window.vapidKey) return;
 
         const registration = await navigator.serviceWorker.register('/sw.js');
         const permission = await Notification.requestPermission();
@@ -860,7 +894,7 @@ new class extends Component
 
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: vapidKey,
+            applicationServerKey: window.vapidKey,
         });
 
         // Envía la suscripción a tu backend
@@ -877,4 +911,3 @@ new class extends Component
     initPush();
 </script>
 @endscript
-@endpush
