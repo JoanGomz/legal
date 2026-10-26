@@ -59,7 +59,7 @@ class UserService implements UserServiceInterface
      * @param int $items
      * @param string $search
      */
-    public function getPaginated($page, $items, $search = '', $brandId = 1, $parkId = 12)
+    public function getPaginated($page = 1, $items = 10, $search = '', $brandId = 1, $parkId = 12)
     {
         $query = User::query();
 

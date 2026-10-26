@@ -83,7 +83,8 @@ class ConsentService extends BaseService
                 $firstConsent = $consent;
             }
 
-            $code = "STSP" . $park->id . "-" . $firstConsent->id;
+            $char = str_contains($park->name, 'Barranquilla') ? "JPL" : "STSP";
+            $code = $char . $park->id . "-" . $firstConsent->id;
 
             $view = str_contains($park->name, 'Barranquilla') ? 'pdf.Consents.generic' : 'pdf.Consents.consent';
 

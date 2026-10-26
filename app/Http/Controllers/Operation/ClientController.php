@@ -16,7 +16,7 @@ class ClientController extends Controller
         $this->service = $service;
     }
 
-    public function indexPaginated(int $page, int $itms, string $search, int $brandId = 1, int $parkId = 12): array
+    public function indexPaginated(int $page = 1, int $itms = 10, string $search = '', int $brandId = 1, int $parkId = 12): array
     {
         try {
             $clients = $this->service->getAllPaginated($page, $itms, $search, $brandId, $parkId);
