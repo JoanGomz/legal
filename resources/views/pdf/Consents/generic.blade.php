@@ -34,6 +34,14 @@
             padding: 25px 22px 22px;
             text-align: center;
             border-radius: 0 0 18px 18px;
+            position: relative;
+        }
+
+        .header-logo {
+            position: absolute;
+            top: 52px;
+            left: 22px;
+            width: 95px;
         }
 
         .brand {
@@ -262,7 +270,24 @@
 
     <div class="top-line"></div>
 
+    @php
+    $logoUrl = 'https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1793051593_logo-monstropolis.png';
+    $logoBase64 = null;
+    try {
+    $logoContent = \Illuminate\Support\Facades\Http::timeout(5)->get($logoUrl);
+    if ($logoContent->successful()) {
+    $logoBase64 = 'data:image/png;base64,' . base64_encode($logoContent->body());
+    }
+    } catch (\Throwable $e) {
+    $logoBase64 = null;
+    }
+    @endphp
+
     <div class="header">
+        @if($logoBase64)
+        <img src="{{ $logoBase64 }}" class="header-logo" alt="Monstrópolis">
+        @endif
+
         <div class="brand">PLAYGROUND</div>
 
         <h1>Consentimiento informado</h1>
