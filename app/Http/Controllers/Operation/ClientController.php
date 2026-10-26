@@ -100,4 +100,18 @@ class ClientController extends Controller
             return $this->responseLivewire('error', $ex->getMessage(), []);
         }
     }
+
+    public function getConsentByClient(Request $request): array
+    {
+        try {
+            $validatedData = $request->validate([
+                'phone' => ['required', 'string', 'max:255'],
+            ]);
+
+            $consent = $this->service->getConsentByClient($validatedData['phone']);
+            return $this->responseLivewire('success', 'Consentimiento obtenido correctamente', $consent);
+        } catch (\Exception $ex) {
+            return $this->responseLivewire('error', $ex->getMessage(), []);
+        }
+    }
 }

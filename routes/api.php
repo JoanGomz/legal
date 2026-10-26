@@ -26,7 +26,8 @@ Route::post('clients', [ClientController::class, 'store']);
 Route::put('clients/{id}', [ClientController::class, 'update']);
 Route::delete('clients/{id}', [ClientController::class, 'delete']);
 Route::post('clients/landbot', [ClientController::class, 'addClientLandbot']);
-Route::post('clients/exist', [ClientController::class, 'existClientByPhone']);
+Route::get('clients/exist', [ClientController::class, 'existClientByPhone']);
+Route::get('clients/consent', [ClientController::class, 'getConsentByClient']);
 
 //Brands
 Route::get('brands', [BrandsController::class, 'indexPaginated']);

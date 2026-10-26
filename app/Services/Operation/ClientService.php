@@ -4,7 +4,9 @@ namespace App\Services\Operation;
 
 use App\Models\LandbotConversations;
 use App\Models\Operation\Clients;
+use App\Models\Operation\Consents;
 use App\Services\BaseService;
+use Carbon\Carbon;
 
 class ClientService extends BaseService
 {
@@ -64,5 +66,54 @@ class ClientService extends BaseService
             ]);
         }
         return $client;
+    }
+
+    public function getConsentByClient(string $phone): array
+    {
+        $cleanedPhone = preg_replace('/^57/', '', $phone);
+
+        $client = Clients::where('phone', $cleanedPhone)->first();
+
+        if (!$client) {
+            return [
+                'success' => false,
+                'total'   => 0,
+                'mensaje' => "😕 No encontramos tu registro.\nVerifica tus datos e intenta de nuevo.",
+                'pdfs'    => [],
+            ];
+        }
+
+        $consents = Consents::class::where('phone', $cleanedPhone)->get();
+
+        if ($consents->isEmpty()) {
+            return [
+                'success' => false,
+                'total'   => 0,
+                'mensaje' => "📭 Aún no tienes consentimientos firmados.",
+                'pdfs'    => [],
+            ];
+        }
+
+        $total = $consents->count();
+
+        $lista = $consents->values()->map(function ($c, $i) {
+            $fecha = $c->created_at
+                ? Carbon::parse($c->created_at)->format('d/m/Y h:i a')
+                : 'Sin fecha';
+            return ($i + 1) . ". 📅 {$fecha}\n🔗 {$c->url_pdf}";
+        })->implode("\n\n");
+
+        $titulo = $total === 1
+            ? "Tienes *1* consentimiento firmado:"
+            : "Tienes *{$total}* consentimientos firmados:";
+
+        $mensaje = "📄 *Tus consentimientos*\n\n{$titulo}\n\n{$lista}\n\n👆 Toca el enlace para ver o descargar tu PDF.";
+
+        return [
+            'success' => true,
+            'total'   => $total,
+            'mensaje' => $mensaje,
+            'pdfs'    => $consents->pluck('url_pdf')->values(),
+        ];
     }
 }
