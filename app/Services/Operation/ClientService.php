@@ -30,13 +30,15 @@ class ClientService extends BaseService
             });
         }
 
-        $u = auth()->user()->park_id;
+        $auth = auth()->user();
 
-        if (auth()->user()->hasRole('Admin')) {
-            $query->where('parks_id', $u);
-        } else {
-            $query->where('parks_id', $parkId);
-            $query->where('brand_id', $brandId);
+        if ($auth) {
+            if (auth()->user()->hasRole('Admin')) {
+                $query->where('parks_id', $auth->park_id);
+            } else {
+                $query->where('parks_id', $parkId);
+                $query->where('brand_id', $brandId);
+            }
         }
 
         $total = $query->count();
