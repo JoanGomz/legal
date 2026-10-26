@@ -134,6 +134,7 @@
                     Consentimientos
                 </div>
             </li>
+            @can('brand')
             <li class="relative group">
                 <a href="{{ route ('config') }}" wire:navigate
                     class="flex items-center h-12 rounded-xl transition-all duration-300
@@ -155,6 +156,7 @@
                     Configuración
                 </div>
             </li>
+            @endcan
         </ul>
     </nav>
 

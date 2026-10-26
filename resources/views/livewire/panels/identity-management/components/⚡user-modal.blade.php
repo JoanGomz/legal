@@ -13,7 +13,6 @@ use App\Models\User;
 new class extends Component {
     use traitCruds;
 
-    // Valores del formulario (solo datos simples: Livewire los puede guardar)
     public $userId;
     public $name;
     public $email;
@@ -23,18 +22,29 @@ new class extends Component {
     public $password_verify;
     public $role_check;
 
+    public function mount()
+    {
+        $this->brand_id = auth()->user()->brand_id;
+    }
+
+    public function rolesBloqueados(): array
+    {
+        return auth()->user()->hasRole('SuperAdmin') ? [] : ['SuperAdmin', 'Gestor'];
+    }
+
     protected function rules()
     {
         return [
             'name'            => 'required|min:3|string',
             'email'           => 'required|min:4|email',
             'park_id'         => 'required|exists:parks,id',
-            'brand_id'        => 'nullable|exists:brands,id', // cámbialo a required si la marca es obligatoria
+            'brand_id'        => 'nullable|exists:brands,id',
             'role_check'      => 'required|string',
             'password'        => ['required', Password::min(8)->mixedCase()],
             'password_verify' => 'required|same:password',
         ];
     }
+
     public function rulesOnly()
     {
         return [
@@ -47,9 +57,11 @@ new class extends Component {
             'password_verify' => 'required_with:password|same:password',
         ];
     }
+
     public function clear()
     {
-        $this->reset('userId', 'name', 'email', 'park_id', 'brand_id', 'password', 'password_verify', 'role_check');
+        $this->reset('userId', 'name', 'email', 'park_id', 'password', 'password_verify', 'role_check');
+        $this->brand_id = auth()->user()->brand_id;
         $this->resetValidation();
     }
     #[On('setEditingUser')]
@@ -120,12 +132,24 @@ new class extends Component {
 
     public function with()
     {
-        $brands = app(BrandsController::class)->indexPaginated(1, 1000, '');
+        $res = app(BrandsController::class)->indexPaginated(1, 1000, '');
+
+        $data = $res instanceof \Illuminate\Pagination\AbstractPaginator ? $res : ($res['data'] ?? []);
+
+        if ($data instanceof \Illuminate\Pagination\AbstractPaginator) {
+            $data = $data->items();
+        } elseif (is_array($data) && isset($data['data'])) {
+            $data = $data['data']; // paginador convertido a array
+        }
+
+        $brands = collect($data);
+
+        if ($miBrand = auth()->user()->brand_id) {
+            $brands = $brands->filter(fn($b) => data_get($b, 'id') == $miBrand);
+        }
 
         return [
-            'brands' => $brands instanceof \Illuminate\Pagination\AbstractPaginator
-                ? $brands->items()
-                : ($brands['data'] ?? []),
+            'brands' => $brands->values()->all(),
             'roles'  => app(RoleController::class)->index(),
             'parks'  => app(ParksController::class)->index(),
         ];
@@ -182,15 +206,18 @@ new class extends Component {
                 <label for="brand_select" class="block mb-2 text-sm font-medium text-gray-900">Seleccionar marca</label>
                 <select wire:model="brand_id" id="brand_select"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    @unless (auth()->user()->brand_id)
                     <option value="">Elija una opción</option>
+                    @endunless
                     @foreach ($brands as $item)
-                    <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                    <option value="{{ data_get($item, 'id') }}">{{ data_get($item, 'name') }}</option>
                     @endforeach
                 </select>
                 <x-input-error :messages="$errors->get('brand_id')" />
             </div>
 
             <div class="mb-5">
+                @php $bloqueados = $this->rolesBloqueados(); @endphp
                 <label for="role_select" class="block mb-2 text-sm font-medium text-gray-900">Seleccionar rol</label>
                 <select wire:model="role_check" id="role_select"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
@@ -198,7 +225,9 @@ new class extends Component {
                     @if ($loop->first)
                     <option value="">Selecciona un rol</option>
                     @endif
-                    <option value="{{ $item['name'] }}">{{ $item['name'] }}</option>
+                    <option value="{{ $item['name'] }}" @disabled(in_array($item['name'], $bloqueados))>
+                        {{ $item['name'] }}
+                    </option>
                     @empty
                     <option value="">No hay opciones disponibles</option>
                     @endforelse

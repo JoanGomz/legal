@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\DashboardController;
+use App\Traits\traitCruds;
 use Livewire\Volt\Component;
 use Carbon\Carbon;
 
 new class extends Component {
+    use traitCruds;
     public $start_date;
     public $end_date;
 
@@ -16,12 +19,14 @@ new class extends Component {
     }
     public function render(): mixed
     {
+        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search);
         $data = app(DashboardController::class)->getAllMetrics($this->start_date, $this->end_date);
         $park = app(DashboardController::class)->getMetricsByPark($this->start_date, $this->end_date);
 
         return view('livewire.panels.dashboard', [
             'data' => $data,
-            'park' => $park
+            'park' => $park,
+            'users' => $users
         ]);
     }
 }; ?>
@@ -142,6 +147,103 @@ new class extends Component {
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div
+            class="mt-4 bg-white shadowCard hover:shadow rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300">
+
+            {{-- Encabezado --}}
+            <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-b border-gray-100">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-700">Clientes</h3>
+                    <p class="text-xs text-gray-400">Listado de clientes registrados</p>
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" wire:model.live.debounce.400ms="search" placeholder="Buscar cliente..."
+                        class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border-gray-200 focus:border-[#0078B6] focus:ring-[#0078B6]">
+                </div>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 font-semibold">Id</th>
+                            <th scope="col" class="px-6 py-3 font-semibold">Nombre</th>
+                            <th scope="col" class="px-6 py-3 font-semibold">Parque</th>
+                            <th scope="col" class="px-6 py-3 font-semibold">Celular</th>
+                            <th scope="col" class="px-6 py-3 font-semibold">Creado</th>
+                            <th scope="col" class="px-6 py-3 font-semibold">Actualizado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($users['data']['data'] as $client)
+                        @php
+                        $fullName = trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? ''));
+                        $initials = collect(explode(' ', $fullName))->filter()->take(2)
+                        ->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->join('');
+                        @endphp
+                        <tr wire:key="client-{{ $client->id }}" class="hover:bg-blue-50/40 transition-colors">
+                            <td class="px-6 py-4 font-mono text-xs text-gray-400">
+                                #{{ $client->id ?? '--' }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 shrink-0 rounded-full bg-blue-100 text-[#0078B6] flex items-center justify-center text-xs font-bold">
+                                        {{ $initials ?: '?' }}
+                                    </div>
+                                    <span class="font-medium text-gray-900 whitespace-nowrap">
+                                        {{ $fullName ?: '--' }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                @if ($client->parks_id && $client->park)
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 whitespace-nowrap">
+                                    {{ $client->park['name'] }}
+                                </span>
+                                @else
+                                <span class="text-gray-400">--</span>
+                                @endif
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ $client->phone ?? '--' }}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                {{ $client->created_at ? \Carbon\Carbon::parse($client->created_at)->format('d/m/Y H:i') : '--' }}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                {{ $client->updated_at ? \Carbon\Carbon::parse($client->updated_at)->diffForHumans() : '--' }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-12">
+                                <div class="flex flex-col items-center justify-center text-center">
+                                    <div
+                                        class="bg-gray-100 w-14 h-14 rounded-2xl flex items-center justify-center mb-4">
+                                        <i class="fa-solid fa-users-slash text-gray-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-base font-bold text-gray-800">No se encontraron clientes</h3>
+                                    <p class="text-sm text-gray-500">Agrega nuevos clientes para comenzar a gestionarlos
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
         @endcan
