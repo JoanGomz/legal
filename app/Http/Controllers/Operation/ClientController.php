@@ -62,11 +62,11 @@ class ClientController extends Controller
             $validatedData = $request->validate([
                 'phone' => ['required', 'string', 'max:20'],
             ]);
+            $cleanedPhone = preg_replace('/^57/', '', $validatedData['phone']);
 
-            $client = $this->service->getAll()->where('phone', $validatedData['phone'])->first();
+            $client = $this->service->getAll()->where('phone', $cleanedPhone)->first();
             if ($client) {
                 $mall_uuid = $client->park->uuid;
-                $cleanedPhone = preg_replace('/^57/', '', $validatedData['phone']);
                 $chanel_landbot = LandbotConversations::where('phone', 'like', '%' . $cleanedPhone)->first();
                 if ($chanel_landbot) {
                     $channel = $chanel_landbot->bot_id;
