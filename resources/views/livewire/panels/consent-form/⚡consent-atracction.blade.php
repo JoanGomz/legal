@@ -164,7 +164,7 @@ new #[Layout('layouts.guest')] class extends Component
     public function with()
     {
         $parque = app(ParksController::class)->index(1);
-        $atracciones = AtraccionArcade::select('id', 'nombre')->where('brand_id', 1)->get()->toArray();
+        $atracciones = AtraccionArcade::select('id', 'nombre')->where('brand_id', 1)->where('is_deleted', 0)->get()->toArray();
         return [
             'parque' => $parque,
             'atracciones' => $atracciones
