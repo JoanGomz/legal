@@ -56,7 +56,7 @@ class ClientService extends BaseService
 
     public function addClientLandbot(array $data)
     {
-        $cleanPhone = preg_replace('/\D+/', '', $data['phone']);
+        $cleanPhone = preg_replace('/^57/', '', $data['phone']);
         $data['phone'] = strlen($cleanPhone) > 10 ? substr($cleanPhone, -10) : $cleanPhone;
 
         $client = Clients::query()->create($data);

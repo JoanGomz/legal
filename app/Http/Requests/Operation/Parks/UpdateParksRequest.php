@@ -26,7 +26,8 @@ class UpdateParksRequest extends FormRequest
             'name' => ['required', 'string'],
             'address' => ['required', 'string'],
             'city_id' => ['nullable'],
-            'type' => ['nullable']
+            'type' => ['nullable'],
+            'brand_id' => ['nullable'],
         ];
     }
 }
