@@ -132,24 +132,10 @@ new class extends Component {
 
     public function with()
     {
-        $res = app(BrandsController::class)->indexPaginated(1, 1000, '');
-
-        $data = $res instanceof \Illuminate\Pagination\AbstractPaginator ? $res : ($res['data'] ?? []);
-
-        if ($data instanceof \Illuminate\Pagination\AbstractPaginator) {
-            $data = $data->items();
-        } elseif (is_array($data) && isset($data['data'])) {
-            $data = $data['data']; // paginador convertido a array
-        }
-
-        $brands = collect($data);
-
-        if ($miBrand = auth()->user()->brand_id) {
-            $brands = $brands->filter(fn($b) => data_get($b, 'id') == $miBrand);
-        }
+        $brand = app(BrandsController::class)->indexPaginated($this->page, $this->perPage, $this->search);
 
         return [
-            'brands' => $brands->values()->all(),
+            'brand' => $brand,
             'roles'  => app(RoleController::class)->index(),
             'parks'  => app(ParksController::class)->index(),
         ];
@@ -206,11 +192,9 @@ new class extends Component {
                 <label for="brand_select" class="block mb-2 text-sm font-medium text-gray-900">Seleccionar marca</label>
                 <select wire:model="brand_id" id="brand_select"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    @unless (auth()->user()->brand_id)
                     <option value="">Elija una opción</option>
-                    @endunless
-                    @foreach ($brands as $item)
-                    <option value="{{ data_get($item, 'id') }}">{{ data_get($item, 'name') }}</option>
+                    @foreach ($brand['data'] as $item)
+                    <option value="{{$item['id']}}"> {{ $item['name'] }} </option>
                     @endforeach
                 </select>
                 <x-input-error :messages="$errors->get('brand_id')" />
@@ -222,9 +206,6 @@ new class extends Component {
                 <select wire:model="role_check" id="role_select"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     @forelse ($roles['data']['roles'] ?? [] as $item)
-                    @if ($loop->first)
-                    <option value="">Selecciona un rol</option>
-                    @endif
                     <option value="{{ $item['name'] }}" @disabled(in_array($item['name'], $bloqueados))>
                         {{ $item['name'] }}
                     </option>
