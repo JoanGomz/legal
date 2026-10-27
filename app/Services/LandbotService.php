@@ -358,8 +358,8 @@ class LandbotService
     public function restartBot(int $conversationId): string
     {
         $conversation = LandbotConversations::findOrFail($conversationId);
-        $mall = Parks::find(auth()->user()->mall_id);
-        $botId = $mall->external_bot_id;
+        $park = Parks::find(auth()->user()->park_id);
+        $botId = $park->external_bot_id;
 
         $response = $this->httpClient->put("v1/customers/{$conversation->landbot_customer_id}/assign_bot/{$botId}/", [
             'json' => ["launch" => true]
@@ -430,7 +430,7 @@ class LandbotService
             });
         }
 
-        $query->where('bot_id', auth()->user()->mall->bot_id);
+        $query->where('bot_id', auth()->user()->park->bot_id);
 
         return $query->orderBy('updated_at', 'desc')->get();
     }
