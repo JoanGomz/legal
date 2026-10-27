@@ -26,6 +26,7 @@ class ClientService extends BaseService
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('document_number', 'like', "%$search%")
                     ->orWhere('phone', 'like', "%$search%");
             });
         }
