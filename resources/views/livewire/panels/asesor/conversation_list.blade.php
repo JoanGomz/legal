@@ -80,7 +80,7 @@ new class extends Component
         ]);
 
         if ($status !== 'activo') {
-            $this->dispatch('activate-conversation', $conversationId)->to('panels.asesor.chat_panel');
+            $this->dispatch('activate-conversation', $conversationId)->to('panels.asesor.chat-panel');
         }
     }
 

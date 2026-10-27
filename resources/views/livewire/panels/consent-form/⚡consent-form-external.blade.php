@@ -40,14 +40,35 @@ new #[Layout('layouts.guest')] class extends Component
     public $check_cuatro = false;
     public $check_cinco = false;
     public $check_seis = false;
+    public $clientFound;
 
     public function consult()
     {
-        $user = app(ClientController::class)->indexPaginated(1, 1, $this->client);
-        $this->full_name = $user['data']['first_name'] ?? null;
-        $this->email = $user['data']['email'] ?? null;
-        $this->document_number = $user['data']['document_number'] ?? null;
-        $this->type_document = $user['data']['document_type'] ?? null;
+        $this->validate(['client' => 'required|digits_between:7,15'], [
+            'client.required' => 'Ingresa un número de teléfono.',
+            'client.digits_between' => 'El teléfono debe tener entre 7 y 15 dígitos.',
+        ]);
+
+        $res = app(ClientController::class)->indexPaginated(1, 1, $this->client);
+        $cliente = collect($res['data']['data'] ?? [])->first();
+
+        if (! $cliente) {
+            $this->clientFound = false;
+            return;
+        }
+
+        $this->clientFound     = true;
+        $this->full_name       = trim(data_get($cliente, 'first_name') . ' ' . data_get($cliente, 'last_name'));
+        $this->email           = data_get($cliente, 'email');
+        $this->document_number = data_get($cliente, 'document_number');
+        $this->type_document   = data_get($cliente, 'document_type');
+        $this->telephone       = data_get($cliente, 'phone');
+    }
+
+    public function clearConsult()
+    {
+        $this->reset('client', 'clientFound', 'full_name', 'email', 'document_number', 'type_document', 'telephone');
+        $this->resetValidation('client');
     }
     public function clear()
     {
@@ -92,7 +113,7 @@ new #[Layout('layouts.guest')] class extends Component
             'date' => 'required|date|before:today' . now()->subYears(2)->format('Y-m-d'),
 
             // Validar que todos los checks sean obligatorios y aceptados
-            'check_uno' => 'accepted',
+            'check_uno' => 'nullable',
             'check_dos' => 'accepted',
             'check_tres' => 'accepted',
             'check_cuatro' => 'accepted',
@@ -172,7 +193,7 @@ new #[Layout('layouts.guest')] class extends Component
 
     public function with()
     {
-        $parque = app(ParksController::class)->index();
+        $parque = app(ParksController::class)->index(2);
         $atracciones = app(AtraccionArcadeController::class)->index();
         return [
             'parque' => $parque,
@@ -186,14 +207,16 @@ new #[Layout('layouts.guest')] class extends Component
     <div class="h-2 bg-blue-600 transition-all duration-500 z-1" :style="`width: ${($wire.step / 4) * 100}%`">
     </div>
     <div
-        class="flex flex-col md:flex-row justify-center md:justify-between items-center p-6 gap-8 w-full max-w-4xl mx-auto">
+        class="flex flex-row md:flex-row justify-center md:justify-between items-center p-6 gap-8 w-full max-w-4xl mx-auto">
         <div class="w-full md:w-auto flex justify-center">
-            <img src="" alt="Logo de Eurema"
-                class="h-10 md:h-14 w-auto object-contain {{ $sede == 13 ? 'flex justify-center items-center text-center' : '' }}">
+            <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1793039364_LOGOS%20EUREMA_Mesa%20de%20trabajo%201%20copia%2016.png"
+                alt="Logo de Eurema"
+                class="h-14 md:h-20 w-auto object-contain {{ $sede == 13 ? 'flex justify-center items-center text-center' : '' }}">
         </div>
 
         <div class="w-full md:w-auto flex justify-center">
-            <img src="" alt="Otro Logo" class="h-10 md:h-24 w-auto object-contain">
+            <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1793043639_Mosntropolis-blanco.png"
+                alt="Logo monstropolis" class="h-14 md:h-24 w-auto object-contain">
         </div>
     </div>
     <div class="md:fixed md:right-4 md:bottom-4 absolute bottom-[-3rem] right-[11.5rem] opacity-50 z-50">
@@ -225,17 +248,31 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
 
-    <div class="p-8" x-data="{ 
+    <div class="p-8" x-data="{
+                    saving: false,
+                    openConsent: false,
                     policy: false,
                     promotions: false,
-                    items: [], 
+                    items: [],
+                     async confirmarConsentimiento() {
+                        if (this.saving) return;
+                        this.saving = true;
+                        try {
+                            await this.guardar('create');
+                        } catch (e) {
+                            console.error(e);
+                        } finally {
+                            this.saving = false;
+                            this.openConsent = false;
+                        }
+                    },
                     get step() { 
                         return this.$wire.step 
                     },
                     
                     get canGoNext() {
-                        if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_siete;
-                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno;
+                        if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion;
+                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno || this.$wire.income;
                         if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && (this.$wire.Atraccion == 10 || !!this.$wire.parentesco);; 
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
@@ -293,31 +330,59 @@ new #[Layout('layouts.guest')] class extends Component
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-8">
-            <div class="flex w-full ">
+            <div
+                class="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#0F2A44] via-[#155C7C] to-[#224B9A] p-6 shadow-lg">
+
                 <div
-                    class="space-x-10 w-full relative flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#0F2A44] via-[#155C7C] to-[#224B9A] p-6 shadow-lg">
-                    <h2 class="relative m-2 text-2xl font-bold text-white">Consultar Cliente</h2>
+                    class="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-[#E8C987]/20 blur-3xl">
+                </div>
 
-                    <form wire:submit.prevent="consult"
-                        class="flex flex-1 w-full max-w-lg items-center rounded-full bg-white/10 backdrop-blur-sm border border-white/15 p-1.5 shadow-lg shadow-black/20 transition focus-within:bg-white/15 focus-within:border-[#E8C987]/50 focus-within:ring-4 focus-within:ring-[#E8C987]/10">
-                        <i class="fa-solid fa-magnifying-glass ml-3 text-sm text-[#E8C987]"></i>
-                        <input type="text" wire:model="client" placeholder="Teléfono"
-                            class="flex-1 min-w-0 bg-transparent border-0 px-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-0">
+                <div class="relative flex flex-col items-center gap-4 text-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Consultar cliente</h2>
+                        <p class="mt-1 text-sm text-white/70">
+                            <i class="fa-solid fa-circle-info mr-1 text-[#E8C987]"></i>
+                            Úsa este buscador solo si ya estás registrado en Eurema
+                        </p>
+                    </div>
 
-                        {{-- Limpiar (solo si hay texto) --}}
-                        @if ($search)
-                        <button type="button" title="Limpiar"
-                            class="mr-1 w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition">
+                    <form wire:submit="consult"
+                        class="flex w-full max-w-lg items-center rounded-full border border-white/15 bg-white/10 p-1.5 shadow-lg shadow-black/20 backdrop-blur-sm transition focus-within:border-[#E8C987]/50 focus-within:bg-white/15 focus-within:ring-4 focus-within:ring-[#E8C987]/10">
+                        <i class="fa-solid fa-phone ml-3 text-sm text-[#E8C987]"></i>
+
+                        <input type="tel" inputmode="numeric" maxlength="15" wire:model="client"
+                            @input="$el.value = $el.value.replace(/\D/g, '')" placeholder="Número de teléfono"
+                            aria-label="Número de teléfono"
+                            class="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-0">
+
+                        @if ($client)
+                        <button type="button" wire:click="clearConsult" title="Limpiar"
+                            class="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition hover:bg-white/10 hover:text-white">
                             <i class="fa-solid fa-xmark text-xs"></i>
                         </button>
                         @endif
 
-                        <button type="submit" wire:loading.attr="disabled" wire:target="buscar"
-                            class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] px-5 py-2 text-sm font-semibold text-[#0A3C55] shadow-md shadow-black/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-70 transition">
-                            <span wire:loading.remove wire:target="buscar">Buscar</span>
-                            <i wire:loading wire:target="buscar" class="fa-solid fa-circle-notch fa-spin"></i>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="consult"
+                            class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] px-5 py-2 text-sm font-semibold text-[#0A3C55] shadow-md shadow-black/30 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-70">
+                            <span wire:loading.remove wire:target="consult">Buscar</span>
+                            <i wire:loading wire:target="consult" class="fa-solid fa-circle-notch fa-spin"></i>
                         </button>
                     </form>
+
+                    {{-- Resultado --}}
+                    @if ($clientFound === true)
+                    <p
+                        class="flex items-center gap-2 rounded-full bg-emerald-500/15 px-4 py-1.5 text-xs font-medium text-emerald-200">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Cliente encontrado, cargamos tus datos en el paso 2
+                    </p>
+                    @elseif ($clientFound === false)
+                    <p
+                        class="flex items-center gap-2 rounded-full bg-red-500/15 px-4 py-1.5 text-xs font-medium text-red-200">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        No encontramos ese número. Puedes registrarte en el paso 2
+                    </p>
+                    @endif
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -347,317 +412,6 @@ new #[Layout('layouts.guest')] class extends Component
                         @endforeach
                     </select>
                     <x-input-error :messages="$errors->get('Atraccion')" />
-                </div>
-            </div>
-
-            <div class="mt-6 pt-6 border-t border-gray-100">
-                <div class="flex items-start md:items-center space-x-3">
-                    <div class="flex-shrink-0">
-                        <input type="checkbox" wire:model.live="check_siete"
-                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                    </div>
-
-                    <div class="text-xs text-gray-500 leading-normal">
-                        <p class="inline">
-                            Acepto y declaro haber leído y comprendido la
-                            <span class="font-semibold text-gray-700">Política de Tratamiento de Datos Personales</span>
-                            y Condiciones de Uso de Eurema.
-                        </p>
-                        <button @click="policy = true"
-                            class="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center transition-colors ml-1 font-medium">
-                            <i class="fa-solid fa-file-pdf mx-1"></i>
-                            Ver Política de Privacidad
-                        </button>
-                    </div>
-                </div>
-                <x-input-error :messages="$errors->get('check_uno')" class="mt-2" />
-
-                <div class="flex items-start md:items-center space-x-3">
-                    <div class="flex-shrink-0">
-                        <input type="checkbox" wire:model.live="check_siete"
-                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                    </div>
-
-                    <div class="text-xs text-gray-500 leading-normal">
-                        <p class="inline">
-                            Sí, autorizo que me envíen promociones e invitaciones de Eurema
-                            <span class="font-semibold text-gray-700">Autorización para el uso de datos en el envío de
-                                promociones
-                            </span>
-                        </p>
-                        <button @click="promotions = true"
-                            class="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center transition-colors ml-1 font-medium">
-                            <i class="fa-solid fa-file-pdf mx-1"></i>
-                            Ver Política de Promociones
-                        </button>
-                    </div>
-                </div>
-                <x-input-error :messages="$errors->get('check_uno')" class="mt-2" />
-            </div>
-            <div x-show="policy" x-cloak x-effect="document.body.classList.toggle('overflow-hidden', policy)"
-                @keydown.escape.window="policy = false"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true"
-                aria-labelledby="politica-titulo">
-
-                {{-- Fondo --}}
-                <div x-show="policy" x-transition.opacity.duration.200ms
-                    class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="policy = false"></div>
-
-                {{-- Panel --}}
-                <div x-show="policy" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                    class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white shadow-2xl shadow-black/30 overflow-hidden">
-
-                    {{-- Cabecera --}}
-                    <div class="flex items-start gap-4 px-6 py-5 bg-gradient-to-br from-[#14678C] to-[#0A3C55]">
-                        <div
-                            class="w-11 h-11 shrink-0 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] flex items-center justify-center shadow-md shadow-black/30">
-                            <i class="fa-solid fa-shield-halved text-[#0A3C55]"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#E8C987]">Ley 1581 de
-                                2012</p>
-                            <h2 id="politica-titulo" class="text-lg sm:text-xl font-semibold text-white leading-tight">
-                                Política de tratamiento de datos personales
-                            </h2>
-                        </div>
-                        <button type="button" @click="policy = false" title="Cerrar"
-                            class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    {{-- Contenido con scroll --}}
-                    <div class="flex-1 overflow-y-auto px-6 py-6 text-sm leading-relaxed text-slate-600 space-y-6">
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">1. Responsable</h3>
-                            <p>[Razón social de Eurema], NIT [por completar], domicilio [dirección y ciudad], correo
-                                [por completar], teléfono [por completar].</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">2. Encargado</h3>
-                            <p>Spoon, NIT [por completar], proveedor de la plataforma NoCard by NEXO, que registra al
-                                visitante y conserva la evidencia de su aceptación. Spoon trata los datos solo por
-                                cuenta de Eurema y según sus instrucciones.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">3. Marco legal</h3>
-                            <p>Artículos 15 y 20 de la Constitución Política, Ley Estatutaria 1581 de 2012, Decreto 1074
-                                de 2015 (que compila el Decreto 1377 de 2013) y demás normas que los modifiquen.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-2">4. Datos que se recolectan</h3>
-                            <ul class="space-y-1.5 list-disc pl-5 marker:text-[#B8913F]">
-                                <li><span class="font-medium text-slate-700">Del adulto responsable:</span> nombre,
-                                    documento de identidad, número de WhatsApp y, si lo entrega, correo electrónico.
-                                </li>
-                                <li><span class="font-medium text-slate-700">Del menor:</span> nombre, edad y estatura,
-                                    para verificar los requisitos de la atracción, y la atracción que va a usar.</li>
-                                <li>Declaración sobre las condiciones médicas, físicas o de salud del menor. Es un dato
-                                    sensible (ver numeral 7).</li>
-                                <li>Evidencia de cada aceptación: fecha, hora, número de WhatsApp y texto aceptado.</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-2">5. Finalidades</h3>
-                            <p class="font-medium text-slate-700 mb-1">Finalidades necesarias para el servicio:</p>
-                            <ul class="space-y-1.5 list-disc pl-5 marker:text-[#B8913F]">
-                                <li>Registrar al visitante y al menor y verificar los requisitos de acceso a cada
-                                    atracción.</li>
-                                <li>Conservar la prueba del consentimiento informado.</li>
-                                <li>Atender consultas, incidentes y solicitudes durante la activación, por WhatsApp o
-                                    con los asesores de Eurema.</li>
-                                <li>Proteger la seguridad de los visitantes y atender requerimientos de autoridades
-                                    competentes.</li>
-                                <li>Elaborar estadísticas de asistencia de forma agregada, sin identificar a la persona.
-                                </li>
-                            </ul>
-                            <div class="mt-3 rounded-2xl bg-[#E8C987]/15 px-4 py-3">
-                                <p class="font-medium text-slate-700 mb-1">Finalidad opcional, solo si el titular la
-                                    autoriza aparte en el Texto 2:</p>
-                                <p>Enviar promociones e invitaciones a próximas activaciones de Eurema [y de las marcas
-                                    del grupo: lista cerrada].</p>
-                            </div>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">6. Autorización</h3>
-                            <p>El tratamiento requiere autorización previa, expresa e informada del titular. Se obtiene
-                                por WhatsApp antes de usar las atracciones, con registro de fecha, hora, número y texto
-                                aceptado, de modo que pueda consultarse después.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">7. Datos sensibles</h3>
-                            <p>La declaración sobre las condiciones de salud del menor es un dato sensible. Responderla
-                                es facultativo. Si el adulto prefiere no declararla, Eurema puede negar el uso de la
-                                atracción por razones de seguridad. Este dato se usa solo para verificar la aptitud del
-                                menor y la seguridad en la atracción, y nunca para promociones.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">8. Datos de niños, niñas y adolescentes</h3>
-                            <p>Se tratan solo con autorización del padre, la madre o el representante legal, y
-                                únicamente para registrar al menor, verificar requisitos y proteger su seguridad. Se
-                                respeta el interés superior del menor y su opinión según su madurez. Los datos del menor
-                                no se usan para promociones, publicidad ni perfilamiento.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">9. Encargados y proveedores tecnológicos</h3>
-                            <p>Spoon trata los datos como encargada. El canal de WhatsApp se presta mediante Meta, y los
-                                servidores y copias de respaldo pueden estar dentro o fuera de Colombia. En todos los
-                                casos el tratamiento se hace por cuenta de Eurema, bajo contrato de transmisión de
-                                datos. Eurema no vende los datos personales.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-2">10. Derechos del titular</h3>
-                            <ul class="space-y-1.5 list-disc pl-5 marker:text-[#B8913F]">
-                                <li>Conocer, actualizar y rectificar sus datos.</li>
-                                <li>Solicitar prueba de la autorización otorgada.</li>
-                                <li>Ser informado sobre el uso que se da a sus datos.</li>
-                                <li>Presentar quejas ante la Superintendencia de Industria y Comercio.</li>
-                                <li>Revocar la autorización o pedir la supresión del dato, cuando proceda.</li>
-                                <li>Acceder gratuitamente a sus datos.</li>
-                                <li>Oponerse en cualquier momento a recibir promociones, sin que eso afecte su entrada
-                                    ni el uso de las atracciones.</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">11. Cómo ejercer los derechos</h3>
-                            <p>Por [correo], [WhatsApp] o [teléfono]. La solicitud debe incluir nombre e identificación
-                                del titular, descripción de los hechos, dirección de contacto y los documentos que la
-                                respalden. Las consultas se responden en máximo diez (10) días hábiles, prorrogables por
-                                cinco (5) más. Los reclamos se responden en máximo quince (15) días hábiles,
-                                prorrogables por ocho (8) más.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">12. Seguridad</h3>
-                            <p>Cifrado de la información, control de accesos y copias de respaldo.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">13. Conservación y supresión</h3>
-                            <p>Al terminar la activación, Spoon entrega la base de datos depurada a Eurema y la borra de
-                                sus sistemas en [plazo acordado por escrito entre las partes]. Eurema conserva los datos
-                                mientras sea necesario para las finalidades de esta política y la prueba del
-                                consentimiento, por [plazo que defina Eurema].</p>
-                        </section>
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">14. Vigencia y cambios</h3>
-                            <p>Esta política rige desde [fecha]. Si cambia la identificación del responsable o la
-                                finalidad del tratamiento, Eurema lo comunica a los titulares y pide una nueva
-                                autorización cuando el cambio afecte la finalidad.</p>
-                        </section>
-                    </div>
-
-                    {{-- Pie --}}
-                    <div class="flex justify-end gap-2 px-6 py-4 bg-slate-50">
-                        <button type="button" @click="policy = false"
-                            class="rounded-full bg-gradient-to-br from-[#14678C] to-[#0A3C55] px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0A3C55]/25 hover:brightness-110 transition">
-                            Entendido
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div x-show="promotions" x-cloak x-effect="document.body.classList.toggle('overflow-hidden', promotions)"
-                @keydown.escape.window="promotions = false"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true"
-                aria-labelledby="politica-titulo">
-
-                {{-- Fondo --}}
-                <div x-show="promotions" x-transition.opacity.duration.200ms
-                    class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="promotions = false"></div>
-
-                {{-- Panel --}}
-                <div x-show="promotions" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                    class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white shadow-2xl shadow-black/30 overflow-hidden">
-
-                    {{-- Cabecera --}}
-                    <div class="flex items-start gap-4 px-6 py-5 bg-gradient-to-br from-[#14678C] to-[#0A3C55]">
-                        <div
-                            class="w-11 h-11 shrink-0 rounded-full bg-gradient-to-br from-[#E8C987] to-[#B8913F] flex items-center justify-center shadow-md shadow-black/30">
-                            <i class="fa-solid fa-shield-halved text-[#0A3C55]"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h2 id="politica-titulo" class="text-lg sm:text-xl font-semibold text-white leading-tight">
-                                Política de Promociones
-                            </h2>
-                        </div>
-                        <button type="button" @click="policy = false" title="Cerrar"
-                            class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                    {{-- Contenido con scroll --}}
-                    <div class="flex-1 overflow-y-auto px-6 py-6 text-sm leading-relaxed text-slate-600 space-y-6">
-
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-1">1. Responsable</h3>
-                            <p>“Yo, {{ $full_name ?? 'Adulto Responsable' }} , mayor de edad, titular de mis propios
-                                datos, autorizo de
-                                forma
-                                libre, previa, expresa e informada a [Eurema], responsable del tratamiento, para que use
-                                mi nombre, mi número de WhatsApp con las siguientes finalidades:</p>
-                        </section>
-                        <section>
-                            <h3 class="font-semibold text-[#0A3C55] mb-2">Entiendo y acepto lo siguiente:</h3>
-                            <ul class="space-y-1.5 list-disc pl-5 marker:text-[#B8913F]">
-                                <li> <span class="font-extrabold">Es voluntaria.</span>Puedo no autorizarla. Mi decisión
-                                    no condiciona la compra de la boleta, mi ingreso ni el uso de las atracciones.</li>
-                                <li> <span class="font-extrabold">Canales.</span> Puedo elegir por cuáles canales
-                                    recibir mensajes: Solo recibiré mensajes por WhatsApp.</li>
-                                <li><span class="font-extrabold">Horarios.</span> Los mensajes publicitarios se envían
-                                    de lunes a viernes entre las 7:00 a.m. y las 7:00 p.m., y los sábados entre las 8:00
-                                    a.m. y las 3:00 p.m. No se envían domingos ni festivos.
-                                </li>
-                                <li><span class="font-bold">Frecuencia.</span> Recibiré como máximo [número] mensajes
-                                    promocionales por [semana o mes].</li>
-                                <li><span class="font-extrabold">Vigencia.</span> Esta autorización rige hasta que yo la
-                                    revoque.</li>
-                                <li><span class="font-extrabold">Datos de menores. </span> Esta autorización no cubre
-                                    los datos del menor que me acompaña, que no se usan para promociones ni publicidad.
-                                </li>
-                                <li><span class="font-extrabold">Terceros.</span> Mis datos no se venden. Solo los usa
-                                    Eurema y, por su cuenta, Spoon como encargada de la plataforma.</li>
-                                <li><span class="font-extrabold">Puedo revocarla cuando quiera.</span> Mis datos no se
-                                    venden. Solo los usa Eurema y, por su cuenta, Spoon como encargada de la plataforma.
-                                </li>
-                                <li><span class="font-extrabold">Mis derechos.</span> Puedo conocer, actualizar,
-                                    rectificar y pedir la supresión de mis datos, y presentar quejas ante la
-                                    Superintendencia de Industria y Comercio, según la Política de Tratamiento de Datos
-                                    Personales de Eurema.</li>
-                                <li><span class="font-extrabold">Prueba.</span> Eurema y Spoon guardan la fecha, la
-                                    hora, mi número de WhatsApp y este texto como evidencia de mi decisión.”</li>
-
-                            </ul>
-                        </section>
-                    </div>
-
-                    {{-- Pie --}}
-                    <div class="flex justify-end gap-2 px-6 py-4 bg-slate-50">
-                        <button type="button" @click="promotions = false"
-                            class="rounded-full bg-gradient-to-br from-[#14678C] to-[#0A3C55] px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0A3C55]/25 hover:brightness-110 transition">
-                            Entendido
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -816,7 +570,7 @@ new #[Layout('layouts.guest')] class extends Component
 
                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p class="text-xs text-gray-500 leading-relaxed mb-3">
-                        Entiendo y acepto que STARK PARK no será responsable por incidentes, lesiones o daños que se
+                        Entiendo y acepto que Eurema no será responsable por incidentes, lesiones o daños que se
                         originen por incumplimiento de las normas de seguridad o instrucciones del operador.
                     </p>
                     <label class="flex items-start cursor-pointer group">
@@ -862,10 +616,7 @@ new #[Layout('layouts.guest')] class extends Component
 
             <template x-if="$wire.step == 4">
                 <button type="button" @click="
-                    if(canGoNext) {
-                        window.dispatchEvent(new CustomEvent('show-loading', { detail: { message: 'Cargando...' } }));
-                        guardar('create');
-                    }
+                    if(canGoNext) { openConsent = true; }
                 " :disabled="!canGoNext" class="text-white font-bold py-2 px-8 rounded-lg shadow-md transition-all"
                     :class="{
                     'bg-green-200 cursor-not-allowed': !$wire.check_dos,
@@ -877,6 +628,52 @@ new #[Layout('layouts.guest')] class extends Component
                     Finalizar Registro
                 </button>
             </template>
+        </div>
+        <div x-show="openConsent" x-cloak x-transition.opacity.duration.200ms
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+
+            <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="if (!saving) openConsent = false">
+            </div>
+
+            <div
+                class="relative flex flex-col items-center gap-4 rounded-2xl bg-white px-8 py-7 shadow-2xl shadow-black/30 w-full max-w-sm">
+
+                {{-- Confirmación --}}
+                <div x-show="!saving" class="flex flex-col items-center gap-4 text-center">
+                    <div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+                        <i class="fa-solid fa-file-signature text-xl text-blue-700"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">¿Generar el consentimiento?</p>
+                        <p class="mt-1 text-md text-red-700">Guarda este consentimiento durante tu estadía en el
+                            parque.</p>
+                    </div>
+                    <div class="flex w-full gap-2">
+                        <button type="button" @click="openConsent = false"
+                            class="flex-1 rounded-xl border border-slate-300 p-2 text-sm text-slate-700 hover:bg-slate-100">
+                            Cancelar
+                        </button>
+                        <button type="button" @click="confirmarConsentimiento()" :disabled="saving"
+                            class="flex-1 rounded-xl bg-blue-700 p-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+                            Aceptar
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Cargando --}}
+                <div x-show="saving" class="flex flex-col items-center gap-4 text-center">
+                    <div class="relative h-14 w-14">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-200"></div>
+                        <div
+                            class="absolute inset-0 rounded-full border-4 border-transparent border-t-[#FD7A0F] animate-spin">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">Generando consentimiento...</p>
+                        <p class="mt-1 text-xs text-slate-500">Por favor espera un momento</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

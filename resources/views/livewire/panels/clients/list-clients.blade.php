@@ -30,7 +30,7 @@ new class extends Component
     #[On('refresh-client-list')]
     public function with()
     {
-        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search, $this->brand);
+        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search, (int)$this->brand, (int)$this->park);
         $brands = app(BrandsController::class)->indexPaginated($this->page, $this->perPage, $this->search);
         return [
             'users' => $users,
