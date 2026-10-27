@@ -13,6 +13,7 @@ class Consents extends BaseModel
         'id',
         'uuid',
         'code',
+        'client_id',
         'consents_id',
         'url_pdf',
         'park_id',
