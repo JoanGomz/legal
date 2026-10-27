@@ -55,7 +55,6 @@ new class extends Component
     </div>
     <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 bg-neutral-primary-soft shadow-xs rounded-base relative">
-        @dump($brand['data'])
         @foreach( $brand['data'] as $sede )
         <div
             class="div p-4 bg-gradient-to-r from-slate-800 to-slate-950 rounded-xl shadow-xl overflow-hidden relative flex flex-col min-h-[400px]">
