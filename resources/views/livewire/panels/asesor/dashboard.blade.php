@@ -28,11 +28,11 @@ new #[Layout('layouts.sidebar-asesor')] class extends Component {
     {
         $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search, (int) $this->brand, (int) $this->park);
         $data = app(DashboardController::class)->getAllMetrics($this->start_date, $this->end_date);
-        $park = app(DashboardController::class)->getMetricsByPark($this->start_date, $this->end_date);
+        $park_data = app(DashboardController::class)->getMetricsByPark($this->start_date, $this->end_date);
 
         return view('livewire.panels.asesor.dashboard', [
             'data' => $data,
-            'park' => $park,
+            'park_data' => $park_data,
             'users' => $users
         ]);
     }
@@ -66,41 +66,36 @@ new #[Layout('layouts.sidebar-asesor')] class extends Component {
             </div>
         </div>
     </div>
-    <div class="w-full sm:px-2 lg:px-2">
-        <div id="charts-container"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div class="mt-4">
+            <div
+                class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
+                    <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
+                    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
+                        Consentimientos Totales
+                    </h3>
 
-            <div class="mt-4">
-                <div
-                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
-                    <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
-                        <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                            <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
-                        </div>
-                        <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
-                            Consentimientos Totales
-                        </h3>
-                        <div class="flex items-baseline space-x-1">
-                            <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                                {{ number_format($data['total_consents'] ?? 0) }}
-                            </span>
-                        </div>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-6xl font-black text-gray-900 tracking-tighter">
+                            {{ number_format($park_data['total_consents'] ?? 0) }}
+                        </span>
                     </div>
                 </div>
             </div>
-
-            <div class="mt-4">
-                <div wire:key="parient-{{ $start_date }}-{{ $end_date }}" wire:ignore
-                    class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
-                    <div class="p-4">
-                        <h3 class="text-sm font-bold text-gray-700 mb-2">Acompañantes Frecuentes </h3>
-                        <div class="w-full" style="min-height: 400px" id="chart_radial"
-                            x-init="$nextTick(() => safeInitCharts())"
-                            data-series="{{ json_encode($data['count_parent']['series'] ?? []) }}"
-                            data-labels="{{ json_encode($data['count_parent']['labels'] ?? []) }}"
-                            data-total="{{ $data['total_consents'] ?? 0 }}">
-                        </div>
+        </div>
+        <div class="mt-4">
+            <div wire:key="consent-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
+                <div class="p-4">
+                    <h3 class="text-sm font-bold text-gray-700 mb-2">Consentimientos por Atracción</h3>
+                    <div class="w-full" style="min-height: 400px" id="chart_by_park"
+                        x-init="$nextTick(() => safeInitCharts())"
+                        data-series="{{ json_encode($park_data['chart_data']['series'] ?? []) }}"
+                        data-labels="{{ json_encode($park_data['chart_data']['labels'] ?? []) }}">
                     </div>
                 </div>
             </div>

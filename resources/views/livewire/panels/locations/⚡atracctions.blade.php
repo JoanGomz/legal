@@ -22,7 +22,7 @@ new class extends Component
     public function with()
     {
 
-        $atraccion = app(AtraccionArcadeController::class)->getPaginated($this->page, $this->perPage, $this->search);
+        $atraccion = app(AtraccionArcadeController::class)->index();
         return [
             'atraccion' => $atraccion
         ];

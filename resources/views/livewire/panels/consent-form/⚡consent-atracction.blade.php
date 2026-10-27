@@ -3,6 +3,7 @@
 use App\Http\Controllers\Operation\AtraccionArcadeController;
 use App\Http\Controllers\Operation\ConsetController;
 use App\Http\Controllers\Operation\ParksController;
+use App\Models\Operation\AtraccionArcade;
 use App\Traits\traitCruds;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -82,7 +83,7 @@ new #[Layout('layouts.guest')] class extends Component
             'date' => 'required|date|before:today' . now()->subYears(2)->format('Y-m-d'),
 
             // Validar que todos los checks sean obligatorios y aceptados
-            'check_uno' => 'accepted',
+            'check_uno' => 'nullable',
             'check_dos' => 'accepted',
             'check_tres' => 'accepted',
             'check_cuatro' => 'accepted',
@@ -162,8 +163,8 @@ new #[Layout('layouts.guest')] class extends Component
 
     public function with()
     {
-        $parque = app(ParksController::class)->index();
-        $atracciones = app(AtraccionArcadeController::class)->index();
+        $parque = app(ParksController::class)->index(1);
+        $atracciones = AtraccionArcade::select('id', 'nombre')->where('brand_id', 1)->get()->toArray();
         return [
             'parque' => $parque,
             'atracciones' => $atracciones
@@ -222,7 +223,7 @@ new #[Layout('layouts.guest')] class extends Component
                     
                     get canGoNext() {
                         if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_siete;
-                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno;
+                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno || this.$wire.income;
                         if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && (this.$wire.Atraccion == 10 || !!this.$wire.parentesco);; 
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
@@ -303,7 +304,7 @@ new #[Layout('layouts.guest')] class extends Component
                     <select wire:model.live="Atraccion" id="atracciones" name="atracciones"
                         class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 transition-all cursor-pointer hover:bg-white">
                         <option value="">Seleccione una atracción</option>
-                        @foreach ($atracciones['data'] as $atr)
+                        @foreach ($atracciones as $atr)
                         <option value="{{ $atr['id'] ?? $atr->id }}">{{ $atr['nombre'] ?? $atr->nombre }}</option>
                         @endforeach
                     </select>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Base\BrandsController;
 use App\Http\Controllers\Operation\AtraccionArcadeController;
 use App\Http\Controllers\Operation\ParksController;
 use App\Models\Operation\AtraccionArcade;
@@ -22,6 +23,8 @@ new class extends Component
     public $parque;
     public $ubication;
     public $state;
+    public $brand;
+    public $brand_user;
 
     public function clear()
     {
@@ -37,7 +40,6 @@ new class extends Component
             'consume' => 'required|int|min:0',
             'time' => 'required|min:0',
             'serial' => 'required|string',
-            'mac' => 'required|string|min:0',
             'parque' => 'required|int|min:0',
             'ubication' => 'required|string|min:0',
             'state' => 'required'
@@ -53,7 +55,6 @@ new class extends Component
             'consume' => 'required|int|min:0',
             'time' => 'required|min:0',
             'serial' => 'required|string',
-            'mac' => 'required|string|min:0',
             'parque' => 'required|int|min:0',
             'ubication' => 'required|string|min:0',
             'state' => 'required'
@@ -75,7 +76,7 @@ new class extends Component
         $this->ubication   = $data['ubication'];
         $this->parque      = $data['parque'];
         $this->serial      = $data['serial'];
-        $this->mac         = $data['mac'];
+        $this->brand         = $data['brand_id'];
         if (!empty($data['time'])) {
             $partes = explode(':', $data['time']);
             $this->time = isset($partes[1]) ? (int)$partes[1] : (int)$data['time'];
@@ -98,6 +99,7 @@ new class extends Component
                 'promedio_consumo' => $this->consume,
                 'tiempo_juego' => '00:' . (strlen($this->time) === 1 ? ('0' . $this->time) : $this->time) . ':00',
                 'numero_serie' => $this->serial,
+                'brand_id' => $this->brand,
                 'device_mac' => $this->mac,
                 'id_park' => $this->parque,
                 'ubicacion' => $this->ubication,
@@ -123,10 +125,11 @@ new class extends Component
     }
     public function with()
     {
-
-        $parques = app(ParksController::class)->index();
+        $brand = app(BrandsController::class)->indexPaginated($this->page, $this->perPage, $this->search);
+        $parques = app(ParksController::class)->index($this->brand);
         return [
-            'parques' => $parques
+            'parques' => $parques,
+            'brand' => $brand
         ];
     }
 };
@@ -210,16 +213,20 @@ new class extends Component
                         placeholder="SN-000000" />
                     <x-input-error :messages="$errors->get('serial')" />
                 </div>
+                <div class="flex-1">
+                    <label for="brand" class="block mb-2 text-sm font-medium text-gray-900">Marca</label>
+                    <select wire:model.live="brand" id="brand"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Selecciona una opción</option>
+                        @foreach ($brand['data'] as $parque )
+                        <option value="{{$parque->id }}">{{ $parque->name }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('brand')" />
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 mb-5">
-                <div class="flex-1">
-                    <label for="mac" class="block mb-2 text-sm font-medium text-gray-700">Mac</label>
-                    <input wire:model="mac" type="text" id="mac"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        placeholder="00:00:00..." />
-                    <x-input-error :messages="$errors->get('mac')" />
-                </div>
                 <div class="flex-1">
                     <label for="parque" class="block mb-2 text-sm font-medium text-gray-900">Parque</label>
                     <select wire:model="parque" id="parque"

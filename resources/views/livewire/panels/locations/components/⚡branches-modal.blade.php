@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Base\BrandsController;
 use App\Http\Controllers\Operation\ParksController;
 use App\Models\Operation\Parks;
 use Livewire\Component;
@@ -17,6 +18,7 @@ new class extends Component {
     public $cities;
     public $type;
     public $capacity;
+    public $brand;
     protected function rules()
     {
         return [
@@ -42,7 +44,7 @@ new class extends Component {
         $this->reset('name', 'address', 'city', 'type');
     }
     #[On('setEditingSede')]
-    public function setEditingSede($id, $name, $address, $city, $type)
+    public function setEditingSede($id, $name, $address, $city, $type, $brand)
     {
         $sede = Parks::select('id', 'name', 'address', 'city_id', 'type')->findOrFail($id);
         $this->id = $sede->id;
@@ -50,6 +52,7 @@ new class extends Component {
         $this->address = $address;
         $this->city = $city;
         $this->type = $type;
+        $this->brand = $brand;
 
         $this->js("window.prepareModal('update', 'Actualizar Sedes')");
     }
@@ -60,6 +63,7 @@ new class extends Component {
             $dataRequest = [
                 'name' => $this->name,
                 'address' => $this->address,
+                'brand_id' => $this->brand,
                 'city_id' => (int)$this->city,
                 'type' => $this->type
             ];
@@ -82,6 +86,13 @@ new class extends Component {
     public function mount()
     {
         $this->cities = \App\Models\Base\Cities::all();
+    }
+    public function with()
+    {
+        $brands = app(BrandsController::class)->indexPaginated($this->page, $this->perPage, $this->search);
+        return [
+            'brands' => $brands['data']
+        ];
     }
 };
 ?>
@@ -122,6 +133,24 @@ new class extends Component {
                 </div>
             </div>
             <div class="mb-5 flex gap-4">
+                <div class="mb-5 flex-1">
+                    <label for="brand" class="block mb-2 text-sm font-medium text-gray-900">
+                        Selecciona la marca
+                    </label>
+
+                    <select wire:model="brand" id="brand"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Elija una opcion</option>
+                        @forelse ( $brands as $brand )
+                        <option value="{{$brand['id']}}">{{ $brand['name'] }}</option>
+                        @empty
+                        <option value="">No hay marcas disponibles</option>
+                        @endforelse
+                    </select>
+                    <x-input-error :messages="$errors->get('type')" />
+                </div>
+            </div>
+            <div class="mb-5 flex gap-4">
                 <div class="flex-1">
                     <label for="role_select" class="block mb-2 text-sm font-medium text-gray-900">
                         Seleccionar Una ciudad
@@ -153,7 +182,6 @@ new class extends Component {
                     </select>
                     <x-input-error :messages="$errors->get('type')" />
                 </div>
-
             </div>
             <!-- Footer buttons modal -->
             <div class="w-full flex flex-1 justify-center pt-4">

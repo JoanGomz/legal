@@ -4,6 +4,7 @@ use App\Http\Controllers\Operation\AtraccionArcadeController;
 use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\ConsetController;
 use App\Http\Controllers\Operation\ParksController;
+use App\Models\Operation\AtraccionArcade;
 use App\Traits\traitCruds;
 use AWS\CRT\HTTP\Request;
 use Livewire\Attributes\Layout;
@@ -194,7 +195,7 @@ new #[Layout('layouts.guest')] class extends Component
     public function with()
     {
         $parque = app(ParksController::class)->index(2);
-        $atracciones = app(AtraccionArcadeController::class)->index();
+        $atracciones = AtraccionArcade::select('id', 'nombre')->where('brand_id', 2)->get()->toArray();
         return [
             'parque' => $parque,
             'atracciones' => $atracciones
@@ -407,7 +408,7 @@ new #[Layout('layouts.guest')] class extends Component
                     <select wire:model.live="Atraccion" id="atracciones" name="atracciones"
                         class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 transition-all cursor-pointer hover:bg-white">
                         <option value="">Seleccione una atracción</option>
-                        @foreach ($atracciones['data'] as $atr)
+                        @foreach ($atracciones as $atr)
                         <option value="{{ $atr['id'] ?? $atr->id }}">{{ $atr['nombre'] ?? $atr->nombre }}</option>
                         @endforeach
                     </select>
@@ -644,7 +645,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <i class="fa-solid fa-file-signature text-xl text-blue-700"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-semibold text-slate-800">¿Generar el consentimiento?</p>
+                        <p class="text-sm font-semibold text-red-800">!! IMPORTANTE ¡¡</p>
                         <p class="mt-1 text-md text-red-700">Guarda este consentimiento durante tu estadía en el
                             parque.</p>
                     </div>
