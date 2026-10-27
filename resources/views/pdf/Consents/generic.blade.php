@@ -288,7 +288,7 @@
         <img src="{{ $logoBase64 }}" class="header-logo" alt="Monstrópolis">
         @endif
 
-        <div class="brand">PLAYGROUND</div>
+        <div class="brand">EUREMA</div>
 
         <h1>Consentimiento informado</h1>
 
@@ -426,7 +426,7 @@
     </div>
 
     <div class="footer">
-        <strong>PLAYGROUND</strong>
+        <strong>EUREMA</strong>
         &nbsp; | &nbsp;
         Documento generado electrónicamente
     </div>
