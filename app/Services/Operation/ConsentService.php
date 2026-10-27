@@ -3,10 +3,12 @@
 namespace App\Services\Operation;
 
 use App\Models\Operation\AtraccionArcade;
+use App\Models\Operation\Clients;
 use App\Models\Operation\Consents;
 use App\Models\Operation\Parks;
 use App\Services\BaseService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Polyfill\Uuid\Uuid;
 
@@ -87,6 +89,27 @@ class ConsentService extends BaseService
             $code = $char . $park->id . "-" . $firstConsent->id;
 
             $view = str_contains($park->name, 'Barranquilla') ? 'pdf.Consents.generic' : 'pdf.Consents.consent';
+
+            // add client
+            $client = Clients::where('phone', $data['phone'])->first();
+            if ($client) {
+                $firstConsent->client_id = $client->id;
+                $firstConsent->save();
+            } else {
+                $client = new Clients();
+                $client->fill([
+                    'first_name' => $data['full_name'],
+                    'document_number' => $data['document_number'],
+                    'document_type' => $data['document_type'],
+                    'phone' => $data['phone'],
+                    'email' => $data['email'] ?? null,
+                    'parks_id' => $park->id,
+                ]);
+                $client->save();
+
+                $firstConsent->client_id = $client->id;
+                $firstConsent->save();
+            }
 
             $pdf = Pdf::loadView($view, [
                 'registration' => $firstConsent,
