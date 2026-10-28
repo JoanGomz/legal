@@ -108,7 +108,7 @@ new #[Layout('layouts.guest')] class extends Component
             'full_name' => 'required|string|min:3|regex:/^([^0-9]*)$/',
             'parentesco' => 'required|string',
             'telephone' => 'required|numeric|digits_between:7,15',
-            'email' => 'required|email',
+            'email' => 'nullable|email',
 
             // Datos del Menor
             'full_name_minor' => 'required|string|min:3|regex:/^([^0-9]*)$/',
@@ -276,7 +276,7 @@ new #[Layout('layouts.guest')] class extends Component
                     
                     get canGoNext() {
                         if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_policy;
-                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.email && this.$wire.check_uno || this.$wire.income;
+                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.check_uno || this.$wire.income;
                         if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && (this.$wire.Atraccion == 10 || !!this.$wire.parentesco);; 
                         if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
                         return true;
