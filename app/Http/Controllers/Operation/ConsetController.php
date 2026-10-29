@@ -19,10 +19,10 @@ class ConsetController extends Controller
     /**
      * retorna todas las facturas paginadas
      */
-    public function indexPaginated($page, $items, $search = '')
+    public function indexPaginated($page, $items, $search = '', $brandId = 1, $parkId = 12)
     {
         try {
-            $response = $this->ConsetService->getPaginated($page, $items, $search);
+            $response = $this->ConsetService->getPaginated($page, $items, $search, $brandId, $parkId);
             return $this->responseLivewire('success', 'success', $response);
         } catch (\Exception $ex) {
             return $this->responseLivewire('error', $ex->getMessage(), []);
