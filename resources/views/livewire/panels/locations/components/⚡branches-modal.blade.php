@@ -18,7 +18,6 @@ new class extends Component {
     public $cities;
     public $type;
     public $capacity;
-    public $brand;
     protected function rules()
     {
         return [

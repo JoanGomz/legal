@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Base\BrandsController;
 use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\DashboardController;
 use App\Traits\traitCruds;
@@ -10,22 +11,39 @@ new class extends Component {
     use traitCruds;
     public $start_date;
     public $end_date;
+    public $park_id;
 
     public function mount()
     {
         $this->start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
 
         $this->end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+        if (! auth()->user()->hasRole('SuperAdmin')) {
+            $this->brand = auth()->user()->brand_id;
+        }
+    }
+    public function getBrand($id)
+    {
+        abort_unless(auth()->user()->hasRole('SuperAdmin'), 403);
+
+        session(['brand_id' => (int) $id]);
+        $this->brand = (int) $id;
+        $this->page = 1;
+
+        $this->dispatch('brand-changed', brandId: $this->brand);
+        $this->dispatch('hide-loading');
     }
     public function render(): mixed
     {
-        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search);
-        $data = app(DashboardController::class)->getAllMetrics($this->start_date, $this->end_date);
-        $park = app(DashboardController::class)->getMetricsByPark($this->start_date, $this->end_date);
+        $this->park_id = auth()->user()->park_id;
+        $data = $this->brand ? app(DashboardController::class)->getMetrics($this->start_date, $this->end_date, $this->brand) : [];
+        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search, (int)$this->brand, (int)$this->park_id);
+        $brands = auth()->user()->hasRole('SuperAdmin') ? app(BrandsController::class)->indexPaginated(1, 50, '')
+            : [];
 
         return view('livewire.panels.dashboard', [
             'data' => $data,
-            'park' => $park,
+            'brands' => $brands,
             'users' => $users
         ]);
     }
@@ -40,7 +58,7 @@ new class extends Component {
             <h1 class="text-xl font-semibold text-gray-900">
                 Bienvenid@ <a href="{{ route('profile') }}" class="text-[#0078B6]">{{ auth()->user()->name }}</a> al
                 área legal de
-                @if (in_array($user['park_id'], [1, 2,3,4,5,6,7,8,9,10,11,12]))
+                @if ($brand == 1)
                 <span> Starpark </span>
                 @else
                 <span>JumpingLand</span>
@@ -59,9 +77,10 @@ new class extends Component {
             </div>
         </div>
     </div>
+
+    @if ($brand || auth()->user()->brand_id)
     <div class="w-full sm:px-2 lg:px-2">
         <div id="charts-container"></div>
-        @can('graphs.sa')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
             <div class="mt-4">
@@ -76,79 +95,59 @@ new class extends Component {
                         </h3>
                         <div class="flex items-baseline space-x-1">
                             <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                                {{ number_format($data['total_consents'] ?? 0) }}
+                                {{ number_format($data['data']['total_consents'] ?? 0) }}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
-
+            @if(auth()->user()->hasRole('SuperAdmin'))
             <div class="mt-4">
-                <div wire:key="parient-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                <div wire:key="parient-{{$brand}}-{{ $start_date }}-{{ $end_date }}" wire:ignore
                     class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
                     <div class="p-4">
                         <h3 class="text-sm font-bold text-gray-700 mb-2">Acompañantes Frecuentes </h3>
                         <div class="w-full" style="min-height: 400px" id="chart_radial"
                             x-init="$nextTick(() => safeInitCharts())"
-                            data-series="{{ json_encode($data['count_parent']['series'] ?? []) }}"
-                            data-labels="{{ json_encode($data['count_parent']['labels'] ?? []) }}"
-                            data-total="{{ $data['total_consents'] ?? 0 }}">
+                            data-series="{{ json_encode($data['data']['count_parent']['series'] ?? []) }}"
+                            data-labels="{{ json_encode($data['data']['count_parent']['labels'] ?? []) }}"
+                            data-total="{{ $data['data']['total_consents'] ?? 0 }}">
                         </div>
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <div class="w-full mt-4">
-            <div wire:key="park-{{ $start_date }}-{{ $end_date }}" wire:ignore
-                class="w-full bg-white shadowCard hover:shadow rounded-lg">
-                <div class="p-4">
-                    <h3>Consentimientos por parque y atracción</h3>
-                    <div class="w-full" style="min-height: 500px" id="chart2" x-init="$nextTick(() => safeInitCharts())"
-                        data-series="{{ json_encode($data['chart_data']['series'] ?? []) }}"
-                        data-labels="{{ json_encode($data['chart_data']['categories'] ?? []) }}">
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endcan
-        @can('graph.admin')
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            @endif
+            @if(auth()->user()->hasRole('Admin'))
             <div class="mt-4">
-                <div
-                    class="bg-white shadowCard hover:shadow rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300">
-                    <div class="p-8 flex flex-col items-center justify-center" style="min-height: 400px">
-                        <div class="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                            <i class="fa-regular fa-file-lines text-blue-600 text-4xl"></i>
-                        </div>
-
-                        <h3 class="text-gray-500 text-xs font-black uppercase tracking-[0.2em] mb-2">
-                            Consentimientos Totales
-                        </h3>
-
-                        <div class="flex items-baseline space-x-1">
-                            <span class="text-6xl font-black text-gray-900 tracking-tighter">
-                                {{ number_format($park['total_consents'] ?? 0) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div wire:key="consent-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                <div wire:key="consent-{{$brand}}-{{ $start_date }}-{{ $end_date }}" wire:ignore
                     class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
                     <div class="p-4">
                         <h3 class="text-sm font-bold text-gray-700 mb-2">Consentimientos por Atracción</h3>
                         <div class="w-full" style="min-height: 400px" id="chart_by_park"
                             x-init="$nextTick(() => safeInitCharts())"
-                            data-series="{{ json_encode($park['chart_data']['series'] ?? []) }}"
-                            data-labels="{{ json_encode($park['chart_data']['labels'] ?? []) }}">
+                            data-series="{{ json_encode($data['data']['chart_data']['series'] ?? []) }}"
+                            data-labels="{{ json_encode($data['data']['chart_data']['labels'] ?? []) }}">
                         </div>
                     </div>
                 </div>
             </div>
+            @endif
         </div>
+        @if(auth()->user()->hasRole('SuperAdmin'))
+        <div class="w-full mt-4">
+            <div wire:key="park-{{$brand}}-{{ $start_date }}-{{ $end_date }}" wire:ignore
+                class="w-full bg-white shadowCard hover:shadow rounded-lg">
+                <div class="p-4">
+                    <h3>Consentimientos por parque y atracción</h3>
+                    <div class="w-full" style="min-height: 500px" id="chart2" x-init="$nextTick(() => safeInitCharts())"
+                        data-series="{{ json_encode($data['data']['chart_data']['series'] ?? []) }}"
+                        data-labels="{{ json_encode($data['data']['chart_data']['categories'] ?? []) }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        @if(!auth()->user()->hasRole('SuperAdmin'))
         <div
             class="mt-4 bg-white shadowCard hover:shadow rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300">
 
@@ -246,7 +245,9 @@ new class extends Component {
                 </table>
             </div>
         </div>
-        @endcan
+        @endif
     </div>
+    @endif
+
 
 </div>

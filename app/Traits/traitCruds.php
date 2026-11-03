@@ -8,7 +8,7 @@ use Livewire\WithPagination;
 
 trait traitCruds
 {
-    use WithPagination;
+    use WithPagination, WithBrandFilter;
 
     // Variable para mantener la página actual
     public $page = 1;

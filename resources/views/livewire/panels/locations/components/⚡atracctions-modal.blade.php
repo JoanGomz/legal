@@ -23,7 +23,6 @@ new class extends Component
     public $parque;
     public $ubication;
     public $state;
-    public $brand;
     public $brand_user;
 
     public function clear()
@@ -65,18 +64,17 @@ new class extends Component
     public function setEditingAtracction($data)
     {
         $atracction = AtraccionArcade::findOrFail($data['id']);
-
         $this->id          = $atracction->id;
-        $this->name        = $data['name'];
-        $this->description = $data['descripcion'];
-        $this->type        = $data['type'];
-        $this->capacity    = $data['capacity'];
-        $this->consume     = $data['consume'];
-        $this->state       = $data['state'];
-        $this->ubication   = $data['ubication'];
-        $this->parque      = $data['parque'];
-        $this->serial      = $data['serial'];
-        $this->brand         = $data['brand_id'];
+        $this->name        = $atracction->nombre;
+        $this->description = $atracction->descripcion;
+        $this->type        = $atracction->tipo;
+        $this->capacity    = $atracction->capacidad;
+        $this->consume     = $atracction->promedio_consumo;
+        $this->state       = $atracction->estado;
+        $this->ubication   = $atracction->ubicacion;
+        $this->parque      = $atracction->id_park;
+        $this->serial      = $atracction->numero_serie;
+        $this->brand         = $atracction->brand_id;
         if (!empty($data['time'])) {
             $partes = explode(':', $data['time']);
             $this->time = isset($partes[1]) ? (int)$partes[1] : (int)$data['time'];

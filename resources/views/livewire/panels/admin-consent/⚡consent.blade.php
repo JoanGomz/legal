@@ -1,12 +1,30 @@
 <?php
 
+use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\ConsetController;
+use App\Http\Controllers\Operation\ParksController;
 use App\Traits\traitCruds;
 use Livewire\Component;
 
 new class extends Component
 {
     use traitCruds;
+    public $park;
+    public function selectPark(?int $id): void
+    {
+        $this->park = $id;
+        $this->resetPage();
+    }
+
+    public function mount()
+    {
+        if (auth()->user()->hasRole('SuperAdmin')) {
+            if ($this->brand == 2) {
+                $this->park = 13;
+            }
+            $this->dispatch('hide-loading');
+        }
+    }
     public function download($pdf)
     {
 
@@ -32,10 +50,14 @@ new class extends Component
     }
     public function with()
     {
-
-        $consent = app(ConsetController::class)->indexPaginated($this->page, $this->perPage, $this->search);
+        $this->mount();
+        $users = app(ClientController::class)->indexPaginated($this->page, $this->perPage, $this->search, (int)$this->brand, (int)$this->park);
+        $consent = app(ConsetController::class)->indexPaginated($this->page, $this->perPage, $this->search, $this->brand, $this->park);
+        $parks = app(ParksController::class)->index($this->brand);
         return [
             'consent' => $consent,
+            'users' => $users,
+            'parks' => $parks
         ];
     }
 };
@@ -47,7 +69,27 @@ new class extends Component
     <div class="flex justify-between items-center px-4">
         <x-input-search mode="tableSearch" placeholder="Buscar consentimiento"></x-input-search>
     </div>
+    @if ($brand && auth()->user()->hasRole('SuperAdmin'))
+    <div class="bg-white rounded-2xl border border-slate-200 mb-6">
+        <div role="group" aria-label="Filtrar por parque" class="flex flex-wrap items-center gap-2 px-6 py-5">
+            <span class="text-sm font-semibold text-slate-500 mr-1">Parque</span>
 
+            @forelse ($parks['data'] ?? [] as $item)
+            <button type="button" wire:key="park-chip-{{ $item['id'] }}" wire:click="selectPark({{ $item['id'] }})"
+                @class([ 'h-11 px-4 rounded-full border text-sm font-medium whitespace-nowrap transition-colors'
+                , 'bg-[#024F86] border-[#024F86] text-white'=> $park == $item['id'],
+                'bg-white border-slate-300 text-slate-800 hover:border-slate-400' => $park != $item['id'],
+                ])>
+                {{ $item['name'] }}
+            </button>
+            @empty
+            <span class="text-sm text-slate-500">Esta marca aún no tiene parques registrados.</span>
+            @endforelse
+
+            <i wire:loading wire:target="selectPark" class="fa-solid fa-spinner fa-spin text-slate-400 ml-2"></i>
+        </div>
+    </div>
+    @endif
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">

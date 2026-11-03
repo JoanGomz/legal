@@ -23,7 +23,7 @@ new class extends Component
     public function with()
     {
 
-        $sedes = app(ParksController::class)->index();
+        $sedes = app(ParksController::class)->index($this->brand);
 
         return [
             'sedes' => $sedes,

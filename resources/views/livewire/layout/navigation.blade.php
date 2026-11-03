@@ -1,13 +1,39 @@
 <?php
 
+use App\Http\Controllers\Base\BrandsController;
 use App\Livewire\Actions\Logout;
+use App\Traits\WithBrandFilter;
 use Livewire\Volt\Component;
 
 new class extends Component
 {
-    /**
-     * Log the current user out of the application.
-     */
+    use WithBrandFilter;
+
+    public function select(int $id): void
+    {
+        abort_unless(auth()->user()->hasRole('SuperAdmin'), 403);
+
+        session(['brand_id' => $id]);
+        $this->brand = $id;
+
+        $this->dispatch('brand-changed', brandId: $id);
+    }
+
+    public function with(): array
+    {
+        $brands = auth()->user()->hasRole('SuperAdmin')
+            ? (app(BrandsController::class)->indexPaginated(1, 50, '')['data'] ?? [])
+            : [];
+
+        $active = collect($brands)->firstWhere('id', $this->brand);
+
+        return [
+            'brands'       => $brands,
+            'activeName'   => $active['name'] ?? null,
+            'isSuperAdmin' => auth()->user()->hasRole('SuperAdmin'),
+        ];
+    }
+
     public function logout(Logout $logout): void
     {
         $logout();
@@ -15,48 +41,51 @@ new class extends Component
         $this->redirect('/', navigate: true);
     }
 }; ?>
-<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 w-full">
-    @php
-    $user = Auth::user();
-    @endphp
-    <div class="mx-auto px-4">
-        <div class="flex justify-between h-16">
 
-            <div class="flex items-center">
-                <button x-cloak @click="sidebarOpen = !sidebarOpen" x-show="!sidebarOpen"
-                    aria-label="Abrir o cerrar menu"
+@php
+// Ajusta los ids a los reales de tu tabla de marcas
+$logos = [
+1 => asset('images/logohori.png'),
+2 => 'https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1791921261_jumpingland.png',
+];
+
+$userName = auth()->user()->name;
+@endphp
+
+<nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 w-full">
+    <div class="mx-auto px-4">
+        <div class="flex justify-between items-center h-16 gap-4">
+
+            {{-- Izquierda: menú móvil + logo --}}
+            <div class="flex items-center gap-3">
+                <button x-cloak type="button" @click="sidebarOpen = !sidebarOpen" aria-label="Abrir o cerrar menú"
                     class="md:hidden p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-colors">
                     <i class="fa-solid" :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
                 </button>
-                <div class="shrink-0 flex items-center ">
-                    @if ($user['park_id'] != 13 )
-                    <img src="{{ asset('images/logohori.png') }}" alt="Logo del Comercio" class="w-40 h-auto">
-                    @else
-                    <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1791921261_jumpingland.png"
-                        alt=" Logo del Comercio" class="w-20 h-auto">
-                    @endif
-                </div>
 
-                <div class="hidden md:flex items-center ml-4 text-gray-400">
-                    <span class="mx-2">/</span>
-                    <h2 class="capitalize font-semibold text-gray-700">
-                        {{ __(request()->route()->getName()) }}
-                    </h2>
+                <div class="shrink-0 flex items-center">
+                    @if (isset($logos[$brand]))
+                    <img src="{{ $logos[$brand] }}" alt="Logo de la marca" class="h-10 w-auto">
+                    @else
+                    <span class="font-bold text-slate-800">Área Legal</span>
+                    @endif
                 </div>
             </div>
 
+            {{-- Derecha: marca activa + usuario --}}
             <div class="flex items-center gap-4">
-
+                <livewire:panels.brand-switcher />
 
                 <x-dropdown align="right" width="56">
                     <x-slot name="trigger">
-                        <button class="flex items-center gap-3 p-1 rounded-full hover:bg-gray-100 transition-all">
+                        <button type="button"
+                            class="flex items-center gap-3 p-1 rounded-full hover:bg-gray-100 transition-all">
                             <div
                                 class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                                {{ substr(auth()->user()->name, 0, 1) }}
+                                {{ mb_strtoupper(mb_substr($userName, 0, 1)) }}
                             </div>
                             <div class="hidden md:block text-left">
-                                <p class="text-xs font-bold text-gray-800 leading-none">{{ auth()->user()->name }}</p>
+                                <p class="text-xs font-bold text-gray-800 leading-none">{{ $userName }}</p>
                                 <p class="text-[10px] text-gray-500 leading-tight">
                                     {{ auth()->user()->roles->first()?->name ?? 'Sin Rol' }}
                                 </p>
@@ -77,10 +106,9 @@ new class extends Component
 
                         <div class="border-t border-gray-100"></div>
 
-                        <button wire:click="logout" class="w-full">
-                            <x-dropdown-link class="text-red-600 hover:bg-red-50">
-                                <i class="fa-solid fa-right-from-bracket mr-2"></i> {{ __('Cerrar Sesión') }}
-                            </x-dropdown-link>
+                        <button type="button" wire:click="logout"
+                            class="block w-full px-4 py-2 text-start text-sm leading-5 text-red-600 hover:bg-red-50 focus:outline-none focus:bg-red-50 transition duration-150 ease-in-out">
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i> {{ __('Cerrar Sesión') }}
                         </button>
                     </x-slot>
                 </x-dropdown>

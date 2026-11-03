@@ -23,7 +23,7 @@ class DashboardController extends Controller
             }
 
             //si es rol (superAdmin,gestor,user) mostrar todas las metricas, sino solo las del parque asignado
-            if (auth()->user()->hasRole('superAdmin') || auth()->user()->hasRole('gestor') || auth()->user()->hasRole('user')) {
+            if (auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('gestor') || auth()->user()->hasRole('user')) {
                 $data =  $this->getAllMetrics($sinceDate, $untilDate, $brandId);
             } else {
                 $data = $this->getMetricsByPark($sinceDate, $untilDate);
@@ -41,9 +41,11 @@ class DashboardController extends Controller
     public function getAllMetrics($sinceDate, $untilDate, $brandId = null)
     {
         //* Conteo total de consentimientos
-        $totalConsents = Consents::where('is_delete', 0)
-            ->where('brand_id', $brandId)
-            ->whereBetween('created_at', [$sinceDate, $untilDate])
+        $totalConsents = Consents::where('consents.is_delete', 0)
+            ->join('parks', 'consents.park_id', '=', 'parks.id')
+            ->where('consents.brand_id', $brandId)
+            ->where('parks.brand_id', $brandId)
+            ->whereBetween('consents.created_at', [$sinceDate, $untilDate])
             ->count();
 
         //* Conteo para gráfico barras por parque y arcade
@@ -57,6 +59,7 @@ class DashboardController extends Controller
                         COUNT(*) as total
                     ")
             ->where('consents.brand_id', $brandId)
+            ->where('parks.brand_id', $brandId)
             ->groupBy('parks.name', 'atraccion_arcade.nombre')
             ->get();
 
@@ -79,9 +82,11 @@ class DashboardController extends Controller
         }
 
         //* Conteo para gráfico parentesco
-        $countParent = Consents::where('is_delete', 0)
-            ->whereBetween('created_at', [$sinceDate, $untilDate])
-            ->where('brand_id', $brandId)
+        $countParent = Consents::where('consents.is_delete', 0)
+            ->join('parks', 'consents.park_id', '=', 'parks.id')
+            ->whereBetween('consents.created_at', [$sinceDate, $untilDate])
+            ->where('consents.brand_id', $brandId)
+            ->where('parks.brand_id', $brandId)
             ->selectRaw('relationship, COUNT(*) as total')
             ->groupBy('relationship')
             ->get();
@@ -120,6 +125,7 @@ class DashboardController extends Controller
             ->where('is_delete', 0)
             ->leftJoin('atraccion_arcade', 'consents.arcade_id', '=', 'atraccion_arcade.id')
             ->selectRaw('COALESCE(atraccion_arcade.nombre, "Sin Arcade") as arcade_name, COUNT(*) as total')
+            ->whereBetween('consents.created_at', [$sinceDate, $untilDate])
             ->groupBy('arcade_id', 'atraccion_arcade.nombre')
             ->get();
 

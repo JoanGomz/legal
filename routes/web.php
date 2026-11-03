@@ -16,10 +16,18 @@ Route::middleware(['auth', 'verified'])
     ->name('asesor.')
     ->group(__DIR__ . '/asesor.php');
 
+// Página donde el SuperAdmin elige la marca al entrar
+Route::middleware(['auth'])->group(function () {
+    Route::livewire('elegir-marca', 'panels.brand-picker')
+        ->middleware('role:SuperAdmin')
+        ->name('brand.picker');
+});
 
 Route::middleware(['auth', 'verified', RedirectByRole::class])->group(function () {
     Route::view('profile', 'profile')->name('profile');
+});
 
+Route::middleware(['auth', 'verified', RedirectByRole::class, 'brand.selected'])->group(function () {
     Route::prefix('sedes')->group(function () {
         Route::livewire('dependencias', 'panels.locations.branches')->name('branches');
         Route::livewire('atracciones', 'panels.locations.atracctions')->name('atracctions');
@@ -41,4 +49,5 @@ Route::post('logout', function (Logout $logout) {
     $logout();
     return redirect('/');
 })->middleware('auth')->name('logout');
+
 require __DIR__ . '/auth.php';
