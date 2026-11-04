@@ -128,7 +128,7 @@ new class extends Component
                 </tr>
             </thead>
             <tbody>
-                @forelse ($users['data']['data'] as $user)
+                @forelse ($users['data'] as $user)
                 <tr class="bg-neutral-primary-soft border-b  border-default">
                     <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
                         {{ $user->id ?? '--'}}

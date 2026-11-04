@@ -16,11 +16,18 @@ class ClientService extends BaseService
         parent::__construct($model);
     }
 
-    public function getAllPaginated(int $page, int $itms, string $search, int $brandId = 1, int $parkId = 12): array
+    public function getAllPaginated($page = 1, $items = 10, $search = '', $brandId = 1, $parkId = 12)
     {
         $query = $this->model->query();
         $query->where('is_deleted', 0);
         $query->with('park');
+
+        if (auth()->user()->hasRole('Admin')) {
+            $query->where('parks_id', auth()->user()->park_id);
+        } else {
+            $query->where('brand_id', $brandId);
+            $query->where('parks_id', $parkId);
+        }
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -31,28 +38,7 @@ class ClientService extends BaseService
             });
         }
 
-        $auth = auth()->user();
-
-        if ($auth) {
-            if (auth()->user()->hasRole('Admin')) {
-                $query->where('parks_id', $auth->park_id);
-            } else {
-                $query->where('parks_id', $parkId);
-                $query->where('brand_id', $brandId);
-            }
-        }
-
-        $total = $query->count();
-        $clients = $query->skip(($page - 1) * $itms)
-            ->take($itms)
-            ->get();
-
-        return [
-            'data' => $clients,
-            'total' => $total,
-            'current_page' => $page,
-            'per_page' => $itms,
-        ];
+        return $query->orderBy('created_at', 'desc')->paginate($items, ['*'], 'page', $page);
     }
 
     public function addClientLandbot(array $data)
