@@ -137,7 +137,7 @@ new class extends Component {
         return [
             'brand' => $brand,
             'roles'  => app(RoleController::class)->index(),
-            'parks'  => app(ParksController::class)->index(),
+            'parks'  => app(ParksController::class)->index($this->brand),
         ];
     }
 };

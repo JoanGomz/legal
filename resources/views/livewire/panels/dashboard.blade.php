@@ -180,7 +180,7 @@ new class extends Component {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse ($users['data']['data'] as $client)
+                        @forelse ($users['data'] as $client)
                         @php
                         $fullName = trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? ''));
                         $initials = collect(explode(' ', $fullName))->filter()->take(2)
