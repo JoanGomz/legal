@@ -12,14 +12,19 @@ trait WithBrandFilter
 
 
     // Livewire ejecuta mount{NombreDelTrait} automáticamente
-    public function mountWithBrandFilter(): void
-    {
-        $user = auth()->user();
+public function mountWithBrandFilter(): void
+{
+    $user = auth()->user();
 
-        $this->brand = $user->hasRole('SuperAdmin') ? session('brand_id') : $user->brand_id;
+    if (!$user) {
+        $this->brand = null;
+        return;
     }
 
-    #[On('brand-changed')]
+    $this->brand = $user->hasRole('SuperAdmin')
+        ? session('brand_id')
+        : $user->brand_id;
+}
     public function onBrandChanged(?int $brandId): void
     {
         $this->brand = $brandId;
