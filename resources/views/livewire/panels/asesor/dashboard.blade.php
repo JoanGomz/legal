@@ -11,14 +11,14 @@ new #[Layout('layouts.sidebar-asesor')] class extends Component {
     use traitCruds;
     public $start_date;
     public $end_date;
-    public $brand;
+    // public $brand;
     public $park;
 
     public function mount()
     {
         $user = auth()->user();
 
-        $this->brand = $user->brand_id;
+        // $this->brand = $user->brand_id;
         $this->park = $user->park_id;
         $this->start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
 
@@ -132,7 +132,7 @@ new #[Layout('layouts.sidebar-asesor')] class extends Component {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse ($users['data']['data'] as $client)
+                    @forelse ($users['data'] as $client)
                     @php
                     $fullName = trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? ''));
                     $initials = collect(explode(' ', $fullName))->filter()->take(2)
