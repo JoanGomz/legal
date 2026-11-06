@@ -51,7 +51,7 @@ new #[Layout('layouts.guest')] class extends Component
         ]);
 
         $res = app(ClientController::class)->indexPaginated(1, 1, $this->client);
-        $cliente = collect($res['data']['data'] ?? [])->first();
+        $cliente = collect($res['data'][0] ?? []);
 
         if (! $cliente) {
             $this->clientFound = false;
@@ -146,6 +146,7 @@ new #[Layout('layouts.guest')] class extends Component
                     'check_cuatro' => $this->check_cuatro,
                     'check_cinco' => $this->check_cinco,
                     'check_seis' => $this->check_seis,
+                    'brand_id' => 2
                 ];
             } else {
                 $this->income = 0;
@@ -166,6 +167,7 @@ new #[Layout('layouts.guest')] class extends Component
                     'check_cuatro' => $this->check_cuatro,
                     'check_cinco' => $this->check_cinco,
                     'check_seis' => $this->check_seis,
+                    'brand_id' => 2
                 ];
             }
             $request = new \Illuminate\Http\Request();

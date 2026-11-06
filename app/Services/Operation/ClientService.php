@@ -22,11 +22,13 @@ class ClientService extends BaseService
         $query->where('is_deleted', 0);
         $query->with('park');
 
-        if (auth()->user()->hasRole('Admin')) {
-            $query->where('parks_id', auth()->user()->park_id);
-        } else {
-            $query->where('brand_id', $brandId);
-            $query->where('parks_id', $parkId);
+        if (auth()->user()) {
+            if (auth()->user()->hasRole('Admin')) {
+                $query->where('parks_id', auth()->user()->park_id);
+            } else {
+                $query->where('brand_id', $brandId);
+                $query->where('parks_id', $parkId);
+            }
         }
 
         if (!empty($search)) {
