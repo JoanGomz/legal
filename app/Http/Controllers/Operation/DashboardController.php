@@ -23,7 +23,7 @@ class DashboardController extends Controller
             }
 
             //si es rol (superAdmin,gestor,user) mostrar todas las metricas, sino solo las del parque asignado
-            if (auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('gestor') || auth()->user()->hasRole('user')) {
+            if (auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Gestor') || auth()->user()->hasRole('User')) {
                 $data =  $this->getAllMetrics($sinceDate, $untilDate, $brandId);
             } else {
                 $data = $this->getMetricsByPark($sinceDate, $untilDate);
