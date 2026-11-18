@@ -101,7 +101,8 @@ new class extends Component {
                     </div>
                 </div>
             </div>
-            @if(auth()->user()->hasRole('SuperAdmin'))
+            @if(auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('User') ||
+            auth()->user()->hasRole('Gestor'))
             <div class="mt-4">
                 <div wire:key="parient-{{$brand}}-{{ $start_date }}-{{ $end_date }}" wire:ignore
                     class="bg-white shadowCard hover:shadow rounded-lg overflow-hidden">
@@ -133,7 +134,8 @@ new class extends Component {
             </div>
             @endif
         </div>
-        @if(auth()->user()->hasRole('SuperAdmin'))
+        @if(auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Gestor') ||
+        auth()->user()->hasRole('User') )
         <div class="w-full mt-4">
             <div wire:key="park-{{$brand}}-{{ $start_date }}-{{ $end_date }}" wire:ignore
                 class="w-full bg-white shadowCard hover:shadow rounded-lg">
@@ -147,7 +149,7 @@ new class extends Component {
             </div>
         </div>
         @endif
-        @if(!auth()->user()->hasRole('SuperAdmin'))
+        @if(!auth()->user()->hasAnyRole(['SuperAdmin', 'Gestor', 'User']))
         <div
             class="mt-4 bg-white shadowCard hover:shadow rounded-2xl border border-gray-100 overflow-hidden transition-all duration-300">
 

@@ -69,7 +69,8 @@ new class extends Component
     <div class="flex justify-between items-center px-4">
         <x-input-search mode="tableSearch" placeholder="Buscar consentimiento"></x-input-search>
     </div>
-    @if ($brand && auth()->user()->hasRole('SuperAdmin'))
+    @if ($brand && auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Gestor') ||
+    auth()->user()->hasRole('User') )
     <div class="bg-white rounded-2xl border border-slate-200 mb-6">
         <div role="group" aria-label="Filtrar por parque" class="flex flex-wrap items-center gap-2 px-6 py-5">
             <span class="text-sm font-semibold text-slate-500 mr-1">Parque</span>
