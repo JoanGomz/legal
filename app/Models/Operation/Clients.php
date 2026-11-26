@@ -29,6 +29,7 @@ class Clients extends BaseModel
         'has_vehicle',
         'contact_channel',
         'accepted_terms_at',
+        'discovery_source',
         'parks_id',
         'amount',
         'data_consent',
