@@ -34,6 +34,7 @@ class Clients extends BaseModel
         'amount',
         'data_consent',
         'accepts_promotions',
+        'image_checked',
         'pdf_url',
         'is_deleted',
         'brand_id',
