@@ -35,7 +35,7 @@ new #[Layout('layouts.guest')] class extends Component
     public $parentesco;
 
     //Campos Paso 4
-    public ?bool $image_authorization = null; // true = sí autoriza, false = no autoriza, null = sin responder
+    public $image_authorization; 
 
     //Campos Paso 5
     public $check_dos = false;
@@ -127,7 +127,6 @@ new #[Layout('layouts.guest')] class extends Component
             'check_cinco' => 'accepted',
             'check_seis' => 'accepted',
             'check_policy' => 'accepted',
-            'image_authorization' => 'required|boolean',
         ];
     }
 
@@ -135,6 +134,7 @@ new #[Layout('layouts.guest')] class extends Component
     {
         try {
             $this->income = $this->income ? 1 : 0;
+            $this->image_authorization = $this->image_authorization ? 1 : 0;
 
             $data = [
                 'park_id' => $this->sede,
@@ -156,13 +156,14 @@ new #[Layout('layouts.guest')] class extends Component
                 'image_checked' => $this->image_authorization,
                 'brand_id' => 2,
             ];
-
             if (! $this->income) {
                 $data['childrens'] = $this->childrens;
             }
+
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
             $this->response = app(ConsetController::class)->store($request);
+
             if ($this->response['status'] == 'success') {
                 if (isset($this->response['data']['url_pdf'])) {
                     $this->showInvoice($this->response['data']['url_pdf']);
@@ -171,7 +172,6 @@ new #[Layout('layouts.guest')] class extends Component
 
                 $this->clear();
             } else {
-
                 $this->callNotification($this->response['message'] ?? 'Error en el servidor', 'error');
             }
             $this->endPetition();
@@ -180,9 +180,9 @@ new #[Layout('layouts.guest')] class extends Component
             $this->handleException($th, $message);
         }
     }
+
     public function showInvoice($url)
     {
-
         $this->dispatch('open-pdf-popup', url: $url);
     }
 
@@ -269,7 +269,7 @@ new #[Layout('layouts.guest')] class extends Component
                         if (this.step == 1) return w.sede && w.Atraccion && w.check_policy;
                         if (this.step == 2) return w.full_name && w.type_document && w.document_number && w.telephone && (w.check_uno || w.income);
                         if (this.step == 3) return this.items.length > 0 && this.items.every(i => i.minor_full_name && i.minor_birth_date) && (w.Atraccion == 10 || !!w.parentesco);
-                        if (this.step == 4) return typeof w.image_authorization === 'boolean';
+                        if (this.step == 4) return w.image_authorization === 1 || w.image_authorization === 0;
                         if (this.step == 5) return w.check_dos && w.check_tres && w.check_cuatro && w.check_cinco && w.check_seis;
                         return true;
                     },
@@ -558,10 +558,10 @@ new #[Layout('layouts.guest')] class extends Component
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label
                         class="flex items-center p-3 bg-white rounded-lg border transition-colors cursor-pointer group"
-                        :class="$wire.image_authorization === true ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
+                        :class="$wire.image_authorization === 1 ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
                         <input type="radio" name="image_authorization"
-                            :checked="$wire.image_authorization === true"
-                            @change="$wire.image_authorization = true"
+                            :checked="$wire.image_authorization === 1"
+                            @change="$wire.image_authorization = 1"
                             class="w-5 h-5 shrink-0 text-blue-600 border-gray-300 focus:ring-blue-500">
                         <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
                             Sí, autorizo el uso de imagen en los términos descritos.
@@ -570,10 +570,10 @@ new #[Layout('layouts.guest')] class extends Component
 
                     <label
                         class="flex items-center p-3 bg-white rounded-lg border transition-colors cursor-pointer group"
-                        :class="$wire.image_authorization === false ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
+                        :class="$wire.image_authorization === 0 ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
                         <input type="radio" name="image_authorization"
-                            :checked="$wire.image_authorization === false"
-                            @change="$wire.image_authorization = false"
+                            :checked="$wire.image_authorization === 0"
+                            @change="$wire.image_authorization = 0"
                             class="w-5 h-5 shrink-0 text-blue-600 border-gray-300 focus:ring-blue-500">
                         <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
                             No autorizo el uso de imagen.
