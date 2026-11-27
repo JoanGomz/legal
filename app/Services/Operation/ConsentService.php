@@ -104,6 +104,7 @@ class ConsentService extends BaseService
                     'phone' => $data['phone'],
                     'email' => $data['email'] ?? null,
                     'parks_id' => $park->id,
+                    'image_checked' => $data['image_checked'] ?? null,
                 ]);
                 $client->save();
 
