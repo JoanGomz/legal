@@ -94,6 +94,7 @@ class ConsentService extends BaseService
             $client = Clients::where('phone', $data['phone'])->first();
             if ($client) {
                 $firstConsent->client_id = $client->id;
+                $firstConsent->image_checked = $data['image_checked'] ?? null;
                 $firstConsent->save();
             } else {
                 $client = new Clients();
