@@ -95,6 +95,9 @@ class ConsentService extends BaseService
             if ($client) {
                 $firstConsent->client_id = $client->id;
                 $firstConsent->save();
+
+                $client->image_checked = $data['image_checked'] ?? null;
+                $client->save();
             } else {
                 $client = new Clients();
                 $client->fill([
@@ -104,6 +107,7 @@ class ConsentService extends BaseService
                     'phone' => $data['phone'],
                     'email' => $data['email'] ?? null,
                     'parks_id' => $park->id,
+                    'image_checked' => $data['image_checked'] ?? null,
                 ]);
                 $client->save();
 

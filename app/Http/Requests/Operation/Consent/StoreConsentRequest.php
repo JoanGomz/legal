@@ -39,6 +39,7 @@ class StoreConsentRequest extends FormRequest
             'check_cuatro' => 'nullable|accepted',
             'check_cinco' => 'nullable|accepted',
             'check_seis' => 'nullable|accepted',
+            'image_checked' => 'nullable|accepted',
 
             //Validar evento
             'event_date' => 'nullable|date|after_or_equal:today',

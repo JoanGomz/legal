@@ -1,12 +1,10 @@
 <?php
 
-use App\Http\Controllers\Operation\AtraccionArcadeController;
 use App\Http\Controllers\Operation\ClientController;
 use App\Http\Controllers\Operation\ConsetController;
 use App\Http\Controllers\Operation\ParksController;
 use App\Models\Operation\AtraccionArcade;
 use App\Traits\traitCruds;
-use AWS\CRT\HTTP\Request;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -15,12 +13,13 @@ new #[Layout('layouts.guest')] class extends Component
     use traitCruds;
     public $step = 1;
     public $client;
+    public $photo;
     // Campos Paso 1
     public $sede = 13;
     public $Atraccion = 12;
     public $check_policy;
 
-    //Campos Paso  2
+    //Campos Paso 2
     public $full_name;
     public $type_document;
     public $document_number;
@@ -36,6 +35,9 @@ new #[Layout('layouts.guest')] class extends Component
     public $parentesco;
 
     //Campos Paso 4
+    public $image_authorization; 
+
+    //Campos Paso 5
     public $check_dos = false;
     public $check_tres = false;
     public $check_cuatro = false;
@@ -47,13 +49,13 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $this->validate(['client' => 'required|digits_between:7,15'], [
             'client.required' => 'Ingresa un número de teléfono o número de identificación.',
-            'client.digits_between' => 'El teléfono debe tener entre 7 y 15 dígitos.',
+            'client.digits_between' => 'El número debe tener entre 7 y 15 dígitos.',
         ]);
 
         $res = app(ClientController::class)->indexPaginated(1, 1, $this->client);
         $cliente = collect($res['data'][0] ?? []);
 
-        if (! $cliente) {
+        if ($cliente->isEmpty()) {
             $this->clientFound = false;
             return;
         }
@@ -71,6 +73,7 @@ new #[Layout('layouts.guest')] class extends Component
         $this->reset('client', 'clientFound', 'full_name', 'email', 'document_number', 'type_document', 'telephone');
         $this->resetValidation('client');
     }
+
     public function clear()
     {
         $this->reset(
@@ -91,6 +94,7 @@ new #[Layout('layouts.guest')] class extends Component
             'check_cinco',
             'check_seis',
             'check_policy',
+            'image_authorization',
             'income'
         );
         $this->step = 1;
@@ -98,6 +102,7 @@ new #[Layout('layouts.guest')] class extends Component
         $this->dispatch('resetDataAlpine');
         $this->clearConsult();
     }
+
     protected function rules()
     {
         return [
@@ -112,9 +117,9 @@ new #[Layout('layouts.guest')] class extends Component
 
             // Datos del Menor
             'full_name_minor' => 'required|string|min:3|regex:/^([^0-9]*)$/',
-            'date' => 'required|date|before:today' . now()->subYears(2)->format('Y-m-d'),
+            'date' => 'required|date|before:' . now()->subYears(2)->format('Y-m-d'),
 
-            // Validar que todos los checks sean obligatorios y aceptados
+            // Checks
             'check_uno' => 'nullable',
             'check_dos' => 'accepted',
             'check_tres' => 'accepted',
@@ -128,51 +133,37 @@ new #[Layout('layouts.guest')] class extends Component
     public function create()
     {
         try {
-            if ($this->income == true) {
-                $this->income = 1;
-                $data = [
-                    'park_id' => $this->sede,
-                    'arcade_id' => (int)$this->Atraccion,
-                    'document_number' => $this->document_number,
-                    'document_type' => $this->type_document,
-                    'full_name' => $this->full_name,
-                    'relationship' => $this->parentesco,
-                    'phone' => $this->telephone,
-                    'email' => $this->email,
-                    'unique_person' => $this->income,
-                    'check_uno' => $this->check_uno,
-                    'check_dos' => $this->check_dos,
-                    'check_tres' => $this->check_tres,
-                    'check_cuatro' => $this->check_cuatro,
-                    'check_cinco' => $this->check_cinco,
-                    'check_seis' => $this->check_seis,
-                    'brand_id' => 2
-                ];
-            } else {
-                $this->income = 0;
-                $data = [
-                    'park_id' => $this->sede,
-                    'arcade_id' => (int)$this->Atraccion,
-                    'document_number' => $this->document_number,
-                    'document_type' => $this->type_document,
-                    'full_name' => $this->full_name,
-                    'relationship' => $this->parentesco,
-                    'phone' => $this->telephone,
-                    'email' => $this->email,
-                    'childrens' => $this->childrens,
-                    'unique_person' => $this->income,
-                    'check_uno' => $this->check_uno,
-                    'check_dos' => $this->check_dos,
-                    'check_tres' => $this->check_tres,
-                    'check_cuatro' => $this->check_cuatro,
-                    'check_cinco' => $this->check_cinco,
-                    'check_seis' => $this->check_seis,
-                    'brand_id' => 2
-                ];
+            $this->income = $this->income ? 1 : 0;
+            $this->image_authorization = $this->image_authorization ? 1 : 0;
+
+            $data = [
+                'park_id' => $this->sede,
+                'arcade_id' => (int) $this->Atraccion,
+                'document_number' => $this->document_number,
+                'document_type' => $this->type_document,
+                'full_name' => $this->full_name,
+                'relationship' => $this->parentesco,
+                'phone' => $this->telephone,
+                'email' => $this->email,
+                'unique_person' => $this->income,
+                'check_uno' => $this->check_uno,
+                'check_dos' => $this->check_dos,
+                'check_tres' => $this->check_tres,
+                'check_cuatro' => $this->check_cuatro,
+                'check_cinco' => $this->check_cinco,
+                'check_seis' => $this->check_seis,
+                'check_policy' => $this->check_policy,
+                'image_checked' => $this->image_authorization,
+                'brand_id' => 2,
+            ];
+            if (! $this->income) {
+                $data['childrens'] = $this->childrens;
             }
+
             $request = new \Illuminate\Http\Request();
             $request->merge($data);
             $this->response = app(ConsetController::class)->store($request);
+
             if ($this->response['status'] == 'success') {
                 if (isset($this->response['data']['url_pdf'])) {
                     $this->showInvoice($this->response['data']['url_pdf']);
@@ -181,7 +172,6 @@ new #[Layout('layouts.guest')] class extends Component
 
                 $this->clear();
             } else {
-
                 $this->callNotification($this->response['message'] ?? 'Error en el servidor', 'error');
             }
             $this->endPetition();
@@ -190,9 +180,9 @@ new #[Layout('layouts.guest')] class extends Component
             $this->handleException($th, $message);
         }
     }
+
     public function showInvoice($url)
     {
-
         $this->dispatch('open-pdf-popup', url: $url);
     }
 
@@ -209,7 +199,7 @@ new #[Layout('layouts.guest')] class extends Component
 ?>
 <div class="max-w-4xl mx-auto my-10 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100" x-data="{income:@entangle('income').live,
     atracction:@entangle('Atraccion').live}">
-    <div class="h-2 bg-blue-600 transition-all duration-500 z-1" :style="`width: ${($wire.step / 4) * 100}%`">
+    <div class="h-2 bg-blue-600 transition-all duration-500 z-1" :style="`width: ${($wire.step / 5) * 100}%`">
     </div>
     <div
         class="flex flex-row md:flex-row justify-center md:justify-between items-center p-6 gap-8 w-full max-w-4xl mx-auto">
@@ -220,8 +210,8 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <div class="w-full md:w-auto flex justify-center">
-            <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1793043639_Mosntropolis-blanco.png"
-                alt="Logo monstropolis" class="h-14 md:h-24 w-auto object-contain">
+            <img src="https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1795748187_santaland-logo-sin-fondo.png"
+                alt="Logo monstropolis" class="h-14 md:h-14 w-auto object-contain">
         </div>
     </div>
     <div class="md:fixed md:right-4 md:bottom-4 absolute bottom-[-3rem] right-[11.5rem] opacity-50 z-50">
@@ -254,13 +244,12 @@ new #[Layout('layouts.guest')] class extends Component
 
 
     <div class="p-8" x-data="{
-                    policy: false,
                     saving: false,
                     openConsent: false,
                     policy: false,
                     promotions: false,
                     items: [],
-                     async confirmarConsentimiento() {
+                    async confirmarConsentimiento() {
                         if (this.saving) return;
                         this.saving = true;
                         try {
@@ -272,66 +261,58 @@ new #[Layout('layouts.guest')] class extends Component
                             this.openConsent = false;
                         }
                     },
-                    get step() { 
-                        return this.$wire.step 
+                    get step() {
+                        return this.$wire.step
                     },
-                    
                     get canGoNext() {
-                        if (this.step == 1) return this.$wire.sede && this.$wire.Atraccion && this.$wire.check_policy;
-                        if (this.step == 2) return this.$wire.full_name && this.$wire.type_document && this.$wire.document_number && this.$wire.telephone && this.$wire.check_uno || this.$wire.income;
-                        if (this.step == 3) return this.items.length > 0 && this.items.every(item => item.minor_full_name && item.minor_birth_date) && (this.$wire.Atraccion == 10 || !!this.$wire.parentesco);; 
-                        if (this.step == 4) return this.$wire.check_tres && this.$wire.check_cuatro && this.$wire.check_cinco && this.$wire.check_seis;
+                        const w = this.$wire;
+                        if (this.step == 1) return w.sede && w.Atraccion && w.check_policy;
+                        if (this.step == 2) return w.full_name && w.type_document && w.document_number && w.telephone && (w.check_uno || w.income);
+                        if (this.step == 3) return this.items.length > 0 && this.items.every(i => i.minor_full_name && i.minor_birth_date) && (w.Atraccion == 10 || !!w.parentesco);
+                        if (this.step == 4) return w.image_authorization === 1 || w.image_authorization === 0;
+                        if (this.step == 5) return w.check_dos && w.check_tres && w.check_cuatro && w.check_cinco && w.check_seis;
                         return true;
                     },
-
-                   next() { 
-                        if (income && this.$wire.step == 2 ) {
-                            this.$wire.step = 4;
-                        } else if (this.canGoNext) {
-                            this.$wire.step++; 
-                        }
+                    next() {
+                        if (!this.canGoNext) return;
+                        this.$wire.step = (this.step == 2 && income) ? 4 : this.step + 1;
                     },
-                    
-                    back() { 
-                        if(this.step == 4 && income == true){
-                            this.$wire.step = 2;
-                        }
-                        else if(this.step > 1) {
-                            this.$wire.step--;
-                        }
+                    back() {
+                        this.$wire.step = (this.step == 4 && income) ? 2 : Math.max(1, this.step - 1);
                     },
-                resetDataAlpine(){
-                this.items.length = 0;
-                },
-                addChildren() {
-                    this.items.push({
-                        minor_full_name: '',
-                        minor_birth_date: '' ,
-                     });
+                    resetDataAlpine() {
+                        this.items.length = 0;
                     },
-                    loadChildren(items){
-                      if (items.children_details.length > 0) {
-                                items.children_details.forEach(item => {
-                                    this.items.push({
-                                        minor_full_name: item.minor_full_name,
-                                        minor_birth_date: item.minor_birth_date,
-                                    });
+                    addChildren() {
+                        this.items.push({
+                            minor_full_name: '',
+                            minor_birth_date: '',
+                        });
+                    },
+                    loadChildren(items) {
+                        if (items.children_details.length > 0) {
+                            items.children_details.forEach(item => {
+                                this.items.push({
+                                    minor_full_name: item.minor_full_name,
+                                    minor_birth_date: item.minor_birth_date,
                                 });
-                    }
+                            });
+                        }
                     },
                     async prepararDetallesEvento() {
-                            await Promise.all([
-                                this.$wire.set('childrens', this.items)
-                            ]);
-                        },
+                        await Promise.all([
+                            this.$wire.set('childrens', this.items)
+                        ]);
+                    },
                     async guardar(livewireMethod) {
-                            await this.prepararDetallesEvento();
-                            await this.$nextTick();
-                            await this.$wire[livewireMethod]();
-                            this.resetDataAlpine();
-                        },
+                        await this.prepararDetallesEvento();
+                        await this.$nextTick();
+                        await this.$wire[livewireMethod]();
+                        this.resetDataAlpine();
+                    },
                 }" @reset-data-alpine.window="resetDataAlpine()">
 
+        {{-- ===================== PASO 1 ===================== --}}
         <div x-show=" step==1"
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
@@ -406,7 +387,6 @@ new #[Layout('layouts.guest')] class extends Component
                 </div>
 
                 <div class="space-y-2">
-
                     <label for="atracciones" class="text-sm font-semibold text-gray-700 flex items-center">
                         <i class="fa-solid fa-ticket mr-2 text-blue-600"></i> Atracciones Asignadas
                     </label>
@@ -446,8 +426,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </div>
 
-
-
+        {{-- ===================== PASO 2 ===================== --}}
         <div x-show="$wire.step == 2" x-cloak
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
@@ -492,14 +471,12 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </div>
 
-
-
-
+        {{-- ===================== PASO 3: MENORES ===================== --}}
         <div x-show="$wire.step == 3" x-cloak x-transition:enter="transition ease-out duration-200 delay-100"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-4">
 
-            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información del Visitante</h2>
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 3: Información de los Menores</h2>
             <div class="flex justify-between">
                 <button type="button" @click="addChildren()"
                     class="bg-blue-600 text-white px-4 py-2 rounded-lg  transition-colors"
@@ -552,18 +529,69 @@ new #[Layout('layouts.guest')] class extends Component
                 <div>
                     <span class="font-semibold">Límite de Visitantes alcanzado:</span> Este formulario permite un máximo
                     de 5 Visitantes por inscripción. Si necesitas añadir más, por favor completa el registro actual y
-                    genera uno
-                    nuevo.
+                    genera uno nuevo.
                 </div>
             </div>
         </div>
 
-
+        {{-- ===================== PASO 4: AUTORIZACIÓN DE IMAGEN ===================== --}}
         <div x-show="$wire.step == 4" x-cloak
             x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
             x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
             class="space-y-4">
-            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 4: Declaraciones y Consentimiento</h2>
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 4: Autorización de uso de imagen</h2>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p class="text-sm text-gray-600 leading-relaxed italic">
+                        Autorizo de manera libre, previa, expresa y gratuita a Spoon de Colombia S.A.S. para captar y
+                        usar mi imagen, y la de los menores de edad a mi cargo de quienes soy padre, madre o acudiente
+                        legal, en fotografías y videos tomados durante la visita a Eurema. El uso será exclusivamente
+                        promocional e informativo en redes sociales, sitio web y material publicitario de la marca, sin
+                        venta de la imagen a terceros. Esta autorización puede revocarse en cualquier momento, conforme
+                        a la Ley 1581 de 2012 y sus decretos reglamentarios.
+                    </p>
+                </div>
+
+                <p class="text-sm font-semibold text-gray-700">¿Autorizas el uso de imagen?</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label
+                        class="flex items-center p-3 bg-white rounded-lg border transition-colors cursor-pointer group"
+                        :class="$wire.image_authorization === 1 ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
+                        <input type="radio" name="image_authorization"
+                            :checked="$wire.image_authorization === 1"
+                            @change="$wire.image_authorization = 1"
+                            class="w-5 h-5 shrink-0 text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
+                            Sí, autorizo el uso de imagen en los términos descritos.
+                        </span>
+                    </label>
+
+                    <label
+                        class="flex items-center p-3 bg-white rounded-lg border transition-colors cursor-pointer group"
+                        :class="$wire.image_authorization === 0 ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200 hover:border-blue-300'">
+                        <input type="radio" name="image_authorization"
+                            :checked="$wire.image_authorization === 0"
+                            @change="$wire.image_authorization = 0"
+                            class="w-5 h-5 shrink-0 text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors">
+                            No autorizo el uso de imagen.
+                        </span>
+                    </label>
+                </div>
+                @error('image_authorization')
+                <span class="text-sm text-red-600 -mt-2">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+
+        {{-- ===================== PASO 5: DECLARACIONES ===================== --}}
+        <div x-show="$wire.step == 5" x-cloak
+            x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+            x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0"
+            class="space-y-4">
+            <h2 class="text-xl font-bold mb-6 text-gray-800">Paso 5: Declaraciones y Consentimiento</h2>
 
             <div class="space-y-3">
                 <label
@@ -607,18 +635,18 @@ new #[Layout('layouts.guest')] class extends Component
                         <input wire:model="check_seis" type="checkbox"
                             class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded" x-on:change="
                             if($el.checked) {
-                            $wire.check_uno = true;
-                            $wire.check_dos = true;
-                            $wire.check_tres = true;
-                            $wire.check_cuatro = true;
-                            $wire.check_cinco = true;
-                            }else{
-                            $wire.check_uno = false;
-                            $wire.check_dos = false;
-                            $wire.check_tres = false;
-                            $wire.check_cuatro = false;
-                            $wire.check_cinco = false;
-                                }">
+                                $wire.check_uno = true;
+                                $wire.check_dos = true;
+                                $wire.check_tres = true;
+                                $wire.check_cuatro = true;
+                                $wire.check_cinco = true;
+                            } else {
+                                $wire.check_uno = false;
+                                $wire.check_dos = false;
+                                $wire.check_tres = false;
+                                $wire.check_cuatro = false;
+                                $wire.check_cinco = false;
+                            }">
                         <span class="ml-3 text-xs font-semibold text-gray-700">Acepto integralmente el consentimiento
                             informado y exoneración de responsabilidad.</span>
                     </label>
@@ -626,7 +654,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </div>
 
-
+        {{-- ===================== BOTONES ===================== --}}
         <div class="mt-10 flex justify-between border-t pt-6">
 
             <div class="flex-1" x-cloak>
@@ -636,7 +664,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </button>
             </div>
 
-            <template x-if="$wire.step < 4">
+            <template x-if="$wire.step < 5">
                 <button type="button" @click="next()" :disabled="!canGoNext"
                     class="font-bold py-2 px-8 rounded-lg shadow-md transition-all text-white"
                     :class="canGoNext ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 opacity-50 cursor-not-allowed'">
@@ -644,7 +672,7 @@ new #[Layout('layouts.guest')] class extends Component
                 </button>
             </template>
 
-            <template x-if="$wire.step == 4">
+            <template x-if="$wire.step == 5">
                 <button type="button" @click="
                     if(canGoNext) { openConsent = true; }
                 " :disabled="!canGoNext" class="text-white font-bold py-2 px-8 rounded-lg shadow-md transition-all"
@@ -659,6 +687,8 @@ new #[Layout('layouts.guest')] class extends Component
                 </button>
             </template>
         </div>
+
+        {{-- ===================== MODAL CONFIRMACIÓN ===================== --}}
         <div x-show="openConsent" x-cloak x-transition.opacity.duration.200ms
             class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
 
@@ -674,7 +704,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <i class="fa-solid fa-file-signature text-xl text-blue-700"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-semibold text-red-800">!! IMPORTANTE ¡¡</p>
+                        <p class="text-sm font-semibold text-red-800">¡¡ IMPORTANTE !!</p>
                         <p class="mt-1 text-md text-red-700">Guarda este consentimiento durante tu estadía en el
                             parque.</p>
                     </div>
