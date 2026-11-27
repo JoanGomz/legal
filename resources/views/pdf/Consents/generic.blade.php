@@ -271,7 +271,7 @@
     <div class="top-line"></div>
 
     @php
-    $logoUrl = 'https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1793051593_logo-monstropolis.png';
+    $logoUrl = 'https://bucketmarketingstarpark.s3.amazonaws.com/chat-files/1795748187_santaland-logo-sin-fondo.png';
     $logoBase64 = null;
     try {
     $logoContent = \Illuminate\Support\Facades\Http::timeout(5)->get($logoUrl);
